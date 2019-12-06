@@ -1,6 +1,9 @@
 
 drop table if exists bernie_data_commons.phoenix_modeling_frame; 
-create table bernie_data_commons.phoenix_modeling_frame as (
+create table bernie_data_commons.phoenix_modeling_frame 
+distkey(person_id)
+sortkey(person_id)
+as (
   
 select p.person_id
   ,x.lalvoterid
