@@ -1,4 +1,37 @@
 
+
+
+create temp table sanders_clinton_impute
+distkey(person_id)
+sortkey(person_id)
+as (
+select 
+person_id
+,coalesce(demo_p2016_clinton_bucket,  avg_impute_clinton, avg_impute_clinton_state) as demo_p2016_clinton_bucket
+,coalesce(demo_p2016_sanders_bucket, avg_impute_sanders, avg_impute_sanders_state) as demo_p2016_sanders_bucket
+from
+
+(select 
+person_id
+,demo_p2016_clinton_bucket
+,demo_p2016_sanders_bucket
+,avg(l2.demo_p2016_clinton_bucket) over (partition by p.state_code || p.county_fips) as avg_impute_clinton
+,avg(l2.demo_p2016_clinton_bucket) over (partition by p.state_code) as avg_impute_clinton_state
+,avg(l2.demo_p2016_sanders_bucket) over (partition by p.state_code || p.county_fips) as avg_impute_sanders
+,avg(l2.demo_p2016_sanders_bucket) over (partition by p.state_code) as avg_impute_sanders_state
+
+from
+phoenix_analytics.person p 
+left join bernie_data_commons.master_xwalk_dnc x using(person_id)
+left join 
+(select  * 
+ ,round(((replace(electionreturns_p16_cnty_pct_clinton_d, '%', '')::float)/10)::float,4) as demo_p2016_clinton_bucket
+,round(((replace(electionreturns_p16_cnty_pct_sanders_d, '%', '')::float)/10)::float,4) as demo_p2016_sanders_bucket from l2.demographics) l2 using(lalvoterid)
+)
+);
+
+
+
 drop table if exists bernie_data_commons.phoenix_modeling_frame; 
 create table bernie_data_commons.phoenix_modeling_frame 
 distkey(person_id)
@@ -14,6 +47,8 @@ select p.person_id
   ,p.dnc_precinct_id
   ,p.us_cong_district_latest
   ,p.media_market
+  ,imp1.demo_p2016_clinton_bucket
+  ,imp1.demo_p2016_sanders_bucket
 
 -- Urbanity 
   ,case 
@@ -165,12 +200,6 @@ select p.person_id
   ,case  
     when registration_date::date > '2018-11-08' then 1 else 0 end as vote_new_reg
   
-  ,((replace(electionreturns_g16_cnty_percent_clinton_d, '%', '')::float) /
-      10)::int                     as demo_g2016_clinton_bucket
-
-  ,((replace(electionreturns_p16_cnty_pct_sanders_d, '%', '')::float) /
-      10)::int                     as demo_p2016_sanders_bucket
-
 from phoenix_analytics.person p 
 left join phoenix_analytics.person_votes pv using(person_id)
 left join phoenix_scores.all_scores_2020 score using(person_id) 
@@ -178,6 +207,8 @@ left join phoenix_consumer.tsmart_consumer tc using(person_id)
 
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
+
+left join sanders_clinton_impute imp1 using(person_id)
 
 
   where p.is_deceased = false -- is alive
