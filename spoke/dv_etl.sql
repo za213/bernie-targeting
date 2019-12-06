@@ -4,7 +4,7 @@ distkey(person_id)
 sortkey(person_id) as
 (
 select
-person_id,
+person_id::varchar,
 case when support_init = 1 then 1
 else 0 end as spoke_support_1box,
 
