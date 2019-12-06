@@ -1,4 +1,3 @@
--- https://platform.civisanalytics.com/spa/#/scripts/sql/47260747
 
 drop table if exists bernie_data_commons.phoenix_modeling_frame; 
 create table bernie_data_commons.phoenix_modeling_frame as (
