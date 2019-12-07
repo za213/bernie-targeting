@@ -1,4 +1,5 @@
 
+set query_group to 'importers';
 
 drop table if exists bernie_data_commons.phoenix_modeling_frame; 
 create table bernie_data_commons.phoenix_modeling_frame 
@@ -7,8 +8,8 @@ sortkey(person_id)
 as (
   
 select p.person_id
-  ,x.lalvoterid
   ,x.jsonid
+  
   ,coalesce(pri.primary16_clinton,.5),
   ,coalesce(pri.primary16_sanders,.5)
 
