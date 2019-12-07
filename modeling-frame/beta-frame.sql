@@ -1,37 +1,5 @@
 
 
-
-create temp table sanders_clinton_impute
-distkey(person_id)
-sortkey(person_id)
-as (
-select 
-person_id
-,coalesce(demo_p2016_clinton_bucket,  avg_impute_clinton, avg_impute_clinton_state) as demo_p2016_clinton_bucket
-,coalesce(demo_p2016_sanders_bucket, avg_impute_sanders, avg_impute_sanders_state) as demo_p2016_sanders_bucket
-from
-
-(select 
-person_id
-,demo_p2016_clinton_bucket
-,demo_p2016_sanders_bucket
-,avg(l2.demo_p2016_clinton_bucket) over (partition by p.state_code || p.county_fips) as avg_impute_clinton
-,avg(l2.demo_p2016_clinton_bucket) over (partition by p.state_code) as avg_impute_clinton_state
-,avg(l2.demo_p2016_sanders_bucket) over (partition by p.state_code || p.county_fips) as avg_impute_sanders
-,avg(l2.demo_p2016_sanders_bucket) over (partition by p.state_code) as avg_impute_sanders_state
-
-from
-phoenix_analytics.person p 
-left join bernie_data_commons.master_xwalk_dnc x using(person_id)
-left join 
-(select  * 
- ,round(((replace(electionreturns_p16_cnty_pct_clinton_d, '%', '')::float)/10)::float,4) as demo_p2016_clinton_bucket
-,round(((replace(electionreturns_p16_cnty_pct_sanders_d, '%', '')::float)/10)::float,4) as demo_p2016_sanders_bucket from l2.demographics) l2 using(lalvoterid)
-)
-);
-
-
-
 drop table if exists bernie_data_commons.phoenix_modeling_frame; 
 create table bernie_data_commons.phoenix_modeling_frame 
 distkey(person_id)
@@ -41,14 +9,8 @@ as (
 select p.person_id
   ,x.lalvoterid
   ,x.jsonid
-  ,p.state_code
-  ,p.county_name
-  ,p.county_fips
-  ,p.dnc_precinct_id
-  ,p.us_cong_district_latest
-  ,p.media_market
-  ,imp1.demo_p2016_clinton_bucket
-  ,imp1.demo_p2016_sanders_bucket
+  ,coalesce(pri.primary16_clinton,.5),
+  ,coalesce(pri.primary16_sanders,.5)
 
 -- Urbanity 
   ,case 
@@ -208,15 +170,13 @@ left join phoenix_consumer.tsmart_consumer tc using(person_id)
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
 
-left join sanders_clinton_impute imp1 using(person_id)
-
+left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(census_county_fips,'3') and p.state_fips = left(lpad(census_county_fips,5,'000'),2)
 
   where p.is_deceased = false -- is alive
   and p.reg_record_merged = false -- removes some duplicates
   and p.reg_on_current_file = true --  voter was on the last voter file that the DNC processed and not eligible to vote in primaries
   and p.reg_voter_flag = true -- voters who are registered to vote (i.e. have a registration status of active or inactive) even if they have moved states and their new state has not updated their file to reflect this yet
 
-
-  );
+);
 
 grant select on table bernie_data_commons.phoenix_modeling_frame to group bernie_data;
