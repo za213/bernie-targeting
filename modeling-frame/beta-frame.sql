@@ -101,7 +101,9 @@ select p.person_id
   ,case 
     when tc.xpg_estimated_household_income =  'L' then 1 else 0 end as inc_250k
 
--- Age                                            
+-- Age     
+  ,coalesce(p.age_combined,l2.voters_age::int) as age_continuous
+  
   ,case 
     when coalesce(p.age_combined,l2.voters_age::int) between 18 and 22
         then 1 else 0 end as age_18_22
