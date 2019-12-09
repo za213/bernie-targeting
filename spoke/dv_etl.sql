@@ -9,9 +9,11 @@ case when support_init = 1 then 1
 else 0 end as spoke_support_1box,
 
 case when support_change >= 1 then 1
+when support_init = 1 then null
 else 0 end as spoke_persuasion_1plus,
 
-case when support_change >= 2 then 1
+case when support_change >= 2  then 1
+when support_init = 1 or support_init = 2 then null
 else 0 end as spoke_persuasion_2plus
 
 from (select 
