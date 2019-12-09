@@ -103,25 +103,25 @@ select p.person_id
 
 -- Age                                            
   ,case 
-    when coalesce(p.age_combined,l2.voters_age::int)  < 23
+    when coalesce(p.age_combined,l2.voters_age::int) between 18 and 22
         then 1 else 0 end as age_18_22
   ,case  
-    when coalesce(p.age_combined,l2.voters_age::int)  < 30
+    when coalesce(p.age_combined,l2.voters_age::int) between 23 and 29
         then 1 else 0 end as age_23_29
   ,case  
-    when coalesce(p.age_combined,l2.voters_age::int)  < 40
+    when coalesce(p.age_combined,l2.voters_age::int) between 30 and 39
         then 1 else 0 end as age_30_39
   ,case  
-    when coalesce(p.age_combined,l2.voters_age::int)  < 50
+    when coalesce(p.age_combined,l2.voters_age::int) between 40 and 49
         then 1 else 0 end as age_40_49
   ,case  
-    when coalesce(p.age_combined,l2.voters_age::int)  < 60
+    when coalesce(p.age_combined,l2.voters_age::int) between 50 and 59
         then 1 else 0 end as age_50_59
   ,case  
-    when coalesce(p.age_combined,l2.voters_age::int)  < 70
+    when coalesce(p.age_combined,l2.voters_age::int) between 60 and 69
         then 1 else 0 end as age_60_69
   ,case  
-    when coalesce(p.age_combined,l2.voters_age::int)  < 80
+    when coalesce(p.age_combined,l2.voters_age::int) between 70 and 79
         then 1 else 0 end as age_70_79
   ,case  
     when coalesce(p.age_combined,l2.voters_age::int)  >= 80
