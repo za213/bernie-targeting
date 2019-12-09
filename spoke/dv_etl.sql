@@ -1,5 +1,5 @@
-drop table if exists modeling.spoke_dvs;
-create table modeling.spoke_dvs 
+drop table if exists bernie_nmarchio2.spoke_dvs;
+create table bernie_nmarchio2.spoke_dvs 
 distkey(person_id)
 sortkey(person_id) as
 (
