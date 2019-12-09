@@ -12,6 +12,46 @@ select p.person_id
   
   ,coalesce(pri.primary16_clinton,.5) as primary16_clinton
   ,coalesce(pri.primary16_sanders,.5) as primary16_sanders
+  ,coalesce(dnc_2020_volprop_overall_rank ,0.5) as dnc_2020_volprop_overall_rank
+  ,coalesce(civis_2020_race_native ,0.5) as civis_2020_race_native
+  ,coalesce(civis_2020_race_black ,0.5) as civis_2020_race_black
+  ,coalesce(civis_2020_race_latinx ,0.5) as civis_2020_race_latinx
+  ,coalesce(civis_2020_race_asian ,0.5) as civis_2020_race_asian
+  ,coalesce(civis_2020_race_white ,0.5) as civis_2020_race_white
+  ,coalesce(civis_2020_likely_race ,0.5) as civis_2020_likely_race
+  ,coalesce(civis_2020_likely_race_confidence ,0.5) as civis_2020_likely_race_confidence
+  ,coalesce(civis_2020_subeth_african_american ,0.5) as civis_2020_subeth_african_american
+  ,coalesce(civis_2020_subeth_west_indian ,0.5) as civis_2020_subeth_west_indian
+  ,coalesce(civis_2020_subeth_haitian ,0.5) as civis_2020_subeth_haitian
+  ,coalesce(civis_2020_subeth_african ,0.5) as civis_2020_subeth_african
+  ,coalesce(civis_2020_subeth_other_black ,0.5) as civis_2020_subeth_other_black
+  ,coalesce(civis_2020_subeth_mexican ,0.5) as civis_2020_subeth_mexican
+  ,coalesce(civis_2020_subeth_cuban ,0.5) as civis_2020_subeth_cuban
+  ,coalesce(civis_2020_subeth_puerto_rican ,0.5) as civis_2020_subeth_puerto_rican
+  ,coalesce(civis_2020_subeth_dominican ,0.5) as civis_2020_subeth_dominican
+  ,coalesce(civis_2020_subeth_other_latin_american ,0.5) as civis_2020_subeth_other_latin_american
+  ,coalesce(civis_2020_subeth_other_hispanic ,0.5) as civis_2020_subeth_other_hispanic
+  ,coalesce(civis_2020_subeth_chinese ,0.5) as civis_2020_subeth_chinese
+  ,coalesce(civis_2020_subeth_indian ,0.5) as civis_2020_subeth_indian
+  ,coalesce(civis_2020_subeth_filipino ,0.5) as civis_2020_subeth_filipino
+  ,coalesce(civis_2020_subeth_japanese ,0.5) as civis_2020_subeth_japanese
+  ,coalesce(civis_2020_subeth_vietnamese ,0.5) as civis_2020_subeth_vietnamese
+  ,coalesce(civis_2020_subeth_korean ,0.5) as civis_2020_subeth_korean
+  ,coalesce(civis_2020_subeth_other_asian ,0.5) as civis_2020_subeth_other_asian
+  ,coalesce(civis_2020_subeth_hmong ,0.5) as civis_2020_subeth_hmong
+  ,coalesce(civis_2020_partisanship ,0.5) as civis_2020_partisanship
+  ,coalesce(civis_2020_ideology_liberal ,0.5) as civis_2020_ideology_liberal
+  ,coalesce(civis_2020_spanish_language_preference ,0.5) as civis_2020_spanish_language_preference
+  ,coalesce(civis_2020_cultural_religion_jewish ,0.5) as civis_2020_cultural_religion_jewish
+  ,coalesce(civis_2020_cultural_religion_mormon ,0.5) as civis_2020_cultural_religion_mormon
+  ,coalesce(civis_2020_cultural_religion_muslim ,0.5) as civis_2020_cultural_religion_muslim
+  ,coalesce(civis_2020_cultural_religion_catholic ,0.5) as civis_2020_cultural_religion_catholic
+  ,coalesce(civis_2020_cultural_religion_evangelical ,0.5) as civis_2020_cultural_religion_evangelical
+  ,coalesce(civis_2020_cultural_religion_mainline_protestant ,0.5) as civis_2020_cultural_religion_mainline_protestant
+  ,coalesce(civis_2020_cultural_religion_hindu ,0.5) as civis_2020_cultural_religion_hindu
+  ,coalesce(civis_2020_cultural_religion_buddhist ,0.5) as civis_2020_cultural_religion_buddhist
+  ,coalesce(civis_2020_marriage ,0.5) as civis_2020_marriage
+  ,coalesce(civis_2020_children_present ,0.5) as civis_2020_children_present
 
 -- Urbanity 
   ,case 
