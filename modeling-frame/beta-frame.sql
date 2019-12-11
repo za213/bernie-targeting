@@ -407,6 +407,7 @@ select p.person_id
   ,case when xp_occupation = 'K06' then 1 else 0 end as xp_occupation_k06
   
 -- ACS Features (industry, women who gave birth, language spoken at home, migration, citizenship, naturalization)
+  -- Industry
   ,xc_24070_e_10
   ,xc_24070_e_11
   ,xc_24070_e_12
@@ -425,6 +426,7 @@ select p.person_id
   ,xc_24070_e_43
   ,xc_24070_e_57
   ,xc_24070_e_71
+  -- Nativity
   ,xb_13008_e_2
   ,xb_13008_e_3
   ,xb_13008_e_6
@@ -432,6 +434,7 @@ select p.person_id
   ,xb_13008_e_5
   ,xb_13008_e_7
   ,xb_13008_e_8
+  -- Language spoken at home
   ,xc_16001_e_12
   ,xc_16001_e_15
   ,xc_16001_e_18
@@ -456,11 +459,13 @@ select p.person_id
   ,xc_16001_e_38
   ,xc_16001_e_5
   ,xc_16001_e_8
+  -- Geo mobility
   ,xb_07001_e_81
   ,xb_07001_e_49
   ,xb_07001_e_65
   ,xb_07001_e_33
   ,xb_07001_e_17
+  -- Citizenship
   ,xb_05007_e_15
   ,xb_05007_e_2
   ,xb_05007_e_28
@@ -470,6 +475,7 @@ select p.person_id
   ,xb_05007_e_43
   ,xb_05007_e_56
   ,xb_05007_e_69
+  -- Immigration origin and year
   ,xb_05007_e_37
   ,xb_05007_e_23
   ,xb_05007_e_51
