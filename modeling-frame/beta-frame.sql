@@ -10,8 +10,8 @@ select p.person_id
   ,x.jsonid
  
 --Primary returns
-  ,pri.primary16_clinton
-  ,pri.primary16_sanders
+  ,coalesce(pri.primary16_clinton,.5) as primary16_clinton
+  ,coalesce(pri.primary16_sanders,.5) as primary16_sanders
   
 --All scores
 
