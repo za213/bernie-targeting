@@ -126,6 +126,130 @@ phoenix_scores.all_scores_2016 using(person_id)
 group by census_block_group_2010
 )
 
+creat temp table tsmart_impute as (
+select 
+census_block_group_2010
+,avg(ts_tsmart_partisan_score) as avg_ts_tsmart_partisan_score
+,avg(ts_tsmart_presidential_general_turnout_score) as avg_ts_tsmart_presidential_general_turnout_score
+,avg(ts_tsmart_midterm_general_turnout_score) as avg_ts_tsmart_midterm_general_turnout_score
+,avg(ts_tsmart_offyear_general_turnout_score) as avg_ts_tsmart_offyear_general_turnout_score
+,avg(ts_tsmart_presidential_primary_turnout_score) as avg_ts_tsmart_presidential_primary_turnout_score
+,avg(ts_tsmart_non_presidential_primary_turnout_score) as avg_ts_tsmart_non_presidential_primary_turnout_score
+,avg(ts_tsmart_midterm_general_enthusiasm_score) as avg_ts_tsmart_midterm_general_enthusiasm_score
+,avg(ts_tsmart_p_white) as avg_ts_tsmart_p_white
+,avg(ts_tsmart_p_afam) as avg_ts_tsmart_p_afam
+,avg(ts_tsmart_p_hisp) as avg_ts_tsmart_p_hisp
+,avg(ts_tsmart_p_natam) as avg_ts_tsmart_p_natam
+,avg(ts_tsmart_p_asian) as avg_ts_tsmart_p_asian
+,avg(ts_tsmart_local_voter_score) as avg_ts_tsmart_local_voter_score
+,avg(ts_tsmart_tea_party_score) as avg_ts_tsmart_tea_party_score
+,avg(ts_tsmart_ideology_score) as avg_ts_tsmart_ideology_score
+,avg(ts_tsmart_moral_authority_score) as avg_ts_tsmart_moral_authority_score
+,avg(ts_tsmart_moral_care_score) as avg_ts_tsmart_moral_care_score
+,avg(ts_tsmart_moral_equality_score) as avg_ts_tsmart_moral_equality_score
+,avg(ts_tsmart_moral_equity_score) as avg_ts_tsmart_moral_equity_score
+,avg(ts_tsmart_moral_loyalty_score) as avg_ts_tsmart_moral_loyalty_score
+,avg(ts_tsmart_moral_purity_score) as avg_ts_tsmart_moral_purity_score
+,avg(ts_tsmart_college_graduate_score) as avg_ts_tsmart_college_graduate_score
+,avg(ts_tsmart_high_school_only_score) as avg_ts_tsmart_high_school_only_score
+,avg(ts_tsmart_prochoice_score) as avg_ts_tsmart_prochoice_score
+,avg(ts_tsmart_path_to_citizen_score) as avg_ts_tsmart_path_to_citizen_score
+,avg(ts_tsmart_climate_change_score) as avg_ts_tsmart_climate_change_score
+,avg(ts_tsmart_gun_control_score) as avg_ts_tsmart_gun_control_score
+,avg(ts_tsmart_gunowner_score) as avg_ts_tsmart_gunowner_score
+,avg(ts_tsmart_trump_resistance_score) as avg_ts_tsmart_trump_resistance_score
+,avg(ts_tsmart_trump_support_score) as avg_ts_tsmart_trump_support_score
+,avg(ts_tsmart_veteran_score) as avg_ts_tsmart_veteran_score
+,avg(ts_tsmart_activist_score) as avg_ts_tsmart_activist_score
+,avg(ts_tsmart_working_class_score) as avg_ts_tsmart_working_class_score
+,avg(predictwise_authoritarianism_score) as avg_predictwise_authoritarianism_score
+,avg(predictwise_compassion_score) as avg_predictwise_compassion_score
+,avg(predictwise_economic_populism_score) as avg_predictwise_economic_populism_score
+,avg(predictwise_free_trade_score) as avg_predictwise_free_trade_score
+,avg(predictwise_globalism_score) as avg_predictwise_globalism_score
+,avg(predictwise_guns_score) as avg_predictwise_guns_score
+,avg(predictwise_healthcare_women_score) as avg_predictwise_healthcare_women_score
+,avg(predictwise_healthcare_score) as avg_predictwise_healthcare_score
+,avg(predictwise_immigrants_score) as avg_predictwise_immigrants_score
+,avg(predictwise_military_score) as avg_predictwise_military_score
+,avg(predictwise_populism_score) as avg_predictwise_populism_score
+,avg(predictwise_poor_score) as avg_predictwise_poor_score
+,avg(predictwise_racial_resentment_score) as avg_predictwise_racial_resentment_score
+,avg(predictwise_regulation_score) as avg_predictwise_regulation_score
+,avg(predictwise_religious_freedom_score) as avg_predictwise_religious_freedom_score
+,avg(predictwise_taxes_score) as avg_predictwise_taxes_score
+,avg(predictwise_traditionalism_score) as avg_predictwise_traditionalism_score
+,avg(predictwise_trust_in_institutions_score) as avg_predictwise_trust_in_institutions_score
+,avg(predictwise_environmentalism_score) as avg_predictwise_environmentalism_score
+,avg(predictwise_presidential_score) as avg_predictwise_presidential_score
+
+,avg(enh_addr_size) as avg_enh_addr_size
+,avg(enh_tsmart_enhanced_hh_size) as avg_enh_tsmart_enhanced_hh_size
+,avg(enh_tsmart_enhanced_hh_number_males) as avg_enh_tsmart_enhanced_hh_number_males
+,avg(enh_tsmart_enhanced_hh_number_females) as avg_enh_tsmart_enhanced_hh_number_females
+,avg(enh_tsmart_enhanced_hh_number_registered) as avg_enh_tsmart_enhanced_hh_number_registered
+,avg(enh_tsmart_enhanced_hh_number_unregistered) as avg_enh_tsmart_enhanced_hh_number_unregistered
+,avg(enh_tsmart_enhanced_hh_number_dems) as avg_enh_tsmart_enhanced_hh_number_dems
+,avg(enh_tsmart_enhanced_hh_number_reps) as avg_enh_tsmart_enhanced_hh_number_reps
+,avg(enh_tsmart_enhanced_hh_number_others) as avg_enh_tsmart_enhanced_hh_number_others
+
+,avg(fec_zip_avg_contribution_amount) as avg_fec_zip_avg_contribution_amount
+,avg(fec_zip_contribution_category_corporation) as avg_fec_zip_contribution_category_corporation
+,avg(fec_zip_contribution_category_democrat) as avg_fec_zip_contribution_category_democrat
+,avg(fec_zip_contribution_category_house) as avg_fec_zip_contribution_category_house
+,avg(fec_zip_contribution_category_labor_organization) as avg_fec_zip_contribution_category_labor_organization
+,avg(fec_zip_contribution_category_membership_organization) as avg_fec_zip_contribution_category_membership_organization
+,avg(fec_zip_contribution_category_presidential) as avg_fec_zip_contribution_category_presidential
+,avg(fec_zip_contribution_category_qualified_party) as avg_fec_zip_contribution_category_qualified_party
+,avg(fec_zip_contribution_category_republican) as avg_fec_zip_contribution_category_republican
+,avg(fec_zip_contribution_category_senate) as avg_fec_zip_contribution_category_senate
+,avg(fec_zip_contribution_category_trade_association) as avg_fec_zip_contribution_category_trade_association
+,avg(fec_zip_contribution_category_unaffiliated) as avg_fec_zip_contribution_category_unaffiliated
+,avg(fec_zip_total_contribution_amount) as avg_fec_zip_total_contribution_amount
+,avg(fec_zip_total_contributions) as avg_fec_zip_total_contributions
+,avg(gsyn_pct_catholic) as avg_gsyn_pct_catholic
+,avg(gsyn_pct_jewish) as avg_gsyn_pct_jewish
+,avg(gsyn_synth_county_pct_of_dem_fec_contributions) as avg_gsyn_synth_county_pct_of_dem_fec_contributions
+,avg(gsyn_synth_county_sum_fec_contribution_count_democrat) as avg_gsyn_synth_county_sum_fec_contribution_count_democrat
+,avg(gsyn_synth_county_sum_fec_contribution_count_republican) as avg_gsyn_synth_county_sum_fec_contribution_count_republican
+,avg(gsyn_synth_county_sum_individual_in_county) as avg_gsyn_synth_county_sum_individual_in_county
+,avg(gsyn_synth_county_total_fec_contributions) as avg_gsyn_synth_county_total_fec_contributions
+,avg(gsyn_synth_hh_average_age) as avg_gsyn_synth_hh_average_age
+,avg(gsyn_synth_hh_distinct_last_names_in_hh) as avg_gsyn_synth_hh_distinct_last_names_in_hh
+,avg(gsyn_synth_hh_distinct_races_in_hh) as avg_gsyn_synth_hh_distinct_races_in_hh
+,avg(gsyn_synth_hh_pct_registered) as avg_gsyn_synth_hh_pct_registered
+,avg(gsyn_synth_hh_sum_dem_primary_votes_cast_count) as avg_gsyn_synth_hh_sum_dem_primary_votes_cast_count
+,avg(gsyn_synth_hh_sum_individuals_in_hh) as avg_gsyn_synth_hh_sum_individuals_in_hh
+,avg(gsyn_synth_hh_sum_primary_votes_cast_count) as avg_gsyn_synth_hh_sum_primary_votes_cast_count
+,avg(gsyn_synth_hh_sum_rep_primary_votes_cast_count) as avg_gsyn_synth_hh_sum_rep_primary_votes_cast_count
+,avg(gsyn_synth_hh_sum_total_votes_cast_count) as avg_gsyn_synth_hh_sum_total_votes_cast_count
+,avg(gsyn_synth_hh_total_primary_votes_person) as avg_gsyn_synth_hh_total_primary_votes_person
+,avg(gsyn_synth_hh_total_votes_per_person) as avg_gsyn_synth_hh_total_votes_per_person
+,avg(gsyn_synth_zip5_pct_catholic) as avg_gsyn_synth_zip5_pct_catholic
+,avg(gsyn_synth_zip5_pct_dem_primary_votes) as avg_gsyn_synth_zip5_pct_dem_primary_votes
+,avg(gsyn_synth_zip5_pct_jewish) as avg_gsyn_synth_zip5_pct_jewish
+,avg(gsyn_synth_zip5_pct_of_dem_fec_contributions) as avg_gsyn_synth_zip5_pct_of_dem_fec_contributions
+,avg(gsyn_synth_zip5_pct_of_dems_per_reg_count) as avg_gsyn_synth_zip5_pct_of_dems_per_reg_count
+,avg(gsyn_synth_zip5_sum_dem_primary_votes_cast_count) as avg_gsyn_synth_zip5_sum_dem_primary_votes_cast_count
+,avg(gsyn_synth_zip5_sum_fec_contribution_count_democrat) as avg_gsyn_synth_zip5_sum_fec_contribution_count_democrat
+,avg(gsyn_synth_zip5_sum_fec_contribution_count_republican) as avg_gsyn_synth_zip5_sum_fec_contribution_count_republican
+,avg(gsyn_synth_zip5_sum_individuals_in_zip5) as avg_gsyn_synth_zip5_sum_individuals_in_zip5
+,avg(gsyn_synth_zip5_sum_primary_votes_cast_count) as avg_gsyn_synth_zip5_sum_primary_votes_cast_count
+,avg(gsyn_synth_zip5_sum_registered) as avg_gsyn_synth_zip5_sum_registered
+,avg(gsyn_synth_zip5_sum_unregistered) as avg_gsyn_synth_zip5_sum_unregistered
+,avg(gsyn_synth_zip5_sum_zip5_democrat) as avg_gsyn_synth_zip5_sum_zip5_democrat
+,avg(gsyn_synth_zip5_sum_zip5_republican) as avg_gsyn_synth_zip5_sum_zip5_republican
+,avg(gsyn_synth_zip5_total_fec_contributions) as avg_gsyn_synth_zip5_total_fec_contributions
+,avg(gsyn_synth_zip9_pct_dem_primary_votes) as avg_gsyn_synth_zip9_pct_dem_primary_votes
+,avg(gsyn_synth_zip9_pct_female) as avg_gsyn_synth_zip9_pct_female
+,avg(gsyn_synth_zip9_pct_male) as avg_gsyn_synth_zip9_pct_male
+
+from 
+phoenix_analytics.person
+left join
+phoenix_consumer.tsmart_consumer using(person_id)
+group by census_block_group_2010
+)
 
 set query_group to 'importers';
 
@@ -256,6 +380,14 @@ select p.person_id
   ,coalesce(dnc_2016_high_school_only,avg_dnc_2016_high_school_only,0.5) as dnc_2016_high_school_only
   ,coalesce(dnc_2016_income_rank,avg_dnc_2016_income_rank,0.5) as dnc_2016_income_rank
   ,coalesce(tsmart_2016_donor_likelihood,avg_tsmart_2016_donor_likelihood,0.5) as tsmart_2016_donor_likelihood
+  
+-- Occupation codes  
+  ,case when xp_occupation = 'K01' then 1 else 0 end as xp_occupation_k01
+  ,case when xp_occupation = 'K02' then 1 else 0 end as xp_occupation_k02
+  ,case when xp_occupation = 'K03' then 1 else 0 end as xp_occupation_k03
+  ,case when xp_occupation = 'K04' then 1 else 0 end as xp_occupation_k04
+  ,case when xp_occupation = 'K05' then 1 else 0 end as xp_occupation_k05
+  ,case when xp_occupation = 'K06' then 1 else 0 end as xp_occupation_k06
 
 -- Urbanity 
   ,case 
