@@ -267,6 +267,21 @@ select p.person_id
   ,pri.primary16_sanders
   
 --All scores
+
+  -- Marriage, children, language, partisan/ideology scores
+  ,coalesce(civis_2020_marriage,avg_civis_2020_marriage,0.5) as civis_2020_marriage
+  ,coalesce(civis_2020_children_present,avg_civis_2020_children_present,0.5) as civis_2020_children_present
+  ,coalesce(civis_2020_partisanship,avg_civis_2020_partisanship,0.5) as civis_2020_partisanship
+  ,coalesce(civis_2020_ideology_liberal,avg_civis_2020_ideology_liberal,0.5) as civis_2020_ideology_liberal
+  ,coalesce(civis_2020_spanish_language_preference,avg_civis_2020_spanish_language_preference,0.5) as civis_2020_spanish_language_preference
+  
+  -- Education and income
+  ,coalesce(dnc_2018_college_graduate,avg_dnc_2018_college_graduate,0.5) as dnc_2018_college_graduate
+  ,coalesce(dnc_2018_income_dollars,avg_dnc_2018_income_dollars,0.5) as dnc_2018_income_dollars
+  ,coalesce(dnc_2018_high_school_only,avg_dnc_2018_high_school_only,0.5) as dnc_2018_high_school_only
+  ,coalesce(dnc_2018_income_rank,avg_dnc_2018_income_rank,0.5) as dnc_2018_income_rank
+  
+  -- Race, ethnicity, religion, 
   ,coalesce(civis_2020_race_native,avg_civis_2020_race_native,0.5) as civis_2020_race_native
   ,coalesce(civis_2020_race_black,avg_civis_2020_race_black,0.5) as civis_2020_race_black
   ,coalesce(civis_2020_race_latinx,avg_civis_2020_race_latinx,0.5) as civis_2020_race_latinx
@@ -274,6 +289,7 @@ select p.person_id
   ,coalesce(civis_2020_race_white,avg_civis_2020_race_white,0.5) as civis_2020_race_white
   ,coalesce(civis_2020_likely_race,avg_civis_2020_likely_race,0.5) as civis_2020_likely_race
   ,coalesce(civis_2020_likely_race_confidence,avg_civis_2020_likely_race_confidence,0.5) as civis_2020_likely_race_confidence
+  
   ,coalesce(civis_2020_subeth_african_american,avg_civis_2020_subeth_african_american,0.5) as civis_2020_subeth_african_american
   ,coalesce(civis_2020_subeth_west_indian,avg_civis_2020_subeth_west_indian,0.5) as civis_2020_subeth_west_indian
   ,coalesce(civis_2020_subeth_haitian,avg_civis_2020_subeth_haitian,0.5) as civis_2020_subeth_haitian
@@ -293,9 +309,7 @@ select p.person_id
   ,coalesce(civis_2020_subeth_korean,avg_civis_2020_subeth_korean,0.5) as civis_2020_subeth_korean
   ,coalesce(civis_2020_subeth_other_asian,avg_civis_2020_subeth_other_asian,0.5) as civis_2020_subeth_other_asian
   ,coalesce(civis_2020_subeth_hmong,avg_civis_2020_subeth_hmong,0.5) as civis_2020_subeth_hmong
-  ,coalesce(civis_2020_partisanship,avg_civis_2020_partisanship,0.5) as civis_2020_partisanship
-  ,coalesce(civis_2020_ideology_liberal,avg_civis_2020_ideology_liberal,0.5) as civis_2020_ideology_liberal
-  ,coalesce(civis_2020_spanish_language_preference,avg_civis_2020_spanish_language_preference,0.5) as civis_2020_spanish_language_preference
+
   ,coalesce(civis_2020_cultural_religion_jewish,avg_civis_2020_cultural_religion_jewish,0.5) as civis_2020_cultural_religion_jewish
   ,coalesce(civis_2020_cultural_religion_mormon,avg_civis_2020_cultural_religion_mormon,0.5) as civis_2020_cultural_religion_mormon
   ,coalesce(civis_2020_cultural_religion_muslim,avg_civis_2020_cultural_religion_muslim,0.5) as civis_2020_cultural_religion_muslim
@@ -304,11 +318,8 @@ select p.person_id
   ,coalesce(civis_2020_cultural_religion_mainline_protestant,avg_civis_2020_cultural_religion_mainline_protestant,0.5) as civis_2020_cultural_religion_mainline_protestant
   ,coalesce(civis_2020_cultural_religion_hindu,avg_civis_2020_cultural_religion_hindu,0.5) as civis_2020_cultural_religion_hindu
   ,coalesce(civis_2020_cultural_religion_buddhist,avg_civis_2020_cultural_religion_buddhist,0.5) as civis_2020_cultural_religion_buddhist
-  ,coalesce(civis_2020_marriage,avg_civis_2020_marriage,0.5) as civis_2020_marriage
-  ,coalesce(civis_2020_children_present,avg_civis_2020_children_present,0.5) as civis_2020_children_present
-  ,coalesce(dnc_2018_college_graduate,avg_dnc_2018_college_graduate,0.5) as dnc_2018_college_graduate
-  ,coalesce(dnc_2018_marriage,avg_dnc_2018_marriage,0.5) as dnc_2018_marriage
-  ,coalesce(dnc_2018_income_dollars,avg_dnc_2018_income_dollars,0.5) as dnc_2018_income_dollars
+  
+  -- DNC persuasion 2018
   ,coalesce(dnc_2018_downballot_defection_rank,avg_dnc_2018_downballot_defection_rank,0.5) as dnc_2018_downballot_defection_rank
   ,coalesce(dnc_2018_downballot_vote,avg_dnc_2018_downballot_vote,0.5) as dnc_2018_downballot_vote
   ,coalesce(dnc_2018_ideology_liberal,avg_dnc_2018_ideology_liberal,0.5) as dnc_2018_ideology_liberal
@@ -327,6 +338,8 @@ select p.person_id
   ,coalesce(dnc_2018_volprop_overall_rank,avg_dnc_2018_volprop_overall_rank,0.5) as dnc_2018_volprop_overall_rank
   ,coalesce(dnc_2018_volprop_phone_rank,avg_dnc_2018_volprop_phone_rank,0.5) as dnc_2018_volprop_phone_rank
   ,coalesce(dnc_2018_volprop_walk_rank,avg_dnc_2018_volprop_walk_rank,0.5) as dnc_2018_volprop_walk_rank
+  
+  -- Civis 2018
   ,coalesce(civis_2018_turnout,avg_civis_2018_turnout,0.5) as civis_2018_turnout
   ,coalesce(civis_2018_partisanship,avg_civis_2018_partisanship,0.5) as civis_2018_partisanship
   ,coalesce(civis_2018_spanish_language_preference,avg_civis_2018_spanish_language_preference,0.5) as civis_2018_spanish_language_preference
@@ -340,13 +353,15 @@ select p.person_id
   ,coalesce(civis_2018_cultural_persuasion,avg_civis_2018_cultural_persuasion,0.5) as civis_2018_cultural_persuasion
   ,coalesce(civis_2018_economic_persuasion,avg_civis_2018_economic_persuasion,0.5) as civis_2018_economic_persuasion
   ,coalesce(civis_2018_political_persuasion,avg_civis_2018_political_persuasion,0.5) as civis_2018_political_persuasion
-  ,coalesce(dnc_2018_high_school_only,avg_dnc_2018_high_school_only,0.5) as dnc_2018_high_school_only
-  ,coalesce(dnc_2018_income_rank,avg_dnc_2018_income_rank,0.5) as dnc_2018_income_rank
+  
+  -- DNC religion
   ,coalesce(dnc_2018_catholic_tier,avg_dnc_2018_catholic_tier,0.5) as dnc_2018_catholic_tier
   ,coalesce(dnc_2018_evangelical_tier,avg_dnc_2018_evangelical_tier,0.5) as dnc_2018_evangelical_tier
   ,coalesce(dnc_2018_otherchristian_tier,avg_dnc_2018_otherchristian_tier,0.5) as dnc_2018_otherchristian_tier
   ,coalesce(dnc_2018_nonchristian_tier,avg_dnc_2018_nonchristian_tier,0.5) as dnc_2018_nonchristian_tier
   ,coalesce(dnc_2018_party_support_score,avg_dnc_2018_party_support_score,0.5) as dnc_2018_party_support_score
+  
+  -- Civis persuasion
   ,coalesce(civis_2018_gotv_raw,avg_civis_2018_gotv_raw,0.5) as civis_2018_gotv_raw
   ,coalesce(civis_2018_one_pct_persuasion,avg_civis_2018_one_pct_persuasion,0.5) as civis_2018_one_pct_persuasion
   ,coalesce(civis_2018_infrastructure_persuasion,avg_civis_2018_infrastructure_persuasion,0.5) as civis_2018_infrastructure_persuasion
@@ -371,6 +386,8 @@ select p.person_id
   ,coalesce(civis_2018_choice_persuasion,avg_civis_2018_choice_persuasion,0.5) as civis_2018_choice_persuasion
   ,coalesce(civis_2018_medicare_persuasion,avg_civis_2018_medicare_persuasion,0.5) as civis_2018_medicare_persuasion
   ,coalesce(civis_2018_ballot_completion,avg_civis_2018_ballot_completion,0.5) as civis_2018_ballot_completion
+  
+  -- 2016 scores
   ,coalesce(pres_2016_support,avg_pres_2016_support,0.5) as pres_2016_support
   ,coalesce(dnc_2016_party_support_score,avg_dnc_2016_party_support_score,0.5) as dnc_2016_party_support_score
   ,coalesce(dnc_2016_turnout,avg_dnc_2016_turnout,0.5) as dnc_2016_turnout
@@ -388,6 +405,94 @@ select p.person_id
   ,case when xp_occupation = 'K04' then 1 else 0 end as xp_occupation_k04
   ,case when xp_occupation = 'K05' then 1 else 0 end as xp_occupation_k05
   ,case when xp_occupation = 'K06' then 1 else 0 end as xp_occupation_k06
+  
+-- ACS Features (industry, women who gave birth, language spoken at home, migration, citizenship, naturalization)
+  ,xc_24070_e_10
+  ,xc_24070_e_11
+  ,xc_24070_e_12
+  ,xc_24070_e_13
+  ,xc_24070_e_14
+  ,xc_24070_e_15
+  ,xc_24070_e_2
+  ,xc_24070_e_3
+  ,xc_24070_e_4
+  ,xc_24070_e_6
+  ,xc_24070_e_7
+  ,xc_24070_e_5
+  ,xc_24070_e_8
+  ,xc_24070_e_9
+  ,xc_24070_e_29
+  ,xc_24070_e_43
+  ,xc_24070_e_57
+  ,xc_24070_e_71
+  ,xb_13008_e_2
+  ,xb_13008_e_3
+  ,xb_13008_e_6
+  ,xb_13008_e_4
+  ,xb_13008_e_5
+  ,xb_13008_e_7
+  ,xb_13008_e_8
+  ,xc_16001_e_12
+  ,xc_16001_e_15
+  ,xc_16001_e_18
+  ,xc_16001_e_2
+  ,xc_16001_e_21
+  ,xc_16001_e_24
+  ,xc_16001_e_27
+  ,xc_16001_e_3
+  ,xc_16001_e_30
+  ,xc_16001_e_33
+  ,xc_16001_e_36
+  ,xc_16001_e_6
+  ,xc_16001_e_9
+  ,xc_16001_e_14
+  ,xc_16001_e_17
+  ,xc_16001_e_20
+  ,xc_16001_e_23
+  ,xc_16001_e_26
+  ,xc_16001_e_29
+  ,xc_16001_e_32
+  ,xc_16001_e_35
+  ,xc_16001_e_38
+  ,xc_16001_e_5
+  ,xc_16001_e_8
+  ,xb_07001_e_81
+  ,xb_07001_e_49
+  ,xb_07001_e_65
+  ,xb_07001_e_33
+  ,xb_07001_e_17
+  ,xb_05007_e_15
+  ,xb_05007_e_2
+  ,xb_05007_e_28
+  ,xb_05007_e_82
+  ,xb_05007_e_29
+  ,xb_05007_e_42
+  ,xb_05007_e_43
+  ,xb_05007_e_56
+  ,xb_05007_e_69
+  ,xb_05007_e_37
+  ,xb_05007_e_23
+  ,xb_05007_e_51
+  ,xb_05007_e_64
+  ,xb_05007_e_77
+  ,xb_05007_e_34
+  ,xb_05007_e_20
+  ,xb_05007_e_7
+  ,xb_05007_e_48
+  ,xb_05007_e_61
+  ,xb_05007_e_74
+  ,xb_05007_e_31
+  ,xb_05007_e_17
+  ,xb_05007_e_4
+  ,xb_05007_e_45
+  ,xb_05007_e_58
+  ,xb_05007_e_71
+  ,xb_05007_e_40
+  ,xb_05007_e_26
+  ,xb_05007_e_13
+  ,xb_05007_e_54
+  ,xb_05007_e_67
+  ,xb_05007_e_80
 
 -- Urbanity 
   ,case 
@@ -548,10 +653,9 @@ left join phoenix_scores.all_scores_2018 score using(person_id)
 left join phoenix_scores.all_scores_2016 score using(person_id) 
 left join all_scores_impute using(census_block_group_2010)
 left join phoenix_consumer.tsmart_consumer tc using(person_id) 
-
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
-
+left join phoenix_census.acs_current on block_group_id = p.census_block_group_2010
 left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(census_county_fips,'3') and p.state_fips = left(lpad(census_county_fips,5,'000'),2)
 
   where p.is_deceased = false -- is alive
