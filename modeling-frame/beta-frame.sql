@@ -296,6 +296,7 @@ left join phoenix_analytics.person_votes pv using(person_id)
 left join phoenix_scores.all_scores_2020 score using(person_id) 
 left join phoenix_scores.all_scores_2018 score using(person_id) 
 left join phoenix_scores.all_scores_2016 score using(person_id) 
+left join all_scores_impute using(census_block_group_2010)
 left join phoenix_consumer.tsmart_consumer tc using(person_id) 
 
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
