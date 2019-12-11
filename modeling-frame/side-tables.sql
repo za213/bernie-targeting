@@ -134,7 +134,7 @@ CREATE TABLE bernie_nmarchio2.tsmart_impute
   DISTSTYLE KEY
   DISTKEY (census_block_group_2010)
   SORTKEY (census_block_group_2010)
-  AS (
+  AS (select
 census_block_group_2010
 ,avg(ts_tsmart_partisan_score) as avg_ts_tsmart_partisan_score
 ,avg(ts_tsmart_presidential_general_turnout_score) as avg_ts_tsmart_presidential_general_turnout_score
