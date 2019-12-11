@@ -10,8 +10,6 @@ CREATE TABLE bernie_nmarchio2.all_scores_impute
 ,avg(civis_2020_race_latinx) as avg_civis_2020_race_latinx
 ,avg(civis_2020_race_asian) as avg_civis_2020_race_asian
 ,avg(civis_2020_race_white) as avg_civis_2020_race_white
-,avg(civis_2020_likely_race) as avg_civis_2020_likely_race
-,avg(civis_2020_likely_race_confidence) as avg_civis_2020_likely_race_confidence
 ,avg(civis_2020_subeth_african_american) as avg_civis_2020_subeth_african_american
 ,avg(civis_2020_subeth_west_indian) as avg_civis_2020_subeth_west_indian
 ,avg(civis_2020_subeth_haitian) as avg_civis_2020_subeth_haitian
