@@ -44,9 +44,7 @@ select p.person_id
   ,coalesce(civis_2020_race_latinx,avg_civis_2020_race_latinx,0.5) as civis_2020_race_latinx
   ,coalesce(civis_2020_race_asian,avg_civis_2020_race_asian,0.5) as civis_2020_race_asian
   ,coalesce(civis_2020_race_white,avg_civis_2020_race_white,0.5) as civis_2020_race_white
-  ,coalesce(civis_2020_likely_race,avg_civis_2020_likely_race,0.5) as civis_2020_likely_race
-  ,coalesce(civis_2020_likely_race_confidence,avg_civis_2020_likely_race_confidence,0.5) as civis_2020_likely_race_confidence
-  
+
   -- Civis subethnicity
   ,coalesce(civis_2020_subeth_african_american,avg_civis_2020_subeth_african_american,0.5) as civis_2020_subeth_african_american
   ,coalesce(civis_2020_subeth_west_indian,avg_civis_2020_subeth_west_indian,0.5) as civis_2020_subeth_west_indian
@@ -261,6 +259,7 @@ select p.person_id
   
 -- Ethnicity
   ,case 
+    when civis_2020_likely_race = 'W' then 1
     when p.ethnicity_combined = 'W' 
     or ((ethnicity_combined is null or ethnicity_combined ='O')
         and(civis_2020_race_white > civis_2020_race_native
@@ -269,6 +268,7 @@ select p.person_id
         and civis_2020_race_white > civis_2020_race_latinx)) then 1 else 0 end as eth_white
   
   ,case 
+    when civis_2020_likely_race = 'A' then 1
     when p.ethnicity_combined = 'A' 
     or ((ethnicity_combined is null or ethnicity_combined ='O')
         and(civis_2020_race_asian > civis_2020_race_native
@@ -277,6 +277,7 @@ select p.person_id
         and civis_2020_race_asian > civis_2020_race_latinx)) then 1 else 0 end as eth_asian
 
   ,case 
+    when civis_2020_likely_race = 'B' then 1
     when p.ethnicity_combined = 'B' 
     or ((ethnicity_combined is null or ethnicity_combined ='O')
         and(civis_2020_race_black > civis_2020_race_native
@@ -285,6 +286,7 @@ select p.person_id
         and civis_2020_race_black > civis_2020_race_white)) then 1 else 0 end as eth_afam
   
   ,case 
+    when civis_2020_likely_race = 'H' then 1
     when p.ethnicity_combined = 'H' 
     or ((ethnicity_combined is null or ethnicity_combined = 'O')
         and(civis_2020_race_latinx > civis_2020_race_native
@@ -293,6 +295,7 @@ select p.person_id
         and civis_2020_race_latinx  > civis_2020_race_white)) then 1 else 0 end as eth_hispanic
 
   ,case 
+    when civis_2020_likely_race = 'N' then 1
     when p.ethnicity_combined = 'N' 
     or ((ethnicity_combined is null or ethnicity_combined = 'O')
         and (civis_2020_race_native > civis_2020_race_black
