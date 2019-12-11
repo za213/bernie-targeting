@@ -27,8 +27,6 @@ select p.person_id
   ,coalesce(civis_2018_turnout,avg_civis_2018_turnout,0.5) as civis_2018_turnout
   ,coalesce(civis_2018_partisanship,avg_civis_2018_partisanship,0.5) as civis_2018_partisanship
   ,coalesce(civis_2018_gotv,avg_civis_2018_gotv,0.5) as civis_2018_gotv
-  ,coalesce(civis_2018_likely_race,avg_civis_2018_likely_race,0.5) as civis_2018_likely_race
-  ,coalesce(civis_2018_likely_race_confidence,avg_civis_2018_likely_race_confidence,0.5) as civis_2018_likely_race_confidence
   ,coalesce(civis_2018_ballot_dropoff,avg_civis_2018_ballot_dropoff,0.5) as civis_2018_ballot_dropoff
   ,coalesce(civis_2018_congressional_gotv_raw,avg_civis_2018_congressional_gotv_raw,0.5) as civis_2018_congressional_gotv_raw
   ,coalesce(civis_2018_congressional_support,avg_civis_2018_congressional_support,0.5) as civis_2018_congressional_support
