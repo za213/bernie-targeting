@@ -147,99 +147,62 @@ select p.person_id
   ,case when xp_occupation = 'K05' then 1 else 0 end as xp_occupation_k05
   ,case when xp_occupation = 'K06' then 1 else 0 end as xp_occupation_k06
   
--- ACS Features (industry, women who gave birth, language spoken at home, migration, citizenship, naturalization)
-  -- Industry
-  ,xc_24070_e_10
-  ,xc_24070_e_11
-  ,xc_24070_e_12
-  ,xc_24070_e_13
-  ,xc_24070_e_14
-  ,xc_24070_e_15
-  ,xc_24070_e_2
-  ,xc_24070_e_3
-  ,xc_24070_e_4
-  ,xc_24070_e_6
-  ,xc_24070_e_7
-  ,xc_24070_e_5
-  ,xc_24070_e_8
-  ,xc_24070_e_9
-  ,xc_24070_e_29
-  ,xc_24070_e_43
-  ,xc_24070_e_57
-  ,xc_24070_e_71
-  -- Nativity
-  ,xb_13008_e_2
-  ,xb_13008_e_3
-  ,xb_13008_e_6
-  ,xb_13008_e_4
-  ,xb_13008_e_5
-  ,xb_13008_e_7
-  ,xb_13008_e_8
+-- Block Group ACS Features
+  -- Industry and economic composition
+  ,coalesce(xc_24070_e_10,10.5021808346473) as pct_prof_sci_mng
+  ,coalesce(xc_24070_e_11,23.3169387120635) as pct_educ_health
+  ,coalesce(xc_24070_e_12,9.76120640305069) as pct_arts_ent_hotel_food
+  ,coalesce(xc_24070_e_13,4.9372763541136) as pct_other_serv
+  ,coalesce(xc_24070_e_14,4.70981094468377) as pct_pub_admin
+  ,coalesce(xc_24070_e_15,67.6719088419246) as pct_private
+  ,coalesce(xc_24070_e_2,2.22482878526911) as pct_agriculture
+  ,coalesce(xc_24070_e_3,6.29887799760338) as pct_construction
+  ,coalesce(xc_24070_e_4,10.5900279493579) as pct_manufacturing
+  ,coalesce(xc_24070_e_6,11.5310261382819) as pct_retail
+  ,coalesce(xc_24070_e_7,5.05414222332237) as pct_transport_warehouse
+  ,coalesce(xc_24070_e_5,2.58820902288239) as pct_wholesale
+  ,coalesce(xc_24070_e_8,1.9808691752496) as pct_information
+  ,coalesce(xc_24070_e_9,6.15837855795037) as pct_finance_insur
+  ,coalesce(xc_24070_e_29,3.35201406323088) as pct_selfemployed_incorporated_biz
+  ,coalesce(xc_24070_e_43,8.18953615208745) as pct_not_for_profit
+  ,coalesce(xc_24070_e_57,14.1523126127464) as pct_government_worker
+  ,coalesce(xc_24070_e_71,6.28800827128944) as pct_selfemployed_nonincorporated_biz
+
+  -- Birth in last year
+  ,coalesce(xb_13008_e_2,5.28599158612465) as pct_had_birth_in_last_year
+
   -- Language spoken at home
-  ,xc_16001_e_12
-  ,xc_16001_e_15
-  ,xc_16001_e_18
-  ,xc_16001_e_2
-  ,xc_16001_e_21
-  ,xc_16001_e_24
-  ,xc_16001_e_27
-  ,xc_16001_e_3
-  ,xc_16001_e_30
-  ,xc_16001_e_33
-  ,xc_16001_e_36
-  ,xc_16001_e_6
-  ,xc_16001_e_9
-  ,xc_16001_e_14
-  ,xc_16001_e_17
-  ,xc_16001_e_20
-  ,xc_16001_e_23
-  ,xc_16001_e_26
-  ,xc_16001_e_29
-  ,xc_16001_e_32
-  ,xc_16001_e_35
-  ,xc_16001_e_38
-  ,xc_16001_e_5
-  ,xc_16001_e_8
-  -- Geo mobility
-  ,xb_07001_e_81
-  ,xb_07001_e_49
-  ,xb_07001_e_65
-  ,xb_07001_e_33
-  ,xb_07001_e_17
-  -- Citizenship
-  ,xb_05007_e_15
-  ,xb_05007_e_2
-  ,xb_05007_e_28
-  ,xb_05007_e_82
-  ,xb_05007_e_29
-  ,xb_05007_e_42
-  ,xb_05007_e_43
-  ,xb_05007_e_56
-  ,xb_05007_e_69
-  -- Immigration origin and year
-  ,xb_05007_e_37
-  ,xb_05007_e_23
-  ,xb_05007_e_51
-  ,xb_05007_e_64
-  ,xb_05007_e_77
-  ,xb_05007_e_34
-  ,xb_05007_e_20
-  ,xb_05007_e_7
-  ,xb_05007_e_48
-  ,xb_05007_e_61
-  ,xb_05007_e_74
-  ,xb_05007_e_31
-  ,xb_05007_e_17
-  ,xb_05007_e_4
-  ,xb_05007_e_45
-  ,xb_05007_e_58
-  ,xb_05007_e_71
-  ,xb_05007_e_40
-  ,xb_05007_e_26
-  ,xb_05007_e_13
-  ,xb_05007_e_54
-  ,xb_05007_e_67
-  ,xb_05007_e_80
+  ,coalesce(xc_16001_e_12,0.666356436745457) as pct_lang_at_home_russian_slavic
+  ,coalesce(xc_16001_e_15,1.65284907167414) as pct_lang_at_home_indo_euro
+  ,coalesce(xc_16001_e_18,0.322285583986244) as pct_lang_at_home_korean
+  ,coalesce(xc_16001_e_2,80.2671499610826) as pct_lang_at_home_only_english
+  ,coalesce(xc_16001_e_21,0.96546189141353) as pct_lang_at_home_chinese
+  ,coalesce(xc_16001_e_24,0.407945143013321) as pct_lang_at_home_vietnamese
+  ,coalesce(xc_16001_e_27,0.47831653476469) as pct_lang_at_home_tagalog
+  ,coalesce(xc_16001_e_3,12.0587109495928) as pct_lang_at_home_spanish
+  ,coalesce(xc_16001_e_30,0.828565265109512) as pct_lang_at_home_other_asian
+  ,coalesce(xc_16001_e_33,0.344957984728002) as pct_lang_at_home_arabic
+  ,coalesce(xc_16001_e_36,0.641450896064653) as pct_lang_at_home_other_lang
+  ,coalesce(xc_16001_e_6,0.65794864225899) as pct_lang_at_home_french
+  ,coalesce(xc_16001_e_9,0.483782984689971) as pct_lang_at_home_germanic
+
+  -- Change of address
+  ,coalesce(xb_07001_e_81,0.594762297133181) as pct_moved_from_abroad
+  ,coalesce(xb_07001_e_49,3.09860403448412) as pct_moved_from_different_county_within_same_state
+  ,coalesce(xb_07001_e_65,2.21059028553814) as pct_moved_from_different_state
+  ,coalesce(xb_07001_e_33,8.71861633001596) as pct_moved_within_same_county
+  ,coalesce(xb_07001_e_17,85.1532493413606) as pct_same_house_1_year_ago
+
+  -- Foreign born
+  ,coalesce(xb_05007_e_15,27.5581932832236) as pct_foreign_born_asia
+  ,coalesce(xb_05007_e_2,19.0890989707642) as pct_foreign_born_europe
+  ,coalesce(xb_05007_e_28,41.1432239245551) as pct_foreign_born_latin_america
+  ,coalesce(xb_05007_e_82,10.1881488482489) as pct_foreign_born_other_areas
+  ,coalesce(xb_05007_e_29,14.8401338549315) as pct_foreign_born_caribbean
+  ,coalesce(xb_05007_e_42,54.2330559167257) as pct_foreign_born_central_america
+  ,coalesce(xb_05007_e_43,51.6578188460353) as pct_foreign_born_mexico
+  ,coalesce(xb_05007_e_56,22.4681717297962) as pct_foreign_born_other_central_america
+  ,coalesce(xb_05007_e_69,17.2102764107977) as pct_foreign_born_south_america
 
 -- Urbanity 
   ,case 
