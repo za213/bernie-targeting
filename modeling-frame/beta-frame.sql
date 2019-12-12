@@ -378,7 +378,7 @@ left join phoenix_scores.all_scores_2018 score using(person_id)
 left join phoenix_scores.all_scores_2016 score using(person_id) 
 left join phoenix_consumer.tsmart_consumer tc using(person_id) 
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
---left join l2.demographics l2 using(lalvoterid)
+left join l2.demographics l2 using(lalvoterid)
 left join phoenix_census.acs_current on block_group_id = p.census_block_group_2010
 left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(census_county_fips,'3') and p.state_fips = left(lpad(census_county_fips,5,'000'),2)
 
