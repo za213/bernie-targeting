@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS bernie_nmarchio2.all_scores_impute;
 CREATE TABLE bernie_nmarchio2.all_scores_impute
   DISTSTYLE KEY
@@ -67,8 +66,6 @@ CREATE TABLE bernie_nmarchio2.all_scores_impute
 ,avg(civis_2018_partisanship) as avg_civis_2018_partisanship
 ,avg(civis_2018_spanish_language_preference) as avg_civis_2018_spanish_language_preference
 ,avg(civis_2018_gotv) as avg_civis_2018_gotv
-,avg(civis_2018_likely_race) as avg_civis_2018_likely_race
-,avg(civis_2018_likely_race_confidence) as avg_civis_2018_likely_race_confidence
 ,avg(civis_2018_ballot_dropoff) as avg_civis_2018_ballot_dropoff
 ,avg(civis_2018_congressional_gotv_raw) as avg_civis_2018_congressional_gotv_raw
 ,avg(civis_2018_congressional_support) as avg_civis_2018_congressional_support
