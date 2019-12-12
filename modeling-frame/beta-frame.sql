@@ -261,6 +261,7 @@ select p.person_id
   ,coalesce(pct_pop_nocompdevic_acs_13_17_tract,9.82876877769372) as pct_pop_nocompdevic_acs_13_17_tract
   ,coalesce(pct_pop_w_broadcomp_acs_13_17_tract,79.380795687885) as pct_pop_w_broadcomp_acs_13_17_tract
   
+  /*
   --Language spoken (block group)
   ,coalesce(pct_diff_hu_1yr_ago_acs_13_17,14.1286465145196) as pct_diff_hu_1yr_ago_acs_13_17
   ,coalesce(pct_eng_vw_span_acs_13_17,3.55591399410956) as pct_eng_vw_span_acs_13_17
@@ -268,6 +269,7 @@ select p.person_id
   ,coalesce(pct_eng_vw_api_acs_13_17,0.834475600956629) as pct_eng_vw_api_acs_13_17
   ,coalesce(pct_eng_vw_other_acs_13_17,0.179089840576882) as pct_eng_vw_other_acs_13_17
   ,coalesce(pct_eng_vw_acs_13_17,5.20987011985097) as pct_eng_vw_acs_13_17
+  */
   
   --Household composition (block group)
   ,coalesce(pct_rel_family_hhd_acs_13_17,65.5190489070009) as pct_rel_family_hhd_acs_13_17
@@ -372,6 +374,7 @@ select p.person_id
   ,coalesce(predictwise_environmentalism_score,53) as predictwise_environmentalism_score
   ,coalesce(predictwise_presidential_score,55) as predictwise_presidential_score
   
+  /*
   -- FEC contributions
   ,coalesce(enh_addr_size,40) as enh_addr_size
   ,coalesce(fec_zip_avg_contribution_amount,285.292351174354) as fec_zip_avg_contribution_amount
@@ -408,7 +411,8 @@ select p.person_id
   ,coalesce(gsyn_synth_zip5_sum_zip5_republican,7051) as gsyn_synth_zip5_sum_zip5_republican
   ,coalesce(gsyn_synth_zip5_total_fec_contributions,141) as gsyn_synth_zip5_total_fec_contributions
   ,coalesce(gsyn_synth_zip9_pct_dem_primary_votes,0.24470400461151) as gsyn_synth_zip9_pct_dem_primary_votes
-
+  */
+  
 -- Urbanity 
   ,case 
     when tc.ts_tsmart_urbanicity in ('R1', 'R2') 
