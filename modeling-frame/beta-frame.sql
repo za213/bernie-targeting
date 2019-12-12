@@ -594,4 +594,4 @@ left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(census_
 
 );
 
-grant select on table bernie_data_commons.phoenix_modeling_frame to group bernie_data;
+grant select on table bernie_data_commons.rainbow_modeling_frame to group bernie_data;
