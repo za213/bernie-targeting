@@ -206,7 +206,7 @@ select p.person_id
   ,coalesce(xb_05007_e_56,22.4681717297962) as pct_foreign_born_other_central_america
   ,coalesce(xb_05007_e_69,17.2102764107977) as pct_foreign_born_south_america
   
-  --Socioeconomic
+  --Block population age, race, education
   ,coalesce(pop_under_5_acs_13_17,90) as pop_under_5_acs_13_17
   ,coalesce(pop_5_17_acs_13_17,246) as pop_5_17_acs_13_17
   ,coalesce(pop_18_24_acs_13_17,142) as pop_18_24_acs_13_17
@@ -218,14 +218,7 @@ select p.person_id
   ,coalesce(nh_blk_alone_acs_13_17,179) as nh_blk_alone_acs_13_17
   ,coalesce(college_acs_13_17,306) as college_acs_13_17
   ,coalesce(tot_prns_in_hhd_acs_13_17,1435) as tot_prns_in_hhd_acs_13_17
-  ,coalesce(med_hhd_inc_bg_acs_13_17,60742) as med_hhd_inc_bg_acs_13_17
-  ,coalesce(med_hhd_inc_tr_acs_13_17,60432) as med_hhd_inc_tr_acs_13_17
-  ,coalesce(aggregate_hh_inc_acs_13_17,44004957) as aggregate_hh_inc_acs_13_17
-  ,coalesce(med_house_value_bg_acs_13_17,228999) as med_house_value_bg_acs_13_17
-  ,coalesce(med_house_value_tr_acs_13_17,238630) as med_house_value_tr_acs_13_17
-  ,coalesce(aggr_house_value_acs_13_17,92372699) as aggr_house_value_acs_13_17
-  ,coalesce(mail_return_rate_cen_2010,77.8642421162023) as mail_return_rate_cen_2010
-  ,coalesce(low_response_score,19.0304782693538) as low_response_score
+  
   ,coalesce(pct_hispanic_acs_13_17,16.7012646296691) as pct_hispanic_acs_13_17
   ,coalesce(pct_nh_white_alone_acs_13_17,62.2094341001194) as pct_nh_white_alone_acs_13_17
   ,coalesce(pct_nh_blk_alone_acs_13_17,12.7993612183865) as pct_nh_blk_alone_acs_13_17
@@ -238,15 +231,45 @@ select p.person_id
   ,coalesce(pct_pop_25yrs_over_acs_13_17,68.4902424247925) as pct_pop_25yrs_over_acs_13_17
   ,coalesce(pct_not_hs_grad_acs_13_17,13.4398143467192) as pct_not_hs_grad_acs_13_17
   ,coalesce(pct_college_acs_13_17,28.9708128627636) as pct_college_acs_13_17
+  
+  --Block income, poverty, wealth, health insurance (block group)
+  ,coalesce(med_hhd_inc_bg_acs_13_17,60742) as med_hhd_inc_bg_acs_13_17
+  ,coalesce(aggregate_hh_inc_acs_13_17,44004957) as aggregate_hh_inc_acs_13_17
+  ,coalesce(med_house_value_bg_acs_13_17,228999) as med_house_value_bg_acs_13_17
+  ,coalesce(med_house_value_tr_acs_13_17,238630) as med_house_value_tr_acs_13_17
+  ,coalesce(aggr_house_value_acs_13_17,92372699) as aggr_house_value_acs_13_17
+  ,coalesce(mail_return_rate_cen_2010,77.8642421162023) as mail_return_rate_cen_2010
   ,coalesce(pct_pov_univ_acs_13_17,97.456398162981) as pct_pov_univ_acs_13_17
   ,coalesce(pct_prs_blw_pov_lev_acs_13_17,15.8553983762712) as pct_prs_blw_pov_lev_acs_13_17
   ,coalesce(pct_no_health_ins_acs_13_17,10.2128929872888) as pct_no_health_ins_acs_13_17
+  ,coalesce(pct_pub_asst_inc_acs_13_17,2.84260713297059) as pct_pub_asst_inc_acs_13_17
+  ,coalesce(avg_agg_hh_inc_acs_13_17,77557) as avg_agg_hh_inc_acs_13_17
+  ,coalesce(pct_no_plumb_acs_13_17,2.28981470976642) as pct_no_plumb_acs_13_17
+  ,coalesce(avg_agg_house_value_acs_13_17,164679) as avg_agg_house_value_acs_13_17
+    
+  --Census contactibility measures
+  ,coalesce(low_response_score,19.0304782693538) as low_response_score
+  ,coalesce(pct_no_ph_srvc_acs_13_17,2.3958790054321) as pct_no_ph_srvc_acs_13_17
+  ,coalesce(pct_hhd_nocompdevic_acs_13_17_tract,14.0227970658165) as pct_hhd_nocompdevic_acs_13_17_tract
+  ,coalesce(pct_hhd_w_computer_acs_13_17_tract,75.1982375986167) as pct_hhd_w_computer_acs_13_17_tract
+  ,coalesce(pct_hhd_w_onlysphne_acs_13_17_tract,4.29331000756511) as pct_hhd_w_onlysphne_acs_13_17_tract
+  ,coalesce(pct_hhd_no_internet_acs_13_17_tract,19.0959819788177) as pct_hhd_no_internet_acs_13_17_tract
+  ,coalesce(pct_hhd_w_broadband_acs_13_17_tract,63.788187749919) as pct_hhd_w_broadband_acs_13_17_tract
+  ,coalesce(mail_return_rate_cen_2010_tract,77.3798754458014) as mail_return_rate_cen_2010_tract
+  ,coalesce(low_response_score_tract,20.4549997298174) as low_response_score_tract
+  ,coalesce(self_response_rate_acs_13_17_tract,59.2657827191181) as self_response_rate_acs_13_17_tract  
+  ,coalesce(pct_pop_nocompdevic_acs_13_17_tract,9.82876877769372) as pct_pop_nocompdevic_acs_13_17_tract
+  ,coalesce(pct_pop_w_broadcomp_acs_13_17_tract,79.380795687885) as pct_pop_w_broadcomp_acs_13_17_tract
+  
+  --Language spoken (block group)
   ,coalesce(pct_diff_hu_1yr_ago_acs_13_17,14.1286465145196) as pct_diff_hu_1yr_ago_acs_13_17
   ,coalesce(pct_eng_vw_span_acs_13_17,3.55591399410956) as pct_eng_vw_span_acs_13_17
   ,coalesce(pct_eng_vw_indoeuro_acs_13_17,0.640391501064182) as pct_eng_vw_indoeuro_acs_13_17
   ,coalesce(pct_eng_vw_api_acs_13_17,0.834475600956629) as pct_eng_vw_api_acs_13_17
   ,coalesce(pct_eng_vw_other_acs_13_17,0.179089840576882) as pct_eng_vw_other_acs_13_17
   ,coalesce(pct_eng_vw_acs_13_17,5.20987011985097) as pct_eng_vw_acs_13_17
+  
+  --Household composition (block group)
   ,coalesce(pct_rel_family_hhd_acs_13_17,65.5190489070009) as pct_rel_family_hhd_acs_13_17
   ,coalesce(pct_mrdcple_hhd_acs_13_17,47.1347214746979) as pct_mrdcple_hhd_acs_13_17
   ,coalesce(pct_not_mrdcple_hhd_acs_13_17,52.1478290682847) as pct_not_mrdcple_hhd_acs_13_17
@@ -257,8 +280,8 @@ select p.person_id
   ,coalesce(avg_tot_prns_in_hhd_acs_13_17,2.63179168349542) as avg_tot_prns_in_hhd_acs_13_17
   ,coalesce(pct_rel_under_6_acs_13_17,20.1481426957165) as pct_rel_under_6_acs_13_17
   ,coalesce(pct_hhd_moved_in_acs_13_17,39.9119242864987) as pct_hhd_moved_in_acs_13_17
-  ,coalesce(pct_pub_asst_inc_acs_13_17,2.84260713297059) as pct_pub_asst_inc_acs_13_17
-  ,coalesce(avg_agg_hh_inc_acs_13_17,77557) as avg_agg_hh_inc_acs_13_17
+  
+  --Home and owner / occupancy (block group)
   ,coalesce(pct_tot_occp_units_acs_13_17,87.6827366954533) as pct_tot_occp_units_acs_13_17
   ,coalesce(pct_vacant_units_acs_13_17,11.6252209369342) as pct_vacant_units_acs_13_17
   ,coalesce(pct_renter_occp_hu_acs_13_17,35.4815095504114) as pct_renter_occp_hu_acs_13_17
@@ -268,12 +291,9 @@ select p.person_id
   ,coalesce(pct_mlt_u10p_acs_13_17,10.869025082026) as pct_mlt_u10p_acs_13_17
   ,coalesce(pct_mobile_homes_acs_13_17,5.93147719382638) as pct_mobile_homes_acs_13_17
   ,coalesce(pct_crowd_occp_u_acs_13_17,3.4240591403949) as pct_crowd_occp_u_acs_13_17
-  ,coalesce(pct_no_ph_srvc_acs_13_17,2.3958790054321) as pct_no_ph_srvc_acs_13_17
-  ,coalesce(pct_no_plumb_acs_13_17,2.28981470976642) as pct_no_plumb_acs_13_17
   ,coalesce(pct_recent_built_hu_acs_13_17,0.663407062176377) as pct_recent_built_hu_acs_13_17
-  ,coalesce(avg_agg_house_value_acs_13_17,164679) as avg_agg_house_value_acs_13_17
 
-  --ACS tract socioeconomic data
+  --Tract socioeconomic battery
   ,coalesce(tot_population_acs_13_17_tract,4383) as tot_population_acs_13_17_tract
   ,coalesce(median_age_acs_13_17_tract,38.9029314816816) as median_age_acs_13_17_tract
   ,coalesce(civ_noninst_pop_acs_13_17_tract,4315) as civ_noninst_pop_acs_13_17_tract
@@ -291,22 +311,12 @@ select p.person_id
   ,coalesce(pct_nohealthins1964_acs_13_17_tract,14.7285166972874) as pct_nohealthins1964_acs_13_17_tract
   ,coalesce(pct_nohealthins_65p_acs_13_17_tract,1.02902464065708) as pct_nohealthins_65p_acs_13_17_tract
   ,coalesce(pct_schl_enroll_3_4_acs_13_17_tract,47.3126352264131) as pct_schl_enroll_3_4_acs_13_17_tract
-  ,coalesce(pct_pop_nocompdevic_acs_13_17_tract,9.82876877769372) as pct_pop_nocompdevic_acs_13_17_tract
-  ,coalesce(pct_pop_w_broadcomp_acs_13_17_tract,79.380795687885) as pct_pop_w_broadcomp_acs_13_17_tract
   ,coalesce(avg_tot_prns_in_hhd_acs_13_17_tract,2.61867083648546) as avg_tot_prns_in_hhd_acs_13_17_tract
   ,coalesce(pct_pub_asst_inc_acs_13_17_tract,2.80919255917) as pct_pub_asst_inc_acs_13_17_tract
   ,coalesce(avg_agg_hh_inc_acs_13_17_tract,77210) as avg_agg_hh_inc_acs_13_17_tract
   ,coalesce(avg_agg_house_value_acs_13_17_tract,170426) as avg_agg_house_value_acs_13_17_tract
   ,coalesce(pct_mrdcple_w_child_acs_13_17_tract,41.1085693829028) as pct_mrdcple_w_child_acs_13_17_tract
-  ,coalesce(pct_hhd_nocompdevic_acs_13_17_tract,14.0227970658165) as pct_hhd_nocompdevic_acs_13_17_tract
-  ,coalesce(pct_hhd_w_computer_acs_13_17_tract,75.1982375986167) as pct_hhd_w_computer_acs_13_17_tract
-  ,coalesce(pct_hhd_w_onlysphne_acs_13_17_tract,4.29331000756511) as pct_hhd_w_onlysphne_acs_13_17_tract
-  ,coalesce(pct_hhd_no_internet_acs_13_17_tract,19.0959819788177) as pct_hhd_no_internet_acs_13_17_tract
-  ,coalesce(pct_hhd_w_broadband_acs_13_17_tract,63.788187749919) as pct_hhd_w_broadband_acs_13_17_tract
-  ,coalesce(mail_return_rate_cen_2010_tract,77.3798754458014) as mail_return_rate_cen_2010_tract
-  ,coalesce(low_response_score_tract,20.4549997298174) as low_response_score_tract
-  ,coalesce(self_response_rate_acs_13_17_tract,59.2657827191181) as self_response_rate_acs_13_17_tract
-  
+
 -- TargetSmart Scores
   -- Turnout 
   ,coalesce(ts_tsmart_partisan_score,53.615874715767) as ts_tsmart_partisan_score
