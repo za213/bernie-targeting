@@ -2,8 +2,8 @@
 
 set query_group to 'importers';
 
-drop table if exists bernie_data_commons.phoenix_modeling_frame; 
-create table bernie_data_commons.phoenix_modeling_frame 
+drop table if exists bernie_data_commons.rainbow_matrix; 
+create table bernie_data_commons.rainbow_matrix 
 distkey(person_id)
 sortkey(person_id)
 as (
