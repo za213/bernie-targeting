@@ -348,18 +348,26 @@ select p.person_id
     when coalesce(p.party_name_dnc,l2.parties_description) = 'Other' then 1 else 0 end as party_other
 
 -- Voter history
+  ,vote_g_2018
+  ,vote_g_2016
+  ,vote_g_2014
+  ,vote_g_2012
   ,case
     when vote_g_2018 = 1 and vote_g_2016 != 1
     and vote_g_2014 != 1 or vote_g_2012 != 1 
-    then 1 else 0 end as vote_midterm_voter
+    then 1 else 0 end as vote_midterm_2018_voter
   ,case  
-    when vote_g_2018 = 1 and vote_g_2016 != 1
+    when vote_g_2018 = 1 and vote_g_2016 = 1
     and vote_g_2014 != 1 or vote_g_2012 != 1  
-    then 1 else 0 end as vote_presidential_voter
+    then 1 else 0 end as vote_pres_midterm_2018_2016_voter
+  ,case  
+    when vote_g_2018 != 1 and vote_g_2016 = 1
+    and vote_g_2014 != 1 or vote_g_2012 != 1  
+    then 1 else 0 end as vote_pres_2016_voter
   ,case  
     when vote_g_2018 != 1 and vote_g_2016 != 1
     and (vote_g_2014 = 1 or vote_g_2012 = 1)  
-    then 1 else 0 end as vote_lapsed_voter
+    then 1 else 0 end as vote_lapsed_2014_2012_voter
   ,case  
     when registration_date::date > '2018-11-08' then 1 else 0 end as vote_new_reg
   
