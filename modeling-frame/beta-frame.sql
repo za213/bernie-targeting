@@ -592,7 +592,7 @@ left join phoenix_census.acs_current on block_group_id = p.census_block_group_20
 left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(census_county_fips,'3') and p.state_fips = left(lpad(census_county_fips,5,'000'),2)
 
   where p.is_deceased = false -- is alive
-  and p.reg_record_merged = false -- removes some duplicates
+  and p.reg_record_merged = false -- removes duplicated registration addresses
   and p.reg_on_current_file = true --  voter was on the last voter file that the DNC processed and not eligible to vote in primaries
   and p.reg_voter_flag = true -- voters who are registered to vote (i.e. have a registration status of active or inactive) even if they have moved states and their new state has not updated their file to reflect this yet
 
