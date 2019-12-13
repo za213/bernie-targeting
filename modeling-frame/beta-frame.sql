@@ -176,16 +176,16 @@ select p.person_id
   -- Language spoken at home
   ,coalesce(xc_16001_e_2,80.2671499610826) as pct_lang_at_home_only_english
   ,coalesce(xc_16001_e_3,12.0587109495928) as pct_lang_at_home_spanish
-  ,coalesce(xc_16001_e_33,0.344957984728002) as pct_lang_at_home_arabic
-  /*
   ,coalesce(xc_16001_e_15,1.65284907167414) as pct_lang_at_home_indo_euro
+  ,coalesce(xc_16001_e_33,0.344957984728002) as pct_lang_at_home_arabic
   ,coalesce(xc_16001_e_21,0.96546189141353) as pct_lang_at_home_chinese
-  ,coalesce(xc_16001_e_6,0.65794864225899) as pct_lang_at_home_french
+  ,coalesce(xc_16001_e_30,0.828565265109512) as pct_lang_at_home_other_asian
   ,coalesce(xc_16001_e_12,0.666356436745457) as pct_lang_at_home_russian_slavic
+  /*
+  ,coalesce(xc_16001_e_6,0.65794864225899) as pct_lang_at_home_french
   ,coalesce(xc_16001_e_18,0.322285583986244) as pct_lang_at_home_korean
   ,coalesce(xc_16001_e_24,0.407945143013321) as pct_lang_at_home_vietnamese
   ,coalesce(xc_16001_e_27,0.47831653476469) as pct_lang_at_home_tagalog
-  ,coalesce(xc_16001_e_30,0.828565265109512) as pct_lang_at_home_other_asian
   ,coalesce(xc_16001_e_36,0.641450896064653) as pct_lang_at_home_other_lang
   ,coalesce(xc_16001_e_9,0.483782984689971) as pct_lang_at_home_germanic
   */
