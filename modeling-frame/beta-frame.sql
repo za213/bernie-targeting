@@ -278,13 +278,13 @@ select p.person_id
   */
   
   -- Household composition (block group)
-  -- Married, related, children
+  -- Married, related, with children
   ,coalesce(pct_rel_family_hhd_acs_13_17,65.5190489070009) as pct_rel_family_hhd_acs_13_17
   ,coalesce(pct_mrdcple_hhd_acs_13_17,47.1347214746979) as pct_mrdcple_hhd_acs_13_17
   ,coalesce(avg_tot_prns_in_hhd_acs_13_17,2.63179168349542) as avg_tot_prns_in_hhd_acs_13_17
   ,coalesce(pct_rel_under_6_acs_13_17,20.1481426957165) as pct_rel_under_6_acs_13_17
   ,coalesce(pct_hhd_ppl_und_18_acs_13_17,31.2046174616645) as pct_hhd_ppl_und_18_acs_13_17
-  -- Not married, single women, not family, single parent, moved
+  -- Living not married, single women, not family, single parent, moved
   ,coalesce(pct_not_mrdcple_hhd_acs_13_17,52.1478290682847) as pct_not_mrdcple_hhd_acs_13_17
   ,coalesce(pct_female_no_hb_acs_13_17,13.3563738388161) as pct_female_no_hb_acs_13_17
   ,coalesce(pct_nonfamily_hhd_acs_13_17,33.7635020444098) as pct_nonfamily_hhd_acs_13_17
@@ -306,7 +306,7 @@ select p.person_id
   ,coalesce(pct_crowd_occp_u_acs_13_17,3.4240591403949) as pct_crowd_occp_u_acs_13_17
   ,coalesce(pct_mobile_homes_acs_13_17,5.93147719382638) as pct_mobile_homes_acs_13_17
 
-  -- Demographics (tract)
+  -- Demographics population, age, race, education, children (tract)
   ,coalesce(tot_population_acs_13_17_tract,4383) as tot_population_acs_13_17_tract
   ,coalesce(median_age_acs_13_17_tract,38.9029314816816) as median_age_acs_13_17_tract
   ,coalesce(civ_noninst_pop_acs_13_17_tract,4315) as civ_noninst_pop_acs_13_17_tract
@@ -566,12 +566,11 @@ select p.person_id
     when coalesce(p.party_name_dnc,l2.parties_description) = 'Republican' then 1 else 0 end as party_rep
   ,case  
     when coalesce(p.party_name_dnc,l2.parties_description) = 'Other' then 1 else 0 end as party_other
-
--- Voter registration
-  ,case when state_code in ('AL','GA','HI','IL','IN','MI','MN','MO','MS','MT','OH','SC','TN','TX','VA','VT','WA','WI') then 1 else 0 end as non_party_reg_state
-  
   
 -- Voter history
+  ,case when state_code in ('AL','GA','HI','IL','IN','MI','MN','MO','MS','MT','OH','SC','TN','TX','VA','VT','WA','WI') then 1 
+             else 0 end as non_party_reg_state
+  
   ,vote_g_2018
   ,vote_g_2016
   ,vote_g_2014
