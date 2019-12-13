@@ -177,7 +177,7 @@ select p.person_id
   ,coalesce(xc_16001_e_2,80.2671499610826) as pct_lang_at_home_only_english
   ,coalesce(xc_16001_e_3,12.0587109495928) as pct_lang_at_home_spanish
   ,coalesce(xc_16001_e_33,0.344957984728002) as pct_lang_at_home_arabic
-  */
+  /*
   ,coalesce(xc_16001_e_15,1.65284907167414) as pct_lang_at_home_indo_euro
   ,coalesce(xc_16001_e_21,0.96546189141353) as pct_lang_at_home_chinese
   ,coalesce(xc_16001_e_6,0.65794864225899) as pct_lang_at_home_french
@@ -188,7 +188,7 @@ select p.person_id
   ,coalesce(xc_16001_e_30,0.828565265109512) as pct_lang_at_home_other_asian
   ,coalesce(xc_16001_e_36,0.641450896064653) as pct_lang_at_home_other_lang
   ,coalesce(xc_16001_e_9,0.483782984689971) as pct_lang_at_home_germanic
-  /*
+  */
 
   -- Change of address
   ,coalesce(xb_07001_e_81,0.594762297133181) as pct_moved_from_abroad
@@ -206,9 +206,9 @@ select p.person_id
   ,coalesce(xb_05007_e_43,51.6578188460353) as pct_foreign_born_mexico
   ,coalesce(xb_05007_e_56,22.4681717297962) as pct_foreign_born_other_central_america
   ,coalesce(xb_05007_e_69,17.2102764107977) as pct_foreign_born_south_america
-  */
-  ,coalesce(xb_05007_e_82,10.1881488482489) as pct_foreign_born_other_areas
   /*
+  ,coalesce(xb_05007_e_82,10.1881488482489) as pct_foreign_born_other_areas
+  */
   
   --Demographics of age, race, education (block group)
   ,coalesce(pop_under_5_acs_13_17,90) as pop_under_5_acs_13_17
