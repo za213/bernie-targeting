@@ -211,6 +211,7 @@ select p.person_id
   */
   
   --Demographics of age, race, education (block group)
+  -- Numbers
   ,coalesce(pop_under_5_acs_13_17,90) as pop_under_5_acs_13_17
   ,coalesce(pop_5_17_acs_13_17,246) as pop_5_17_acs_13_17
   ,coalesce(pop_18_24_acs_13_17,142) as pop_18_24_acs_13_17
@@ -222,7 +223,7 @@ select p.person_id
   ,coalesce(nh_blk_alone_acs_13_17,179) as nh_blk_alone_acs_13_17
   ,coalesce(college_acs_13_17,306) as college_acs_13_17
   ,coalesce(tot_prns_in_hhd_acs_13_17,1435) as tot_prns_in_hhd_acs_13_17
-  
+  -- Percents
   ,coalesce(pct_hispanic_acs_13_17,16.7012646296691) as pct_hispanic_acs_13_17
   ,coalesce(pct_nh_white_alone_acs_13_17,62.2094341001194) as pct_nh_white_alone_acs_13_17
   ,coalesce(pct_nh_blk_alone_acs_13_17,12.7993612183865) as pct_nh_blk_alone_acs_13_17
@@ -276,29 +277,34 @@ select p.person_id
   ,coalesce(pct_eng_vw_other_acs_13_17,0.179089840576882) as pct_eng_vw_other_acs_13_17
   */
   
-  --Household composition (block group)
+  -- Household composition (block group)
+  -- Married, related, children
   ,coalesce(pct_rel_family_hhd_acs_13_17,65.5190489070009) as pct_rel_family_hhd_acs_13_17
   ,coalesce(pct_mrdcple_hhd_acs_13_17,47.1347214746979) as pct_mrdcple_hhd_acs_13_17
+  ,coalesce(avg_tot_prns_in_hhd_acs_13_17,2.63179168349542) as avg_tot_prns_in_hhd_acs_13_17
+  ,coalesce(pct_rel_under_6_acs_13_17,20.1481426957165) as pct_rel_under_6_acs_13_17
+  ,coalesce(pct_hhd_ppl_und_18_acs_13_17,31.2046174616645) as pct_hhd_ppl_und_18_acs_13_17
+  -- Not married, single women, not family, single parent, moved
   ,coalesce(pct_not_mrdcple_hhd_acs_13_17,52.1478290682847) as pct_not_mrdcple_hhd_acs_13_17
   ,coalesce(pct_female_no_hb_acs_13_17,13.3563738388161) as pct_female_no_hb_acs_13_17
   ,coalesce(pct_nonfamily_hhd_acs_13_17,33.7635020444098) as pct_nonfamily_hhd_acs_13_17
   ,coalesce(pct_sngl_prns_hhd_acs_13_17,27.4661560104739) as pct_sngl_prns_hhd_acs_13_17
-  ,coalesce(pct_hhd_ppl_und_18_acs_13_17,31.2046174616645) as pct_hhd_ppl_und_18_acs_13_17
-  ,coalesce(avg_tot_prns_in_hhd_acs_13_17,2.63179168349542) as avg_tot_prns_in_hhd_acs_13_17
-  ,coalesce(pct_rel_under_6_acs_13_17,20.1481426957165) as pct_rel_under_6_acs_13_17
   ,coalesce(pct_hhd_moved_in_acs_13_17,39.9119242864987) as pct_hhd_moved_in_acs_13_17
-  
-  --Type of home, ownership, and occupancy (block group)
+
+  -- Housing (block group)
+  -- Occupancy, vacancy 
   ,coalesce(pct_tot_occp_units_acs_13_17,87.6827366954533) as pct_tot_occp_units_acs_13_17
+  ,coalesce(pct_recent_built_hu_acs_13_17,0.663407062176377) as pct_recent_built_hu_acs_13_17
   ,coalesce(pct_vacant_units_acs_13_17,11.6252209369342) as pct_vacant_units_acs_13_17
+  -- Renter / owner
   ,coalesce(pct_renter_occp_hu_acs_13_17,35.4815095504114) as pct_renter_occp_hu_acs_13_17
   ,coalesce(pct_owner_occp_hu_acs_13_17,63.8010405841431) as pct_owner_occp_hu_acs_13_17
+  -- Single / multiunit, multiperson rooms, mobile
   ,coalesce(pct_single_unit_acs_13_17,69.259552771185) as pct_single_unit_acs_13_17
   ,coalesce(pct_mlt_u2_9_strc_acs_13_17,13.1689796103596) as pct_mlt_u2_9_strc_acs_13_17
   ,coalesce(pct_mlt_u10p_acs_13_17,10.869025082026) as pct_mlt_u10p_acs_13_17
-  ,coalesce(pct_mobile_homes_acs_13_17,5.93147719382638) as pct_mobile_homes_acs_13_17
   ,coalesce(pct_crowd_occp_u_acs_13_17,3.4240591403949) as pct_crowd_occp_u_acs_13_17
-  ,coalesce(pct_recent_built_hu_acs_13_17,0.663407062176377) as pct_recent_built_hu_acs_13_17
+  ,coalesce(pct_mobile_homes_acs_13_17,5.93147719382638) as pct_mobile_homes_acs_13_17
 
   -- Demographics (tract)
   ,coalesce(tot_population_acs_13_17_tract,4383) as tot_population_acs_13_17_tract
