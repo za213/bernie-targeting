@@ -570,22 +570,97 @@ select p.person_id
   ,vote_g_2016
   ,vote_g_2014
   ,vote_g_2012
+  
+  ,vote_pp_2000_party_d
+  ,vote_pp_2004_party_d
+  ,vote_pp_2008_party_d
+  ,vote_pp_2016_party_d
+
+  ,case when (vote_pp_2012 = 1 or
+   vote_pp_2016 = 1) then 1 else 0 end as pre_primary_voter_post12
+
+  ,case when (vote_p_2016_party_d = 1 or
+  vote_p_2017_party_d = 1 or
+  vote_p_2018_party_d = 1) then 1 else 0 end as primary_dem_voter_post16
+
+  ,case when (vote_p_2008_party_d = 1 or
+  vote_p_2009_party_d = 1 or
+  vote_p_2010_party_d = 1 or
+  vote_p_2011_party_d = 1 or
+  vote_p_2012_party_d = 1 or
+  vote_p_2013_party_d = 1 or
+  vote_p_2014_party_d = 1 or
+  vote_p_2015_party_d = 1 or
+  vote_p_2016_party_d = 1 or
+  vote_p_2017_party_d = 1 or
+  vote_p_2018_party_d = 1) then 1 else 0 end as primary_dem_voter_post08
+
+  ,case when (vote_pp_2016_method_early = 1 or
+  vote_p_2017_method_early = 1 or
+  vote_p_2018_method_early = 1) then 1 else 0 end as primary_early_voter_post16
+
+  ,case when (vote_p_2014_method_absentee = 1 or
+  vote_p_2015_method_absentee = 1 or
+  vote_p_2016_method_absentee = 1 or
+  vote_p_2017_method_absentee = 1 or
+  vote_p_2018_method_absentee = 1) then 1 else 0 end as primary_absentee_voter_post14
+
+  ,case when (vote_g_2014_method_absentee = 1 or
+  vote_g_2015_method_absentee = 1 or
+  vote_g_2016_method_absentee = 1 or
+  vote_g_2017_method_absentee = 1 or
+  vote_g_2018_method_absentee = 1) then 1 else 0 end as general_absentee_voter_post14
+
+  ,case when (vote_pp_2004_method_absentee = 1 or
+  vote_pp_2008_method_absentee = 1 or
+  vote_pp_2012_method_absentee = 1 or
+  vote_pp_2016_method_absentee = 1) then 1 else 0 end as pres_primary_absentee_voter_post04
+
+  case when (vote_pp_2008_novote_eligible = 1 and
+  vote_pp_2016_novote_eligible = 1) then 1 else 0 end as pres_primary_novote_eligible_post08
+
+  ,case when (vote_p_2016_novote_eligible = 1 and
+  vote_p_2018_novote_eligible = 1) then 1 else 0 end as primary_novote_eligible_post16
+
+  ,case when (vote_g_2008_novote_eligible = 1 and 
+  vote_g_2012_novote_eligible = 1 and
+  vote_g_2016_novote_eligible = 1 and
+  vote_g_2018_novote_eligible = 1) then 1 else 0 end as general_novote_eligible_post08
+
+  ,case when (vote_g_2008 +
+  vote_g_2012 +
+  vote_g_2013 +
+  vote_g_2014 +
+  vote_g_2015 +
+  vote_g_2016 +
+  vote_g_2017 +
+  vote_g_2018) >= 2 then 1 else 0 end as general_at_least_twice_post08
+
+  ,case when (vote_p_2008 +
+  vote_p_2012 +
+  vote_p_2013 +
+  vote_p_2014 +
+  vote_p_2015 +
+  vote_p_2016 +
+  vote_p_2017 +
+  vote_p_2018) >= 2 then 1 else 0 end as primary_at_least_twice_post08
+  
   ,case
-    when vote_g_2018 = 1 and vote_g_2016 != 1
-    and vote_g_2014 != 1 or vote_g_2012 != 1 
+    when vote_g_2018 = 1 and vote_g_2016 != 1 and vote_g_2014 != 1 or vote_g_2012 != 1 
     then 1 else 0 end as vote_midterm_2018_voter
+    
   ,case  
-    when vote_g_2018 = 1 and vote_g_2016 = 1
-    and vote_g_2014 != 1 or vote_g_2012 != 1  
+    when vote_g_2018 = 1 and vote_g_2016 = 1 and vote_g_2014 != 1 or vote_g_2012 != 1  
     then 1 else 0 end as vote_pres_midterm_2018_2016_voter
+    
   ,case  
-    when vote_g_2018 != 1 and vote_g_2016 = 1
-    and vote_g_2014 != 1 or vote_g_2012 != 1  
+    when vote_g_2018 != 1 and vote_g_2016 = 1 and vote_g_2014 != 1 or vote_g_2012 != 1  
     then 1 else 0 end as vote_pres_2016_voter
+    
   ,case  
-    when vote_g_2018 != 1 and vote_g_2016 != 1
-    and (vote_g_2014 = 1 or vote_g_2012 = 1)  
-    then 1 else 0 end as vote_lapsed_2014_2012_voter
+    when vote_g_2018 != 1 and vote_g_2016 != 1 and (vote_g_2014 = 1 or vote_g_2012 = 1 or vote_g_2008 = 1)  
+    then 1 else 0 end as vote_lapsed_voter
+    
   ,case  
     when registration_date::date > '2018-11-08' then 1 else 0 end as vote_new_reg
   
