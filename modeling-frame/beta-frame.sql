@@ -166,9 +166,6 @@ select p.person_id
   ,coalesce(xc_24070_e_57,14.1523126127464) as pct_government_worker
   ,coalesce(xc_24070_e_71,6.28800827128944) as pct_selfemployed_nonincorporated_biz
 
-  -- Birth in last year (block group)
-  ,coalesce(xb_13008_e_2,5.28599158612465) as pct_had_birth_in_last_year
-  
   -- Language spoken at home (block group)
   ,coalesce(xc_16001_e_2,80.2671499610826) as pct_lang_at_home_only_english
   ,coalesce(xc_16001_e_3,12.0587109495928) as pct_lang_at_home_spanish
@@ -206,8 +203,8 @@ select p.person_id
   ,coalesce(xb_05007_e_82,10.1881488482489) as pct_foreign_born_other_areas
   */
 
-  --Demographics of age, race, education (block group)
-    -- Numbers (block group)
+  -- Size demographics of age, race, education (block group)
+  ,coalesce(xb_13008_e_2,5.28599158612465) as pct_had_birth_in_last_year
   ,coalesce(pop_under_5_acs_13_17,126) as pop_under_5_acs_13_17
   ,coalesce(pop_5_17_acs_13_17,353) as pop_5_17_acs_13_17
   ,coalesce(pop_18_24_acs_13_17,186) as pop_18_24_acs_13_17
@@ -219,7 +216,8 @@ select p.person_id
   ,coalesce(nh_blk_alone_acs_13_17,238) as nh_blk_alone_acs_13_17
   ,coalesce(college_acs_13_17,480) as college_acs_13_17
   ,coalesce(tot_prns_in_hhd_acs_13_17,1990) as tot_prns_in_hhd_acs_13_17
-    -- Percents (block group)
+  
+  -- Percents demographics of age, race, education (block group)
   ,coalesce(pct_hispanic_acs_13_17,14.2960721578394) as pct_hispanic_acs_13_17
   ,coalesce(pct_nh_white_alone_acs_13_17,65.5333628958917) as pct_nh_white_alone_acs_13_17
   ,coalesce(pct_nh_blk_alone_acs_13_17,12.0509472949503) as pct_nh_blk_alone_acs_13_17
@@ -270,13 +268,13 @@ select p.person_id
   ,coalesce(pct_eng_vw_api_acs_13_17,0.817020607263466) as pct_eng_vw_api_acs_13_17
   ,coalesce(pct_eng_vw_acs_13_17,3.84689136566416) as pct_eng_vw_acs_13_17
 
-  -- Household composition (block group)
   -- Married, related, with children (block group)
   ,coalesce(pct_rel_family_hhd_acs_13_17,67.4416347001227) as pct_rel_family_hhd_acs_13_17
   ,coalesce(pct_mrdcple_hhd_acs_13_17,50.4965271841652) as pct_mrdcple_hhd_acs_13_17
   ,coalesce(avg_tot_prns_in_hhd_acs_13_17,2.66520630002142) as avg_tot_prns_in_hhd_acs_13_17
   ,coalesce(pct_rel_under_6_acs_13_17,19.79222392925) as pct_rel_under_6_acs_13_17
   ,coalesce(pct_hhd_ppl_und_18_acs_13_17,32.0634267116686) as pct_hhd_ppl_und_18_acs_13_17
+  
   -- Living not married, single women, not family, single parent, moved (block group)
   ,coalesce(pct_not_mrdcple_hhd_acs_13_17,49.4127305321737) as pct_not_mrdcple_hhd_acs_13_17
   ,coalesce(pct_female_no_hb_acs_13_17,12.2731174327349) as pct_female_no_hb_acs_13_17
@@ -284,24 +282,23 @@ select p.person_id
   ,coalesce(pct_sngl_prns_hhd_acs_13_17,26.2937187836754) as pct_sngl_prns_hhd_acs_13_17
   ,coalesce(pct_hhd_moved_in_acs_13_17,40.407480726983) as pct_hhd_moved_in_acs_13_17
   
-  
-  -- Housing (block group)
   -- Occupancy, vacancy (block group) 
   ,coalesce(pct_tot_occp_units_acs_13_17,89.6550041580204) as pct_tot_occp_units_acs_13_17
   ,coalesce(pct_recent_built_hu_acs_13_17,0.995234668985221) as pct_recent_built_hu_acs_13_17
   ,coalesce(pct_vacant_units_acs_13_17,10.2576800990454) as pct_vacant_units_acs_13_17
+  
   -- Renter / owner (block group)
   ,coalesce(pct_renter_occp_hu_acs_13_17,32.5914873973869) as pct_renter_occp_hu_acs_13_17
   ,coalesce(pct_owner_occp_hu_acs_13_17,67.3177701390769) as pct_owner_occp_hu_acs_13_17
-  -- Single / multiunit, multiperson rooms, mobile (block group)
+  
+  -- Single / multiunit, multiperson rooms, mobile home (block group)
   ,coalesce(pct_single_unit_acs_13_17,71.626622643208) as pct_single_unit_acs_13_17
   ,coalesce(pct_mlt_u2_9_strc_acs_13_17,11.4387903065272) as pct_mlt_u2_9_strc_acs_13_17
   ,coalesce(pct_mlt_u10p_acs_13_17,11.1029455588377) as pct_mlt_u10p_acs_13_17
   ,coalesce(pct_crowd_occp_u_acs_13_17,2.9544471103295) as pct_crowd_occp_u_acs_13_17
   ,coalesce(pct_mobile_homes_acs_13_17,5.66837761256287) as pct_mobile_homes_acs_13_17 
  
-
-  -- Demographics population, age, race, education, children (tract)
+  -- Demographics on population, age, race, education, children (tract)
   ,coalesce(tot_population_acs_13_17_tract,5465) as tot_population_acs_13_17_tract
   ,coalesce(median_age_acs_13_17_tract,39.7290404593366) as median_age_acs_13_17_tract
   ,coalesce(civ_noninst_pop_acs_13_17_tract,5400) as civ_noninst_pop_acs_13_17_tract
@@ -410,7 +407,7 @@ select p.person_id
   ,coalesce(kfr_hisp_male_p25,0.426604211724126) as kfr_hisp_male_p25
   ,coalesce(kfr_white_male_p25,0.451330839800494) as kfr_white_male_p25
   
-  --Fraction of children born in 1978-1983 birth cohorts with parents at the 25th percentile of the national income distribution who were incarcerated on April st 1 , 2010. (tract)
+  -- Fraction of children born in 1978-1983 birth cohorts with parents at the 25th percentile of the national income distribution who were incarcerated on April 2010 (tract)
   ,coalesce(jail_black_female_p25,0.00631471659606834) as jail_black_female_p25
   ,coalesce(jail_hisp_female_p25,0.00310764332757126) as jail_hisp_female_p25
   ,coalesce(jail_white_female_p25,0.00464152872385685) as jail_white_female_p25
@@ -470,7 +467,7 @@ select p.person_id
   ,coalesce(fraction_of_parents_in_10th_national_income_decile,0.117994046920011) as fraction_of_parents_in_10th_national_income_decile
   */
   
-  -- Urban structure and dynamics (county)
+  -- Urban dynamics (county)
   ,coalesce(log_population_density,6.12619867247722) as log_population_density
   ,coalesce(fraction_with_commute_less15_mins,0.294810198323762) as fraction_with_commute_less15_mins
   --,coalesce(fraction_with_commute__15_mins,-0.0099986728359157) as fraction_with_commute__15_mins
@@ -496,7 +493,7 @@ select p.person_id
   ,coalesce(college_graduation_rate_income_adjusted,0.00744872225522498) as college_graduation_rate_income_adjusted
   ,coalesce(no_college,0) as no_college
   
-  -- Affordability and income (county)
+  -- Affordability (county)
   ,coalesce(median_house_price_for_below_median_income_families,111719.45713786) as median_house_price_for_below_median_income_families
   ,coalesce(median_house_price_for_above_median_income_families,140790.018749115) as median_house_price_for_above_median_income_families
   ,coalesce(median_house_rent_for_below_median_income_families,592.904223753325) as median_house_rent_for_below_median_income_families
@@ -506,7 +503,7 @@ select p.person_id
   ,coalesce(location_affordability_of_median_income_family,53.639155643285) as location_affordability_of_median_income_family
   --,coalesce(location_affordability_of_median_household,0.0156450285786106) as location_affordability_of_median_household
 
-  -- Social capital (county)
+  -- Social cohesion (county)
   ,coalesce(social_capital_index,-0.32310404048882) as social_capital_index
   ,coalesce(fraction_religious,0.503391600402358) as fraction_religious
   ,coalesce(violent_crime_rate,0.00179317116792631) as violent_crime_rate
@@ -525,9 +522,8 @@ select p.person_id
   -- 2016 primary returns (county)
   ,coalesce(primary16_clinton,0.5480444769384) as primary16_clinton
   ,coalesce(primary16_sanders,0.434347726321799) as primary16_sanders
-
--- TargetSmart Scores
-  -- Turnout 
+  
+  -- TargetSmart Turnout 
   ,coalesce(ts_tsmart_partisan_score,53.615874715767) as ts_tsmart_partisan_score
   ,coalesce(ts_tsmart_presidential_general_turnout_score,72.1139112743012) as ts_tsmart_presidential_general_turnout_score
   ,coalesce(ts_tsmart_midterm_general_turnout_score,49.2156783912222) as ts_tsmart_midterm_general_turnout_score
@@ -537,7 +533,7 @@ select p.person_id
   ,coalesce(ts_tsmart_midterm_general_enthusiasm_score,40.6038213693376) as ts_tsmart_midterm_general_enthusiasm_score
   ,coalesce(ts_tsmart_local_voter_score,35.6934520560535) as ts_tsmart_local_voter_score
   
-  -- Ideology and issue scores
+  -- TargetSmart ideology and issue scores
   ,coalesce(ts_tsmart_tea_party_score,46.0826663961952) as ts_tsmart_tea_party_score
   ,coalesce(ts_tsmart_ideology_score,58.2238378150888) as ts_tsmart_ideology_score
   ,coalesce(ts_tsmart_moral_authority_score,40.7086519676708) as ts_tsmart_moral_authority_score
@@ -559,7 +555,7 @@ select p.person_id
   ,coalesce(ts_tsmart_activist_score,42.7382851129463) as ts_tsmart_activist_score
   ,coalesce(ts_tsmart_working_class_score,58.6177878423767) as ts_tsmart_working_class_score
   
-  -- Predictwise
+  -- PredictWise
   ,coalesce(predictwise_authoritarianism_score,71) as predictwise_authoritarianism_score
   ,coalesce(predictwise_compassion_score,55) as predictwise_compassion_score
   ,coalesce(predictwise_economic_populism_score,43) as predictwise_economic_populism_score
@@ -581,43 +577,45 @@ select p.person_id
   ,coalesce(predictwise_environmentalism_score,53) as predictwise_environmentalism_score
   ,coalesce(predictwise_presidential_score,55) as predictwise_presidential_score
   
-  /*
-  -- FEC contributions
-  ,coalesce(enh_addr_size,40) as enh_addr_size
-  ,coalesce(fec_zip_avg_contribution_amount,285.292351174354) as fec_zip_avg_contribution_amount
-  ,coalesce(fec_zip_contribution_category_corporation,92676) as fec_zip_contribution_category_corporation
+  -- FEC contributions 
   ,coalesce(fec_zip_contribution_category_democrat,514867) as fec_zip_contribution_category_democrat
-  ,coalesce(fec_zip_contribution_category_house,289501) as fec_zip_contribution_category_house
   ,coalesce(fec_zip_contribution_category_labor_organization,14300) as fec_zip_contribution_category_labor_organization
-  ,coalesce(fec_zip_contribution_category_membership_organization,40105) as fec_zip_contribution_category_membership_organization
   ,coalesce(fec_zip_contribution_category_presidential,184526) as fec_zip_contribution_category_presidential
-  ,coalesce(fec_zip_contribution_category_qualified_party,225967) as fec_zip_contribution_category_qualified_party
   ,coalesce(fec_zip_contribution_category_republican,400768) as fec_zip_contribution_category_republican
   ,coalesce(fec_zip_contribution_category_senate,223010) as fec_zip_contribution_category_senate
   ,coalesce(fec_zip_contribution_category_trade_association,49267) as fec_zip_contribution_category_trade_association
-  ,coalesce(fec_zip_contribution_category_unaffiliated,487791) as fec_zip_contribution_category_unaffiliated
-  ,coalesce(fec_zip_total_contribution_amount,1408448) as fec_zip_total_contribution_amount
-  ,coalesce(fec_zip_total_contributions,3919) as fec_zip_total_contributions
-  ,coalesce(gsyn_synth_hh_average_age,50.3527862005709) as gsyn_synth_hh_average_age
+  
+  -- Synthetic registration 
   ,coalesce(gsyn_synth_hh_pct_registered,95.974742397142) as gsyn_synth_hh_pct_registered
   ,coalesce(gsyn_synth_hh_total_primary_votes_person,1.62222639559819) as gsyn_synth_hh_total_primary_votes_person
-  ,coalesce(gsyn_synth_hh_total_votes_per_person,5.47473457667572) as gsyn_synth_hh_total_votes_per_person
-  ,coalesce(gsyn_synth_zip5_pct_catholic,14.4101302276016) as gsyn_synth_zip5_pct_catholic
   ,coalesce(gsyn_synth_zip5_pct_dem_primary_votes,0.233256642021729) as gsyn_synth_zip5_pct_dem_primary_votes
-  ,coalesce(gsyn_synth_zip5_pct_jewish,1.10422757474685) as gsyn_synth_zip5_pct_jewish
   ,coalesce(gsyn_synth_zip5_pct_of_dem_fec_contributions,0.529875692892941) as gsyn_synth_zip5_pct_of_dem_fec_contributions
   ,coalesce(gsyn_synth_zip5_pct_of_dems_per_reg_count,0.494239755293577) as gsyn_synth_zip5_pct_of_dems_per_reg_count
   ,coalesce(gsyn_synth_zip5_sum_dem_primary_votes_cast_count,7515) as gsyn_synth_zip5_sum_dem_primary_votes_cast_count
   ,coalesce(gsyn_synth_zip5_sum_fec_contribution_count_democrat,85) as gsyn_synth_zip5_sum_fec_contribution_count_democrat
-  ,coalesce(gsyn_synth_zip5_sum_fec_contribution_count_republican,51) as gsyn_synth_zip5_sum_fec_contribution_count_republican
-  ,coalesce(gsyn_synth_zip5_sum_individuals_in_zip5,25065) as gsyn_synth_zip5_sum_individuals_in_zip5
-  ,coalesce(gsyn_synth_zip5_sum_primary_votes_cast_count,33423) as gsyn_synth_zip5_sum_primary_votes_cast_count
+  ,coalesce(gsyn_synth_zip9_pct_dem_primary_votes,0.24470400461151) as gsyn_synth_zip9_pct_dem_primary_votes
   ,coalesce(gsyn_synth_zip5_sum_registered,19430) as gsyn_synth_zip5_sum_registered
   ,coalesce(gsyn_synth_zip5_sum_unregistered,5666) as gsyn_synth_zip5_sum_unregistered
   ,coalesce(gsyn_synth_zip5_sum_zip5_democrat,10504) as gsyn_synth_zip5_sum_zip5_democrat
   ,coalesce(gsyn_synth_zip5_sum_zip5_republican,7051) as gsyn_synth_zip5_sum_zip5_republican
+  /*
+  ,coalesce(enh_addr_size,40) as enh_addr_size
+  ,coalesce(fec_zip_avg_contribution_amount,285.292351174354) as fec_zip_avg_contribution_amount
+  ,coalesce(fec_zip_contribution_category_corporation,92676) as fec_zip_contribution_category_corporation
+  ,coalesce(fec_zip_contribution_category_house,289501) as fec_zip_contribution_category_house
+  ,coalesce(fec_zip_contribution_category_membership_organization,40105) as fec_zip_contribution_category_membership_organization
+  ,coalesce(fec_zip_contribution_category_qualified_party,225967) as fec_zip_contribution_category_qualified_party
+  ,coalesce(fec_zip_contribution_category_unaffiliated,487791) as fec_zip_contribution_category_unaffiliated
+  ,coalesce(fec_zip_total_contribution_amount,1408448) as fec_zip_total_contribution_amount
+  ,coalesce(fec_zip_total_contributions,3919) as fec_zip_total_contributions
+  ,coalesce(gsyn_synth_hh_average_age,50.3527862005709) as gsyn_synth_hh_average_age
+  ,coalesce(gsyn_synth_hh_total_votes_per_person,5.47473457667572) as gsyn_synth_hh_total_votes_per_person
+  ,coalesce(gsyn_synth_zip5_pct_catholic,14.4101302276016) as gsyn_synth_zip5_pct_catholic
+  ,coalesce(gsyn_synth_zip5_pct_jewish,1.10422757474685) as gsyn_synth_zip5_pct_jewish
+  ,coalesce(gsyn_synth_zip5_sum_fec_contribution_count_republican,51) as gsyn_synth_zip5_sum_fec_contribution_count_republican
+  ,coalesce(gsyn_synth_zip5_sum_individuals_in_zip5,25065) as gsyn_synth_zip5_sum_individuals_in_zip5
+  ,coalesce(gsyn_synth_zip5_sum_primary_votes_cast_count,33423) as gsyn_synth_zip5_sum_primary_votes_cast_count
   ,coalesce(gsyn_synth_zip5_total_fec_contributions,141) as gsyn_synth_zip5_total_fec_contributions
-  ,coalesce(gsyn_synth_zip9_pct_dem_primary_votes,0.24470400461151) as gsyn_synth_zip9_pct_dem_primary_votes
   */
   
 -- Urbanity 
