@@ -1,4 +1,4 @@
---Data Dictionary https://docs.google.com/spreadsheets/d/183LBmZGNbWdjmGxuBY8GrbtXuoUMobcm5BO331vs5Og/edit?usp=sharing
+-- Data Dictionary: https://docs.google.com/spreadsheets/d/183LBmZGNbWdjmGxuBY8GrbtXuoUMobcm5BO331vs5Og/edit?usp=sharing
 
 set query_group to 'importers';
 
