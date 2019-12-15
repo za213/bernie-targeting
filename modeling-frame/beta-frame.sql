@@ -10,10 +10,6 @@ as (
   
 select p.person_id
   ,x.jsonid
- 
---Primary returns
-  ,coalesce(pri.primary16_clinton,.5) as primary16_clinton
-  ,coalesce(pri.primary16_sanders,.5) as primary16_sanders
   
 --All scores
   -- Civis marriage, children, language, partisan/ideology scores
@@ -150,7 +146,7 @@ select p.person_id
   ,case when xp_occupation = 'K06' then 1 else 0 end as xp_occupation_k06
   
 -- Block Group ACS 
-  -- Industry and economic composition
+  -- Industry and economic composition (block group)
   ,coalesce(xc_24070_e_10,10.5021808346473) as pct_prof_sci_mng
   ,coalesce(xc_24070_e_11,23.3169387120635) as pct_educ_health
   ,coalesce(xc_24070_e_12,9.76120640305069) as pct_arts_ent_hotel_food
@@ -170,10 +166,10 @@ select p.person_id
   ,coalesce(xc_24070_e_57,14.1523126127464) as pct_government_worker
   ,coalesce(xc_24070_e_71,6.28800827128944) as pct_selfemployed_nonincorporated_biz
 
-  -- Birth in last year
+  -- Birth in last year (block group)
   ,coalesce(xb_13008_e_2,5.28599158612465) as pct_had_birth_in_last_year
   
-  -- Language spoken at home
+  -- Language spoken at home (block group)
   ,coalesce(xc_16001_e_2,80.2671499610826) as pct_lang_at_home_only_english
   ,coalesce(xc_16001_e_3,12.0587109495928) as pct_lang_at_home_spanish
   ,coalesce(xc_16001_e_15,1.65284907167414) as pct_lang_at_home_indo_euro
@@ -190,14 +186,14 @@ select p.person_id
   ,coalesce(xc_16001_e_9,0.483782984689971) as pct_lang_at_home_germanic
   */
 
-  -- Change of address
+  -- Change of address (block group)
   ,coalesce(xb_07001_e_81,0.594762297133181) as pct_moved_from_abroad
   ,coalesce(xb_07001_e_49,3.09860403448412) as pct_moved_from_different_county_within_same_state
   ,coalesce(xb_07001_e_65,2.21059028553814) as pct_moved_from_different_state
   ,coalesce(xb_07001_e_33,8.71861633001596) as pct_moved_within_same_county
   ,coalesce(xb_07001_e_17,85.1532493413606) as pct_same_house_1_year_ago
 
-  -- Foreign born
+  -- Foreign born (block group)
   ,coalesce(xb_05007_e_15,27.5581932832236) as pct_foreign_born_asia
   ,coalesce(xb_05007_e_2,19.0890989707642) as pct_foreign_born_europe
   ,coalesce(xb_05007_e_28,41.1432239245551) as pct_foreign_born_latin_america
@@ -211,7 +207,7 @@ select p.person_id
   */
 
   --Demographics of age, race, education (block group)
-  -- Numbers
+    -- Numbers (block group)
   ,coalesce(pop_under_5_acs_13_17,126) as pop_under_5_acs_13_17
   ,coalesce(pop_5_17_acs_13_17,353) as pop_5_17_acs_13_17
   ,coalesce(pop_18_24_acs_13_17,186) as pop_18_24_acs_13_17
@@ -223,7 +219,7 @@ select p.person_id
   ,coalesce(nh_blk_alone_acs_13_17,238) as nh_blk_alone_acs_13_17
   ,coalesce(college_acs_13_17,480) as college_acs_13_17
   ,coalesce(tot_prns_in_hhd_acs_13_17,1990) as tot_prns_in_hhd_acs_13_17
-  -- Percents
+    -- Percents (block group)
   ,coalesce(pct_hispanic_acs_13_17,14.2960721578394) as pct_hispanic_acs_13_17
   ,coalesce(pct_nh_white_alone_acs_13_17,65.5333628958917) as pct_nh_white_alone_acs_13_17
   ,coalesce(pct_nh_blk_alone_acs_13_17,12.0509472949503) as pct_nh_blk_alone_acs_13_17
@@ -275,13 +271,13 @@ select p.person_id
   ,coalesce(pct_eng_vw_acs_13_17,3.84689136566416) as pct_eng_vw_acs_13_17
 
   -- Household composition (block group)
-  -- Married, related, with children
+  -- Married, related, with children (block group)
   ,coalesce(pct_rel_family_hhd_acs_13_17,67.4416347001227) as pct_rel_family_hhd_acs_13_17
   ,coalesce(pct_mrdcple_hhd_acs_13_17,50.4965271841652) as pct_mrdcple_hhd_acs_13_17
   ,coalesce(avg_tot_prns_in_hhd_acs_13_17,2.66520630002142) as avg_tot_prns_in_hhd_acs_13_17
   ,coalesce(pct_rel_under_6_acs_13_17,19.79222392925) as pct_rel_under_6_acs_13_17
   ,coalesce(pct_hhd_ppl_und_18_acs_13_17,32.0634267116686) as pct_hhd_ppl_und_18_acs_13_17
-  -- Living not married, single women, not family, single parent, moved
+  -- Living not married, single women, not family, single parent, moved (block group)
   ,coalesce(pct_not_mrdcple_hhd_acs_13_17,49.4127305321737) as pct_not_mrdcple_hhd_acs_13_17
   ,coalesce(pct_female_no_hb_acs_13_17,12.2731174327349) as pct_female_no_hb_acs_13_17
   ,coalesce(pct_nonfamily_hhd_acs_13_17,32.4676233732405) as pct_nonfamily_hhd_acs_13_17
@@ -290,14 +286,14 @@ select p.person_id
   
   
   -- Housing (block group)
-  -- Occupancy, vacancy 
+  -- Occupancy, vacancy (block group) 
   ,coalesce(pct_tot_occp_units_acs_13_17,89.6550041580204) as pct_tot_occp_units_acs_13_17
   ,coalesce(pct_recent_built_hu_acs_13_17,0.995234668985221) as pct_recent_built_hu_acs_13_17
   ,coalesce(pct_vacant_units_acs_13_17,10.2576800990454) as pct_vacant_units_acs_13_17
-  -- Renter / owner
+  -- Renter / owner (block group)
   ,coalesce(pct_renter_occp_hu_acs_13_17,32.5914873973869) as pct_renter_occp_hu_acs_13_17
   ,coalesce(pct_owner_occp_hu_acs_13_17,67.3177701390769) as pct_owner_occp_hu_acs_13_17
-  -- Single / multiunit, multiperson rooms, mobile
+  -- Single / multiunit, multiperson rooms, mobile (block group)
   ,coalesce(pct_single_unit_acs_13_17,71.626622643208) as pct_single_unit_acs_13_17
   ,coalesce(pct_mlt_u2_9_strc_acs_13_17,11.4387903065272) as pct_mlt_u2_9_strc_acs_13_17
   ,coalesce(pct_mlt_u10p_acs_13_17,11.1029455588377) as pct_mlt_u10p_acs_13_17
@@ -386,7 +382,7 @@ select p.person_id
   ,coalesce(pct_eng_vw_other_acs_13_17,0.161400892051139) as pct_eng_vw_other_acs_13_17
   */
   
-  -- Neighborhooed effects and determinants of socioeconomic mobility 
+  -- Neighborhooed effects and determinants of socioeconomic mobility (tract)
   ,coalesce(hhinc_mean2000,84608.8675030326) as hhinc_mean2000
   ,coalesce(mean_commutetime2000,27.1511583146669) as mean_commutetime2000
   ,coalesce(frac_coll_plus2010,0.293429982272959) as frac_coll_plus2010
@@ -406,7 +402,21 @@ select p.person_id
   ,coalesce(ann_avg_job_growth_2004_2013,0.0181115701144405) as ann_avg_job_growth_2004_2013
   ,coalesce(job_density_2013,1984.48679821812) as job_density_2013
 
-  -- Mean household income rank for children whose parents were at the 25th percentile of the national income distribution
+  -- Mean household income rank for children whose parents were at the 25th percentile of the national income distribution (tract)
+  ,coalesce(kfr_black_female_p25,0.382206283736095) as kfr_black_female_p25
+  ,coalesce(kfr_hisp_female_p25,0.447209772710046) as kfr_hisp_female_p25
+  ,coalesce(kfr_white_female_p25,0.478709529962811) as kfr_white_female_p25
+  ,coalesce(kfr_black_male_p25,0.334165703430485) as kfr_black_male_p25
+  ,coalesce(kfr_hisp_male_p25,0.426604211724126) as kfr_hisp_male_p25
+  ,coalesce(kfr_white_male_p25,0.451330839800494) as kfr_white_male_p25
+  
+  --Fraction of children born in 1978-1983 birth cohorts with parents at the 25th percentile of the national income distribution who were incarcerated on April st 1 , 2010. (tract)
+  ,coalesce(jail_black_female_p25,0.00631471659606834) as jail_black_female_p25
+  ,coalesce(jail_hisp_female_p25,0.00310764332757126) as jail_hisp_female_p25
+  ,coalesce(jail_white_female_p25,0.00464152872385685) as jail_white_female_p25
+  ,coalesce(jail_black_male_p25,0.0892361528008483) as jail_black_male_p25
+  ,coalesce(jail_hisp_male_p25,0.0327939162010329) as jail_hisp_male_p25
+  ,coalesce(jail_white_male_p25,0.0300551823879225) as jail_white_male_p25
    /*
   ,coalesce(kfr_pooled_pooled_p25,0.433407375913507) as kfr_pooled_pooled_p25
   ,coalesce(jail_pooled_pooled_p25,0.0213830856711985) as jail_pooled_pooled_p25
@@ -421,20 +431,8 @@ select p.person_id
   ,coalesce(jail_pooled_female_p25,0.00385537099132036) as jail_pooled_female_p25
   ,coalesce(jail_pooled_male_p25,0.0403304433992196) as jail_pooled_male_p25
   */
-  ,coalesce(kfr_black_female_p25,0.382206283736095) as kfr_black_female_p25
-  ,coalesce(kfr_hisp_female_p25,0.447209772710046) as kfr_hisp_female_p25
-  ,coalesce(kfr_white_female_p25,0.478709529962811) as kfr_white_female_p25
-  ,coalesce(kfr_black_male_p25,0.334165703430485) as kfr_black_male_p25
-  ,coalesce(kfr_hisp_male_p25,0.426604211724126) as kfr_hisp_male_p25
-  ,coalesce(kfr_white_male_p25,0.451330839800494) as kfr_white_male_p25
-  ,coalesce(jail_black_female_p25,0.00631471659606834) as jail_black_female_p25
-  ,coalesce(jail_hisp_female_p25,0.00310764332757126) as jail_hisp_female_p25
-  ,coalesce(jail_white_female_p25,0.00464152872385685) as jail_white_female_p25
-  ,coalesce(jail_black_male_p25,0.0892361528008483) as jail_black_male_p25
-  ,coalesce(jail_hisp_male_p25,0.0327939162010329) as jail_hisp_male_p25
-  ,coalesce(jail_white_male_p25,0.0300551823879225) as jail_white_male_p25
  
-  -- Determinants of socioeconomic mobility (county)
+  -- Socioeconomic mobility (county)
   ,coalesce(cty_exposure_natl_hh_income_at_age_26_p25,-0.00116575193502995) as cty_exposure_natl_hh_income_at_age_26_p25
   ,coalesce(cty_exposure_effects_natl_hh_income_at_age_26_p75,-0.00914190872321934) as cty_exposure_effects_natl_hh_income_at_age_26_p75
   ,coalesce(cty_exposure_college_attendance_at_ages_18_23_p25,-0.0106601971605495) as cty_exposure_college_attendance_at_ages_18_23_p25
@@ -443,56 +441,23 @@ select p.person_id
   ,coalesce(cty_exposure_value_of_hh_income_at_age_26_p75,-2.39628461786069) as cty_exposure_value_of_hh_income_at_age_26_p75
   ,coalesce(cty_exposure_marriage_rate_at_age_26_p25,0.00831731094751134) as cty_exposure_marriage_rate_at_age_26_p25
   ,coalesce(cty_exposure_marriage_rate_at_age_26_p75,-0.00209350639976409) as cty_exposure_marriage_rate_at_age_26_p75
+  
+  -- Segregation, inequality, precarity (county)
   ,coalesce(racial_segregation,0.171863755227516) as racial_segregation
   ,coalesce(income_segregation,0.0711031029332531) as income_segregation
   ,coalesce(segregation_of_poverty_p25,0.0632798063417) as segregation_of_poverty_p25
   ,coalesce(segregation_of_poverty_p75,0.0773876799842774) as segregation_of_poverty_p75
-  ,coalesce(fraction_with_commute_less15_mins,0.294810198323762) as fraction_with_commute_less15_mins
-  ,coalesce(household_income_per_capita,39765.3684302678) as household_income_per_capita
   ,coalesce(gini,0.445165973890533) as gini
   ,coalesce(top_1pct_income_share,0.00136530467373247) as top_1pct_income_share
   ,coalesce(fraction_middle_class_between_p25_and_p75,0.498556746393662) as fraction_middle_class_between_p25_and_p75
-  ,coalesce(local_tax_rate,0.0245131597256442) as local_tax_rate
-  ,coalesce(local_tax_rate_per_capita,0.874316688348967) as local_tax_rate_per_capita
-  ,coalesce(local_govt_expenditures_per_capita,2.38913995258842) as local_govt_expenditures_per_capita
-  ,coalesce(state_eitc_exposure,1.9312584869822) as state_eitc_exposure
-  ,coalesce(tax_progressivity,0.700113017799344) as tax_progressivity
-  ,coalesce(school_expenditure_per_student,6.56856733641607) as school_expenditure_per_student
-  ,coalesce(student_teacher_ratio,17.9089800964499) as student_teacher_ratio
-  ,coalesce(test_score_percentile_income_adjusted,-3.42893630380351) as test_score_percentile_income_adjusted
-  ,coalesce(high_school_dropout_rate_income_adjusted,0.011010379642501) as high_school_dropout_rate_income_adjusted
-  ,coalesce(number_of_colleges_per_capita,0.0127898836217141) as number_of_colleges_per_capita
-  ,coalesce(college_tuition,5480.21990120936) as college_tuition
-  ,coalesce(college_graduation_rate_income_adjusted,0.00744872225522498) as college_graduation_rate_income_adjusted
-  ,coalesce(labor_force_participation,0.646471359028166) as labor_force_participation
-  ,coalesce(share_working_in_manufacturing,0.140205520832831) as share_working_in_manufacturing
-  ,coalesce(teenage_14_16_labor_force_participation,0.452254845437077) as teenage_14_16_labor_force_participation
-  ,coalesce(migration_inflow_rate,0.0402778500933353) as migration_inflow_rate
-  ,coalesce(migration_outlflow_rate,0.0376845754615703) as migration_outlflow_rate
-  ,coalesce(fraction_foreign_born,0.0885283698594889) as fraction_foreign_born
-  ,coalesce(social_capital_index,-0.32310404048882) as social_capital_index
-  ,coalesce(fraction_religious,0.503391600402358) as fraction_religious
-  ,coalesce(violent_crime_rate,0.00179317116792631) as violent_crime_rate
-  ,coalesce(total_crime_rate,0.00705892372461041) as total_crime_rate
-  ,coalesce(fraction_of_children_with_single_mothers,0.220423024748469) as fraction_of_children_with_single_mothers
-  ,coalesce(fraction_of_adults_divorced,0.0973050643676738) as fraction_of_adults_divorced
-  ,coalesce(fraction_of_adults_married,0.549051926141323) as fraction_of_adults_married
-  ,coalesce(median_house_price_for_below_median_income_families,111719.45713786) as median_house_price_for_below_median_income_families
-  ,coalesce(median_house_price_for_above_median_income_families,140790.018749115) as median_house_price_for_above_median_income_families
-  ,coalesce(median_house_rent_for_below_median_income_families,592.904223753325) as median_house_rent_for_below_median_income_families
-  ,coalesce(median_house_rent_for_above_median_income_families,669.260216430718) as median_house_rent_for_above_median_income_families
-  ,coalesce(log_population_density,6.12619867247722) as log_population_density
-  ,coalesce(location_affordability_of_very_low_income_individual,148.729604991793) as location_affordability_of_very_low_income_individual
-  ,coalesce(location_affordability_of_median_income_family,53.639155643285) as location_affordability_of_median_income_family
+  ,coalesce(segregation_of_affluence_p75,-0.00107713826175978) as segregation_of_affluence_p75
   ,coalesce(unemployment_rate,0.0467524233687776) as unemployment_rate
   ,coalesce(fraction_black,-0.0583997544016713) as fraction_black
   ,coalesce(poverty_rate,-0.0614342101400683) as poverty_rate
-  ,coalesce(segregation_of_affluence_p75,-0.00107713826175978) as segregation_of_affluence_p75
-  ,coalesce(fraction_with_commute__15_mins,-0.0099986728359157) as fraction_with_commute__15_mins
-  ,coalesce(location_affordability_of_median_household,0.0156450285786106) as location_affordability_of_median_household
-  ,coalesce(no_college,0) as no_college
-
-  /*
+  ,coalesce(fraction_of_children_with_single_mothers,0.220423024748469) as fraction_of_children_with_single_mothers
+  ,coalesce(fraction_of_adults_divorced,0.0973050643676738) as fraction_of_adults_divorced
+  --,coalesce(fraction_of_adults_married,0.549051926141323) as fraction_of_adults_married
+  /* Inequality (county)
   ,coalesce(fraction_of_parents_in_1st_national_income_decile,0.0592356556168324) as fraction_of_parents_in_1st_national_income_decile
   ,coalesce(fraction_of_parents_in_2nd_national_income_decile,0.0823170255208072) as fraction_of_parents_in_2nd_national_income_decile
   ,coalesce(fraction_of_parents_in_3rd_national_income_decile,0.0904236007944681) as fraction_of_parents_in_3rd_national_income_decile
@@ -505,7 +470,49 @@ select p.person_id
   ,coalesce(fraction_of_parents_in_10th_national_income_decile,0.117994046920011) as fraction_of_parents_in_10th_national_income_decile
   */
   
-  -- An indicator for whether the child reports positive W-2 earnings with income quintile and gender
+  -- Urban structure and dynamics (county)
+  ,coalesce(log_population_density,6.12619867247722) as log_population_density
+  ,coalesce(fraction_with_commute_less15_mins,0.294810198323762) as fraction_with_commute_less15_mins
+  --,coalesce(fraction_with_commute__15_mins,-0.0099986728359157) as fraction_with_commute__15_mins
+  ,coalesce(labor_force_participation,0.646471359028166) as labor_force_participation
+  ,coalesce(share_working_in_manufacturing,0.140205520832831) as share_working_in_manufacturing
+  ,coalesce(teenage_14_16_labor_force_participation,0.452254845437077) as teenage_14_16_labor_force_participation
+  ,coalesce(migration_inflow_rate,0.0402778500933353) as migration_inflow_rate
+  ,coalesce(migration_outlflow_rate,0.0376845754615703) as migration_outlflow_rate
+  ,coalesce(fraction_foreign_born,0.0885283698594889) as fraction_foreign_born
+
+  -- Public investment (county)
+  ,coalesce(local_tax_rate,0.0245131597256442) as local_tax_rate
+  ,coalesce(local_tax_rate_per_capita,0.874316688348967) as local_tax_rate_per_capita
+  ,coalesce(local_govt_expenditures_per_capita,2.38913995258842) as local_govt_expenditures_per_capita
+  ,coalesce(state_eitc_exposure,1.9312584869822) as state_eitc_exposure
+  ,coalesce(tax_progressivity,0.700113017799344) as tax_progressivity
+  ,coalesce(school_expenditure_per_student,6.56856733641607) as school_expenditure_per_student
+  ,coalesce(student_teacher_ratio,17.9089800964499) as student_teacher_ratio
+  ,coalesce(test_score_percentile_income_adjusted,-3.42893630380351) as test_score_percentile_income_adjusted
+  ,coalesce(high_school_dropout_rate_income_adjusted,0.011010379642501) as high_school_dropout_rate_income_adjusted
+  ,coalesce(number_of_colleges_per_capita,0.0127898836217141) as number_of_colleges_per_capita
+  ,coalesce(college_tuition,5480.21990120936) as college_tuition
+  ,coalesce(college_graduation_rate_income_adjusted,0.00744872225522498) as college_graduation_rate_income_adjusted
+  ,coalesce(no_college,0) as no_college
+  
+  -- Affordability and income (county)
+  ,coalesce(median_house_price_for_below_median_income_families,111719.45713786) as median_house_price_for_below_median_income_families
+  ,coalesce(median_house_price_for_above_median_income_families,140790.018749115) as median_house_price_for_above_median_income_families
+  ,coalesce(median_house_rent_for_below_median_income_families,592.904223753325) as median_house_rent_for_below_median_income_families
+  ,coalesce(median_house_rent_for_above_median_income_families,669.260216430718) as median_house_rent_for_above_median_income_families
+  ,coalesce(household_income_per_capita,39765.3684302678) as household_income_per_capita
+  ,coalesce(location_affordability_of_very_low_income_individual,148.729604991793) as location_affordability_of_very_low_income_individual
+  ,coalesce(location_affordability_of_median_income_family,53.639155643285) as location_affordability_of_median_income_family
+  --,coalesce(location_affordability_of_median_household,0.0156450285786106) as location_affordability_of_median_household
+
+  -- Social capital (county)
+  ,coalesce(social_capital_index,-0.32310404048882) as social_capital_index
+  ,coalesce(fraction_religious,0.503391600402358) as fraction_religious
+  ,coalesce(violent_crime_rate,0.00179317116792631) as violent_crime_rate
+  ,coalesce(total_crime_rate,0.00705892372461041) as total_crime_rate
+  
+  -- An indicator for whether the child reports positive W-2 earnings with income quintile and gender (county)
   ,coalesce(w2_pos_30_q1_f,0.728292494647528) as w2_pos_30_q1_f
   ,coalesce(w2_pos_30_q1_m,0.696787968406929) as w2_pos_30_q1_m
   ,coalesce(w2_pos_30_q2_f,0.774017520106013) as w2_pos_30_q2_f
@@ -515,7 +522,7 @@ select p.person_id
   ,coalesce(w2_pos_30_q4_f,0.827237745177449) as w2_pos_30_q4_f
   ,coalesce(w2_pos_30_q4_m,0.860967714537158) as w2_pos_30_q4_m
   
-  -- 2016 primary returns by county
+  -- 2016 primary returns (county)
   ,coalesce(primary16_clinton,0.5480444769384) as primary16_clinton
   ,coalesce(primary16_sanders,0.434347726321799) as primary16_sanders
 
@@ -862,7 +869,8 @@ left join phoenix_scores.all_scores_2020 score using(person_id)
 left join phoenix_scores.all_scores_2018 score using(person_id) 
 left join phoenix_scores.all_scores_2016 score using(person_id) 
 left join phoenix_consumer.tsmart_consumer tc using(person_id) 
-left join bernie_nmarchio2.census_pdb_blocktract on gidtr = census_tract_2010
+left join bernie_nmarchio2.geo_county_covariates on left(census_block_group_2010,5) = county_fip_id
+left join bernie_nmarchio2.geotable_intermed_tract on left(census_block_group_2010,11) = tract_id
 left join bernie_nmarchio2.census_pdb_block on gidbg = census_block_group_2010
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
