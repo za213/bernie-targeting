@@ -145,8 +145,7 @@ select p.person_id
   ,case when xp_occupation = 'K05' then 1 else 0 end as xp_occupation_k05
   ,case when xp_occupation = 'K06' then 1 else 0 end as xp_occupation_k06
   
--- Block Group ACS 
-  -- Industry and economic composition (block group)
+  -- Industry and economic composition (block group) from phoenix_census.acs_current
   ,coalesce(xc_24070_e_10,10.5021808346473) as pct_prof_sci_mng
   ,coalesce(xc_24070_e_11,23.3169387120635) as pct_educ_health
   ,coalesce(xc_24070_e_12,9.76120640305069) as pct_arts_ent_hotel_food
@@ -166,7 +165,7 @@ select p.person_id
   ,coalesce(xc_24070_e_57,14.1523126127464) as pct_government_worker
   ,coalesce(xc_24070_e_71,6.28800827128944) as pct_selfemployed_nonincorporated_biz
 
-  -- Language spoken at home (block group)
+  -- Language spoken at home (block group) from phoenix_census.acs_current
   ,coalesce(xc_16001_e_2,80.2671499610826) as pct_lang_at_home_only_english
   ,coalesce(xc_16001_e_3,12.0587109495928) as pct_lang_at_home_spanish
   ,coalesce(xc_16001_e_15,1.65284907167414) as pct_lang_at_home_indo_euro
@@ -183,14 +182,14 @@ select p.person_id
   ,coalesce(xc_16001_e_9,0.483782984689971) as pct_lang_at_home_germanic
   */
 
-  -- Change of address (block group)
+  -- Change of address (block group) from phoenix_census.acs_current
   ,coalesce(xb_07001_e_81,0.594762297133181) as pct_moved_from_abroad
   ,coalesce(xb_07001_e_49,3.09860403448412) as pct_moved_from_different_county_within_same_state
   ,coalesce(xb_07001_e_65,2.21059028553814) as pct_moved_from_different_state
   ,coalesce(xb_07001_e_33,8.71861633001596) as pct_moved_within_same_county
   ,coalesce(xb_07001_e_17,85.1532493413606) as pct_same_house_1_year_ago
 
-  -- Foreign born (block group)
+  -- Foreign born (block group) from phoenix_census.acs_current
   ,coalesce(xb_05007_e_15,27.5581932832236) as pct_foreign_born_asia
   ,coalesce(xb_05007_e_2,19.0890989707642) as pct_foreign_born_europe
   ,coalesce(xb_05007_e_28,41.1432239245551) as pct_foreign_born_latin_america
@@ -203,7 +202,8 @@ select p.person_id
   ,coalesce(xb_05007_e_82,10.1881488482489) as pct_foreign_born_other_areas
   */
 
-  -- Size demographics of age, race, education (block group)
+  -- Size demographics of age, race, education (block group) from Census 
+  -- Source: https://www.census.gov/topics/research/guidance/planning-databases/2019.html
   ,coalesce(xb_13008_e_2,5.28599158612465) as pct_had_birth_in_last_year
   ,coalesce(pop_under_5_acs_13_17,126) as pop_under_5_acs_13_17
   ,coalesce(pop_5_17_acs_13_17,353) as pop_5_17_acs_13_17
@@ -217,7 +217,7 @@ select p.person_id
   ,coalesce(college_acs_13_17,480) as college_acs_13_17
   ,coalesce(tot_prns_in_hhd_acs_13_17,1990) as tot_prns_in_hhd_acs_13_17
   
-  -- Percents demographics of age, race, education (block group)
+  -- Percents demographics of age, race, education (block group) from Census 
   ,coalesce(pct_hispanic_acs_13_17,14.2960721578394) as pct_hispanic_acs_13_17
   ,coalesce(pct_nh_white_alone_acs_13_17,65.5333628958917) as pct_nh_white_alone_acs_13_17
   ,coalesce(pct_nh_blk_alone_acs_13_17,12.0509472949503) as pct_nh_blk_alone_acs_13_17
@@ -231,7 +231,7 @@ select p.person_id
   ,coalesce(pct_not_hs_grad_acs_13_17,11.3517254717505) as pct_not_hs_grad_acs_13_17
   ,coalesce(pct_college_acs_13_17,32.7026963835036) as pct_college_acs_13_17
 
-   --Income, poverty, home value, health insurance, public assistance (block group)
+   --Income, poverty, home value, health insurance, public assistance (block group) from Census  
   ,coalesce(med_hhd_inc_bg_acs_13_17,68045) as med_hhd_inc_bg_acs_13_17
   ,coalesce(aggregate_hh_inc_acs_13_17,66425576) as aggregate_hh_inc_acs_13_17
   ,coalesce(med_house_value_bg_acs_13_17,251049) as med_house_value_bg_acs_13_17
@@ -244,14 +244,14 @@ select p.person_id
   ,coalesce(pct_no_plumb_acs_13_17,1.77677765652254) as pct_no_plumb_acs_13_17
   ,coalesce(avg_agg_house_value_acs_13_17,187575) as avg_agg_house_value_acs_13_17
 
-  -- Contactibility measures (block and tract)
+  -- Contactibility measures (block and tract) from Census 
   ,coalesce(mail_return_rate_cen_2010,79.5546348682809) as mail_return_rate_cen_2010
   ,coalesce(low_response_score,18.6366616406632) as low_response_score
   ,coalesce(mail_return_rate_cen_2010_tract,79.8577954947941) as mail_return_rate_cen_2010_tract
   ,coalesce(low_response_score_tract,19.8377285675556) as low_response_score_tract
   ,coalesce(self_response_rate_acs_13_17_tract,63.7345458651875) as self_response_rate_acs_13_17_tract
 
-  -- Phone, mobile, broadband, computer access (block and tract)
+  -- Phone, mobile, broadband, computer access (block and tract) from Census 
   ,coalesce(pct_no_ph_srvc_acs_13_17,2.17084304611568) as pct_no_ph_srvc_acs_13_17
   ,coalesce(pct_hhd_nocompdevic_acs_13_17_tract,12.5549686617213) as pct_hhd_nocompdevic_acs_13_17_tract
   ,coalesce(pct_hhd_w_computer_acs_13_17_tract,78.8041191804697) as pct_hhd_w_computer_acs_13_17_tract
@@ -262,43 +262,43 @@ select p.person_id
   ,coalesce(pct_pop_w_broadcomp_acs_13_17_tract,82.53493757977) as pct_pop_w_broadcomp_acs_13_17_tract
   ,coalesce(pct_diff_hu_1yr_ago_acs_13_17,14.0637516667325) as pct_diff_hu_1yr_ago_acs_13_17
   
-  --Language spoken (block group)
+  --Language spoken (block group) from Census 
   ,coalesce(pct_eng_vw_span_acs_13_17,2.25840224846234) as pct_eng_vw_span_acs_13_17
   ,coalesce(pct_eng_vw_indoeuro_acs_13_17,0.610076091630018) as pct_eng_vw_indoeuro_acs_13_17
   ,coalesce(pct_eng_vw_api_acs_13_17,0.817020607263466) as pct_eng_vw_api_acs_13_17
   ,coalesce(pct_eng_vw_acs_13_17,3.84689136566416) as pct_eng_vw_acs_13_17
 
-  -- Married, related, with children (block group)
+  -- Married, related, with children (block group) from Census 
   ,coalesce(pct_rel_family_hhd_acs_13_17,67.4416347001227) as pct_rel_family_hhd_acs_13_17
   ,coalesce(pct_mrdcple_hhd_acs_13_17,50.4965271841652) as pct_mrdcple_hhd_acs_13_17
   ,coalesce(avg_tot_prns_in_hhd_acs_13_17,2.66520630002142) as avg_tot_prns_in_hhd_acs_13_17
   ,coalesce(pct_rel_under_6_acs_13_17,19.79222392925) as pct_rel_under_6_acs_13_17
   ,coalesce(pct_hhd_ppl_und_18_acs_13_17,32.0634267116686) as pct_hhd_ppl_und_18_acs_13_17
   
-  -- Living not married, single women, not family, single parent, moved (block group)
+  -- Living not married, single women, not family, single parent, moved (block group) from Census 
   ,coalesce(pct_not_mrdcple_hhd_acs_13_17,49.4127305321737) as pct_not_mrdcple_hhd_acs_13_17
   ,coalesce(pct_female_no_hb_acs_13_17,12.2731174327349) as pct_female_no_hb_acs_13_17
   ,coalesce(pct_nonfamily_hhd_acs_13_17,32.4676233732405) as pct_nonfamily_hhd_acs_13_17
   ,coalesce(pct_sngl_prns_hhd_acs_13_17,26.2937187836754) as pct_sngl_prns_hhd_acs_13_17
   ,coalesce(pct_hhd_moved_in_acs_13_17,40.407480726983) as pct_hhd_moved_in_acs_13_17
   
-  -- Occupancy, vacancy (block group) 
+  -- Occupancy, vacancy (block group) from Census 
   ,coalesce(pct_tot_occp_units_acs_13_17,89.6550041580204) as pct_tot_occp_units_acs_13_17
   ,coalesce(pct_recent_built_hu_acs_13_17,0.995234668985221) as pct_recent_built_hu_acs_13_17
   ,coalesce(pct_vacant_units_acs_13_17,10.2576800990454) as pct_vacant_units_acs_13_17
   
-  -- Renter / owner (block group)
+  -- Renter / owner (block group) from Census 
   ,coalesce(pct_renter_occp_hu_acs_13_17,32.5914873973869) as pct_renter_occp_hu_acs_13_17
   ,coalesce(pct_owner_occp_hu_acs_13_17,67.3177701390769) as pct_owner_occp_hu_acs_13_17
   
-  -- Single / multiunit, multiperson rooms, mobile home (block group)
+  -- Single / multiunit, multiperson rooms, mobile home (block group) from Census 
   ,coalesce(pct_single_unit_acs_13_17,71.626622643208) as pct_single_unit_acs_13_17
   ,coalesce(pct_mlt_u2_9_strc_acs_13_17,11.4387903065272) as pct_mlt_u2_9_strc_acs_13_17
   ,coalesce(pct_mlt_u10p_acs_13_17,11.1029455588377) as pct_mlt_u10p_acs_13_17
   ,coalesce(pct_crowd_occp_u_acs_13_17,2.9544471103295) as pct_crowd_occp_u_acs_13_17
   ,coalesce(pct_mobile_homes_acs_13_17,5.66837761256287) as pct_mobile_homes_acs_13_17 
  
-  -- Demographics on population, age, race, education, children (tract)
+  -- Demographics on population, age, race, education, children (tract) from Census 
   ,coalesce(tot_population_acs_13_17_tract,5465) as tot_population_acs_13_17_tract
   ,coalesce(median_age_acs_13_17_tract,39.7290404593366) as median_age_acs_13_17_tract
   ,coalesce(civ_noninst_pop_acs_13_17_tract,5400) as civ_noninst_pop_acs_13_17_tract
@@ -308,7 +308,7 @@ select p.person_id
   ,coalesce(pct_mrdcple_w_child_acs_13_17_tract,41.4087852007455) as pct_mrdcple_w_child_acs_13_17_tract
   ,coalesce(pct_college_acs_13_17_tract,32.1265139931656) as pct_college_acs_13_17_tract
   
-  -- Income, home value, poverty, health insurance, public assistance, disability (tract)
+  -- Income, home value, poverty, health insurance, public assistance, disability (tract) from Census 
   ,coalesce(med_hhd_inc_acs_13_17_tract,65326.8763985767) as med_hhd_inc_acs_13_17_tract
   ,coalesce(aggregate_hh_inc_acs_13_17_tract,174829609.633088) as aggregate_hh_inc_acs_13_17_tract
   ,coalesce(med_house_value_acs_13_17_tract,225182.009954215) as med_house_value_acs_13_17_tract
@@ -324,7 +324,7 @@ select p.person_id
   ,coalesce(avg_agg_hh_inc_acs_13_17_tract,82921) as avg_agg_hh_inc_acs_13_17_tract
   ,coalesce(avg_agg_house_value_acs_13_17_tract,171676.234079983) as avg_agg_house_value_acs_13_17_tract
 
-  /* Other block group covariates
+  /* Other block group covariates from Census 
   ,coalesce(males_acs_13_17,993) as males_acs_13_17
   ,coalesce(females_acs_13_17,1035) as females_acs_13_17
   ,coalesce(median_age_acs_13_17,40.2860906050171) as median_age_acs_13_17
@@ -380,6 +380,7 @@ select p.person_id
   */
   
   -- Neighborhooed effects and determinants of socioeconomic mobility (tract)
+  -- Source: http://www.equality-of-opportunity.org/data/
   ,coalesce(hhinc_mean2000,84608.8675030326) as hhinc_mean2000
   ,coalesce(mean_commutetime2000,27.1511583146669) as mean_commutetime2000
   ,coalesce(frac_coll_plus2010,0.293429982272959) as frac_coll_plus2010
