@@ -209,128 +209,315 @@ select p.person_id
   /*
   ,coalesce(xb_05007_e_82,10.1881488482489) as pct_foreign_born_other_areas
   */
-  
+
   --Demographics of age, race, education (block group)
   -- Numbers
-  ,coalesce(pop_under_5_acs_13_17,90) as pop_under_5_acs_13_17
-  ,coalesce(pop_5_17_acs_13_17,246) as pop_5_17_acs_13_17
-  ,coalesce(pop_18_24_acs_13_17,142) as pop_18_24_acs_13_17
-  ,coalesce(pop_25_44_acs_13_17,388) as pop_25_44_acs_13_17
-  ,coalesce(pop_45_64_acs_13_17,384) as pop_45_64_acs_13_17
-  ,coalesce(pop_65plus_acs_13_17,219) as pop_65plus_acs_13_17
-  ,coalesce(hispanic_acs_13_17,272) as hispanic_acs_13_17
-  ,coalesce(nh_white_alone_acs_13_17,895) as nh_white_alone_acs_13_17
-  ,coalesce(nh_blk_alone_acs_13_17,179) as nh_blk_alone_acs_13_17
-  ,coalesce(college_acs_13_17,306) as college_acs_13_17
-  ,coalesce(tot_prns_in_hhd_acs_13_17,1435) as tot_prns_in_hhd_acs_13_17
+  ,coalesce(pop_under_5_acs_13_17,126) as pop_under_5_acs_13_17
+  ,coalesce(pop_5_17_acs_13_17,353) as pop_5_17_acs_13_17
+  ,coalesce(pop_18_24_acs_13_17,186) as pop_18_24_acs_13_17
+  ,coalesce(pop_25_44_acs_13_17,539) as pop_25_44_acs_13_17
+  ,coalesce(pop_45_64_acs_13_17,526) as pop_45_64_acs_13_17
+  ,coalesce(pop_65plus_acs_13_17,295) as pop_65plus_acs_13_17
+  ,coalesce(hispanic_acs_13_17,324) as hispanic_acs_13_17
+  ,coalesce(nh_white_alone_acs_13_17,1281) as nh_white_alone_acs_13_17
+  ,coalesce(nh_blk_alone_acs_13_17,238) as nh_blk_alone_acs_13_17
+  ,coalesce(college_acs_13_17,480) as college_acs_13_17
+  ,coalesce(tot_prns_in_hhd_acs_13_17,1990) as tot_prns_in_hhd_acs_13_17
   -- Percents
-  ,coalesce(pct_hispanic_acs_13_17,16.7012646296691) as pct_hispanic_acs_13_17
-  ,coalesce(pct_nh_white_alone_acs_13_17,62.2094341001194) as pct_nh_white_alone_acs_13_17
-  ,coalesce(pct_nh_blk_alone_acs_13_17,12.7993612183865) as pct_nh_blk_alone_acs_13_17
-  ,coalesce(pct_nh_aian_alone_acs_13_17,0.707012756572289) as pct_nh_aian_alone_acs_13_17
-  ,coalesce(pct_nh_asian_alone_acs_13_17,4.48027868413529) as pct_nh_asian_alone_acs_13_17
-  ,coalesce(pct_nh_nhopi_alone_acs_13_17,0.138450060583508) as pct_nh_nhopi_alone_acs_13_17
-  ,coalesce(pct_nh_sor_alone_acs_13_17,0.214007315401825) as pct_nh_sor_alone_acs_13_17
-  ,coalesce(pct_pop_5yrs_over_acs_13_17,93.6101607845451) as pct_pop_5yrs_over_acs_13_17
-  ,coalesce(pct_othr_lang_acs_13_17,20.1166995829495) as pct_othr_lang_acs_13_17
-  ,coalesce(pct_pop_25yrs_over_acs_13_17,68.4902424247925) as pct_pop_25yrs_over_acs_13_17
-  ,coalesce(pct_not_hs_grad_acs_13_17,13.4398143467192) as pct_not_hs_grad_acs_13_17
-  ,coalesce(pct_college_acs_13_17,28.9708128627636) as pct_college_acs_13_17
-  
-  --Income, poverty, home value, health insurance, public assistance (block group)
-  ,coalesce(med_hhd_inc_bg_acs_13_17,60742) as med_hhd_inc_bg_acs_13_17
-  ,coalesce(aggregate_hh_inc_acs_13_17,44004957) as aggregate_hh_inc_acs_13_17
-  ,coalesce(med_house_value_bg_acs_13_17,228999) as med_house_value_bg_acs_13_17
-  ,coalesce(aggr_house_value_acs_13_17,92372699) as aggr_house_value_acs_13_17
-  ,coalesce(pct_pov_univ_acs_13_17,97.456398162981) as pct_pov_univ_acs_13_17
-  ,coalesce(pct_prs_blw_pov_lev_acs_13_17,15.8553983762712) as pct_prs_blw_pov_lev_acs_13_17
-  ,coalesce(pct_no_health_ins_acs_13_17,10.2128929872888) as pct_no_health_ins_acs_13_17
-  ,coalesce(pct_pub_asst_inc_acs_13_17,2.84260713297059) as pct_pub_asst_inc_acs_13_17
-  ,coalesce(avg_agg_hh_inc_acs_13_17,77557) as avg_agg_hh_inc_acs_13_17
-  ,coalesce(pct_no_plumb_acs_13_17,2.28981470976642) as pct_no_plumb_acs_13_17
-  ,coalesce(avg_agg_house_value_acs_13_17,164679) as avg_agg_house_value_acs_13_17
-    
+  ,coalesce(pct_hispanic_acs_13_17,14.2960721578394) as pct_hispanic_acs_13_17
+  ,coalesce(pct_nh_white_alone_acs_13_17,65.5333628958917) as pct_nh_white_alone_acs_13_17
+  ,coalesce(pct_nh_blk_alone_acs_13_17,12.0509472949503) as pct_nh_blk_alone_acs_13_17
+  ,coalesce(pct_nh_aian_alone_acs_13_17,0.579797434159419) as pct_nh_aian_alone_acs_13_17
+  ,coalesce(pct_nh_asian_alone_acs_13_17,4.89668018767149) as pct_nh_asian_alone_acs_13_17
+  ,coalesce(pct_nh_nhopi_alone_acs_13_17,0.132654528723658) as pct_nh_nhopi_alone_acs_13_17
+  ,coalesce(pct_nh_sor_alone_acs_13_17,0.212287286270046) as pct_nh_sor_alone_acs_13_17
+  ,coalesce(pct_pop_5yrs_over_acs_13_17,94.1220723999255) as pct_pop_5yrs_over_acs_13_17
+  ,coalesce(pct_othr_lang_acs_13_17,18.1678419982226) as pct_othr_lang_acs_13_17
+  ,coalesce(pct_pop_25yrs_over_acs_13_17,68.8434220457763) as pct_pop_25yrs_over_acs_13_17
+  ,coalesce(pct_not_hs_grad_acs_13_17,11.3517254717505) as pct_not_hs_grad_acs_13_17
+  ,coalesce(pct_college_acs_13_17,32.7026963835036) as pct_college_acs_13_17
+
+   --Income, poverty, home value, health insurance, public assistance (block group)
+  ,coalesce(med_hhd_inc_bg_acs_13_17,68045) as med_hhd_inc_bg_acs_13_17
+  ,coalesce(aggregate_hh_inc_acs_13_17,66425576) as aggregate_hh_inc_acs_13_17
+  ,coalesce(med_house_value_bg_acs_13_17,251049) as med_house_value_bg_acs_13_17
+  ,coalesce(aggr_house_value_acs_13_17,142357778) as aggr_house_value_acs_13_17
+  ,coalesce(pct_pov_univ_acs_13_17,98.2608273235828) as pct_pov_univ_acs_13_17
+  ,coalesce(pct_prs_blw_pov_lev_acs_13_17,13.4248472146267) as pct_prs_blw_pov_lev_acs_13_17
+  ,coalesce(pct_no_health_ins_acs_13_17,9.31498551549904) as pct_no_health_ins_acs_13_17
+  ,coalesce(pct_pub_asst_inc_acs_13_17,2.40123700682686) as pct_pub_asst_inc_acs_13_17
+  ,coalesce(avg_agg_hh_inc_acs_13_17,85659) as avg_agg_hh_inc_acs_13_17
+  ,coalesce(pct_no_plumb_acs_13_17,1.77677765652254) as pct_no_plumb_acs_13_17
+  ,coalesce(avg_agg_house_value_acs_13_17,187575) as avg_agg_house_value_acs_13_17
+
   -- Contactibility measures (block and tract)
-  ,coalesce(mail_return_rate_cen_2010,77.8642421162023) as mail_return_rate_cen_2010
-  ,coalesce(low_response_score,19.0304782693538) as low_response_score
-  ,coalesce(mail_return_rate_cen_2010_tract,77.3798754458014) as mail_return_rate_cen_2010_tract
-  ,coalesce(low_response_score_tract,20.4549997298174) as low_response_score_tract
-  ,coalesce(self_response_rate_acs_13_17_tract,59.2657827191181) as self_response_rate_acs_13_17_tract  
-  
+  ,coalesce(mail_return_rate_cen_2010,79.5546348682809) as mail_return_rate_cen_2010
+  ,coalesce(low_response_score,18.6366616406632) as low_response_score
+  ,coalesce(mail_return_rate_cen_2010_tract,79.8577954947941) as mail_return_rate_cen_2010_tract
+  ,coalesce(low_response_score_tract,19.8377285675556) as low_response_score_tract
+  ,coalesce(self_response_rate_acs_13_17_tract,63.7345458651875) as self_response_rate_acs_13_17_tract
+
   -- Phone, mobile, broadband, computer access (block and tract)
-  ,coalesce(pct_no_ph_srvc_acs_13_17,2.3958790054321) as pct_no_ph_srvc_acs_13_17
-  ,coalesce(pct_hhd_nocompdevic_acs_13_17_tract,14.0227970658165) as pct_hhd_nocompdevic_acs_13_17_tract
-  ,coalesce(pct_hhd_w_computer_acs_13_17_tract,75.1982375986167) as pct_hhd_w_computer_acs_13_17_tract
-  ,coalesce(pct_hhd_w_onlysphne_acs_13_17_tract,4.29331000756511) as pct_hhd_w_onlysphne_acs_13_17_tract
-  ,coalesce(pct_hhd_no_internet_acs_13_17_tract,19.0959819788177) as pct_hhd_no_internet_acs_13_17_tract
-  ,coalesce(pct_hhd_w_broadband_acs_13_17_tract,63.788187749919) as pct_hhd_w_broadband_acs_13_17_tract
-  ,coalesce(pct_pop_nocompdevic_acs_13_17_tract,9.82876877769372) as pct_pop_nocompdevic_acs_13_17_tract
-  ,coalesce(pct_pop_w_broadcomp_acs_13_17_tract,79.380795687885) as pct_pop_w_broadcomp_acs_13_17_tract
+  ,coalesce(pct_no_ph_srvc_acs_13_17,2.17084304611568) as pct_no_ph_srvc_acs_13_17
+  ,coalesce(pct_hhd_nocompdevic_acs_13_17_tract,12.5549686617213) as pct_hhd_nocompdevic_acs_13_17_tract
+  ,coalesce(pct_hhd_w_computer_acs_13_17_tract,78.8041191804697) as pct_hhd_w_computer_acs_13_17_tract
+  ,coalesce(pct_hhd_w_onlysphne_acs_13_17_tract,3.77286671999414) as pct_hhd_w_onlysphne_acs_13_17_tract
+  ,coalesce(pct_hhd_no_internet_acs_13_17_tract,17.1918159627054) as pct_hhd_no_internet_acs_13_17_tract
+  ,coalesce(pct_hhd_w_broadband_acs_13_17_tract,67.6080443696615) as pct_hhd_w_broadband_acs_13_17_tract
+  ,coalesce(pct_pop_nocompdevic_acs_13_17_tract,8.56910770409689) as pct_pop_nocompdevic_acs_13_17_tract
+  ,coalesce(pct_pop_w_broadcomp_acs_13_17_tract,82.53493757977) as pct_pop_w_broadcomp_acs_13_17_tract
+  ,coalesce(pct_diff_hu_1yr_ago_acs_13_17,14.0637516667325) as pct_diff_hu_1yr_ago_acs_13_17
   
   --Language spoken (block group)
-  ,coalesce(pct_diff_hu_1yr_ago_acs_13_17,14.1286465145196) as pct_diff_hu_1yr_ago_acs_13_17
-  ,coalesce(pct_eng_vw_span_acs_13_17,3.55591399410956) as pct_eng_vw_span_acs_13_17
-  ,coalesce(pct_eng_vw_indoeuro_acs_13_17,0.640391501064182) as pct_eng_vw_indoeuro_acs_13_17
-  ,coalesce(pct_eng_vw_api_acs_13_17,0.834475600956629) as pct_eng_vw_api_acs_13_17
-  ,coalesce(pct_eng_vw_acs_13_17,5.20987011985097) as pct_eng_vw_acs_13_17
-  /*
-  ,coalesce(pct_eng_vw_other_acs_13_17,0.179089840576882) as pct_eng_vw_other_acs_13_17
-  */
-  
+  ,coalesce(pct_eng_vw_span_acs_13_17,2.25840224846234) as pct_eng_vw_span_acs_13_17
+  ,coalesce(pct_eng_vw_indoeuro_acs_13_17,0.610076091630018) as pct_eng_vw_indoeuro_acs_13_17
+  ,coalesce(pct_eng_vw_api_acs_13_17,0.817020607263466) as pct_eng_vw_api_acs_13_17
+  ,coalesce(pct_eng_vw_acs_13_17,3.84689136566416) as pct_eng_vw_acs_13_17
+
   -- Household composition (block group)
   -- Married, related, with children
-  ,coalesce(pct_rel_family_hhd_acs_13_17,65.5190489070009) as pct_rel_family_hhd_acs_13_17
-  ,coalesce(pct_mrdcple_hhd_acs_13_17,47.1347214746979) as pct_mrdcple_hhd_acs_13_17
-  ,coalesce(avg_tot_prns_in_hhd_acs_13_17,2.63179168349542) as avg_tot_prns_in_hhd_acs_13_17
-  ,coalesce(pct_rel_under_6_acs_13_17,20.1481426957165) as pct_rel_under_6_acs_13_17
-  ,coalesce(pct_hhd_ppl_und_18_acs_13_17,31.2046174616645) as pct_hhd_ppl_und_18_acs_13_17
+  ,coalesce(pct_rel_family_hhd_acs_13_17,67.4416347001227) as pct_rel_family_hhd_acs_13_17
+  ,coalesce(pct_mrdcple_hhd_acs_13_17,50.4965271841652) as pct_mrdcple_hhd_acs_13_17
+  ,coalesce(avg_tot_prns_in_hhd_acs_13_17,2.66520630002142) as avg_tot_prns_in_hhd_acs_13_17
+  ,coalesce(pct_rel_under_6_acs_13_17,19.79222392925) as pct_rel_under_6_acs_13_17
+  ,coalesce(pct_hhd_ppl_und_18_acs_13_17,32.0634267116686) as pct_hhd_ppl_und_18_acs_13_17
   -- Living not married, single women, not family, single parent, moved
-  ,coalesce(pct_not_mrdcple_hhd_acs_13_17,52.1478290682847) as pct_not_mrdcple_hhd_acs_13_17
-  ,coalesce(pct_female_no_hb_acs_13_17,13.3563738388161) as pct_female_no_hb_acs_13_17
-  ,coalesce(pct_nonfamily_hhd_acs_13_17,33.7635020444098) as pct_nonfamily_hhd_acs_13_17
-  ,coalesce(pct_sngl_prns_hhd_acs_13_17,27.4661560104739) as pct_sngl_prns_hhd_acs_13_17
-  ,coalesce(pct_hhd_moved_in_acs_13_17,39.9119242864987) as pct_hhd_moved_in_acs_13_17
-
+  ,coalesce(pct_not_mrdcple_hhd_acs_13_17,49.4127305321737) as pct_not_mrdcple_hhd_acs_13_17
+  ,coalesce(pct_female_no_hb_acs_13_17,12.2731174327349) as pct_female_no_hb_acs_13_17
+  ,coalesce(pct_nonfamily_hhd_acs_13_17,32.4676233732405) as pct_nonfamily_hhd_acs_13_17
+  ,coalesce(pct_sngl_prns_hhd_acs_13_17,26.2937187836754) as pct_sngl_prns_hhd_acs_13_17
+  ,coalesce(pct_hhd_moved_in_acs_13_17,40.407480726983) as pct_hhd_moved_in_acs_13_17
+  
+  
   -- Housing (block group)
   -- Occupancy, vacancy 
-  ,coalesce(pct_tot_occp_units_acs_13_17,87.6827366954533) as pct_tot_occp_units_acs_13_17
-  ,coalesce(pct_recent_built_hu_acs_13_17,0.663407062176377) as pct_recent_built_hu_acs_13_17
-  ,coalesce(pct_vacant_units_acs_13_17,11.6252209369342) as pct_vacant_units_acs_13_17
+  ,coalesce(pct_tot_occp_units_acs_13_17,89.6550041580204) as pct_tot_occp_units_acs_13_17
+  ,coalesce(pct_recent_built_hu_acs_13_17,0.995234668985221) as pct_recent_built_hu_acs_13_17
+  ,coalesce(pct_vacant_units_acs_13_17,10.2576800990454) as pct_vacant_units_acs_13_17
   -- Renter / owner
-  ,coalesce(pct_renter_occp_hu_acs_13_17,35.4815095504114) as pct_renter_occp_hu_acs_13_17
-  ,coalesce(pct_owner_occp_hu_acs_13_17,63.8010405841431) as pct_owner_occp_hu_acs_13_17
+  ,coalesce(pct_renter_occp_hu_acs_13_17,32.5914873973869) as pct_renter_occp_hu_acs_13_17
+  ,coalesce(pct_owner_occp_hu_acs_13_17,67.3177701390769) as pct_owner_occp_hu_acs_13_17
   -- Single / multiunit, multiperson rooms, mobile
-  ,coalesce(pct_single_unit_acs_13_17,69.259552771185) as pct_single_unit_acs_13_17
-  ,coalesce(pct_mlt_u2_9_strc_acs_13_17,13.1689796103596) as pct_mlt_u2_9_strc_acs_13_17
-  ,coalesce(pct_mlt_u10p_acs_13_17,10.869025082026) as pct_mlt_u10p_acs_13_17
-  ,coalesce(pct_crowd_occp_u_acs_13_17,3.4240591403949) as pct_crowd_occp_u_acs_13_17
-  ,coalesce(pct_mobile_homes_acs_13_17,5.93147719382638) as pct_mobile_homes_acs_13_17
+  ,coalesce(pct_single_unit_acs_13_17,71.626622643208) as pct_single_unit_acs_13_17
+  ,coalesce(pct_mlt_u2_9_strc_acs_13_17,11.4387903065272) as pct_mlt_u2_9_strc_acs_13_17
+  ,coalesce(pct_mlt_u10p_acs_13_17,11.1029455588377) as pct_mlt_u10p_acs_13_17
+  ,coalesce(pct_crowd_occp_u_acs_13_17,2.9544471103295) as pct_crowd_occp_u_acs_13_17
+  ,coalesce(pct_mobile_homes_acs_13_17,5.66837761256287) as pct_mobile_homes_acs_13_17 
+ 
 
   -- Demographics population, age, race, education, children (tract)
-  ,coalesce(tot_population_acs_13_17_tract,4383) as tot_population_acs_13_17_tract
-  ,coalesce(median_age_acs_13_17_tract,38.9029314816816) as median_age_acs_13_17_tract
-  ,coalesce(civ_noninst_pop_acs_13_17_tract,4315) as civ_noninst_pop_acs_13_17_tract
-  ,coalesce(tot_prns_in_hhd_acs_13_17_tract,4273) as tot_prns_in_hhd_acs_13_17_tract
-  ,coalesce(pct_schl_enroll_3_4_acs_13_17_tract,47.3126352264131) as pct_schl_enroll_3_4_acs_13_17_tract
-  ,coalesce(avg_tot_prns_in_hhd_acs_13_17_tract,2.61867083648546) as avg_tot_prns_in_hhd_acs_13_17_tract
-  ,coalesce(pct_mrdcple_w_child_acs_13_17_tract,41.1085693829028) as pct_mrdcple_w_child_acs_13_17_tract
-  ,coalesce(pct_college_acs_13_17_tract,29.2599319139738) as pct_college_acs_13_17_tract
+  ,coalesce(tot_population_acs_13_17_tract,5465) as tot_population_acs_13_17_tract
+  ,coalesce(median_age_acs_13_17_tract,39.7290404593366) as median_age_acs_13_17_tract
+  ,coalesce(civ_noninst_pop_acs_13_17_tract,5400) as civ_noninst_pop_acs_13_17_tract
+  ,coalesce(tot_prns_in_hhd_acs_13_17_tract,5358) as tot_prns_in_hhd_acs_13_17_tract
+  ,coalesce(pct_schl_enroll_3_4_acs_13_17_tract,48.8100875693337) as pct_schl_enroll_3_4_acs_13_17_tract
+  ,coalesce(avg_tot_prns_in_hhd_acs_13_17_tract,2.61999195050279) as avg_tot_prns_in_hhd_acs_13_17_tract
+  ,coalesce(pct_mrdcple_w_child_acs_13_17_tract,41.4087852007455) as pct_mrdcple_w_child_acs_13_17_tract
+  ,coalesce(pct_college_acs_13_17_tract,32.1265139931656) as pct_college_acs_13_17_tract
   
   -- Income, home value, poverty, health insurance, public assistance, disability (tract)
-  ,coalesce(med_hhd_inc_acs_13_17_tract,60312) as med_hhd_inc_acs_13_17_tract
-  ,coalesce(aggregate_hh_inc_acs_13_17_tract,130999155) as aggregate_hh_inc_acs_13_17_tract
-  ,coalesce(med_house_value_acs_13_17_tract,237591) as med_house_value_acs_13_17_tract
-  ,coalesce(pct_prs_blw_pov_lev_acs_13_17_tract,15.9299831135848) as pct_prs_blw_pov_lev_acs_13_17_tract
-  ,coalesce(pct_no_health_ins_acs_13_17_tract,10.2100414730358) as pct_no_health_ins_acs_13_17_tract
-  ,coalesce(pct_civ_unemp_16p_acs_13_17_tract,7.16511496271479) as pct_civ_unemp_16p_acs_13_17_tract  
-  ,coalesce(pct_pop_disabled_acs_13_17_tract,13.2864662812061) as pct_pop_disabled_acs_13_17_tract
-  ,coalesce(pct_children_in_pov_acs_13_17_tract,20.8320197503512) as pct_children_in_pov_acs_13_17_tract
-  ,coalesce(pct_nohealthins_u19_acs_13_17_tract,5.37268358910623) as pct_nohealthins_u19_acs_13_17_tract
-  ,coalesce(pct_nohealthins1964_acs_13_17_tract,14.7285166972874) as pct_nohealthins1964_acs_13_17_tract
-  ,coalesce(pct_nohealthins_65p_acs_13_17_tract,1.02902464065708) as pct_nohealthins_65p_acs_13_17_tract 
-  ,coalesce(pct_pub_asst_inc_acs_13_17_tract,2.80919255917) as pct_pub_asst_inc_acs_13_17_tract
-  ,coalesce(avg_agg_hh_inc_acs_13_17_tract,77210) as avg_agg_hh_inc_acs_13_17_tract  
-  ,coalesce(avg_agg_house_value_acs_13_17_tract,170426) as avg_agg_house_value_acs_13_17_tract
+  ,coalesce(med_hhd_inc_acs_13_17_tract,65326.8763985767) as med_hhd_inc_acs_13_17_tract
+  ,coalesce(aggregate_hh_inc_acs_13_17_tract,174829609.633088) as aggregate_hh_inc_acs_13_17_tract
+  ,coalesce(med_house_value_acs_13_17_tract,225182.009954215) as med_house_value_acs_13_17_tract
+  ,coalesce(pct_prs_blw_pov_lev_acs_13_17_tract,13.7351624595932) as pct_prs_blw_pov_lev_acs_13_17_tract
+  ,coalesce(pct_no_health_ins_acs_13_17_tract,9.50153871512217) as pct_no_health_ins_acs_13_17_tract
+  ,coalesce(pct_civ_unemp_16p_acs_13_17_tract,6.41159512780591) as pct_civ_unemp_16p_acs_13_17_tract
+  ,coalesce(pct_pop_disabled_acs_13_17_tract,12.8469866347057) as pct_pop_disabled_acs_13_17_tract
+  ,coalesce(pct_children_in_pov_acs_13_17_tract,17.955219420835) as pct_children_in_pov_acs_13_17_tract
+  ,coalesce(pct_nohealthins_u19_acs_13_17_tract,5.20173238270458) as pct_nohealthins_u19_acs_13_17_tract
+  ,coalesce(pct_nohealthins1964_acs_13_17_tract,13.639066910752) as pct_nohealthins1964_acs_13_17_tract
+  ,coalesce(pct_nohealthins_65p_acs_13_17_tract,0.922277158371395) as pct_nohealthins_65p_acs_13_17_tract
+  ,coalesce(pct_pub_asst_inc_acs_13_17_tract,2.33454496030974) as pct_pub_asst_inc_acs_13_17_tract
+  ,coalesce(avg_agg_hh_inc_acs_13_17_tract,82921) as avg_agg_hh_inc_acs_13_17_tract
+  ,coalesce(avg_agg_house_value_acs_13_17_tract,171676.234079983) as avg_agg_house_value_acs_13_17_tract
+
+  /* Other block group covariates
+  ,coalesce(males_acs_13_17,993) as males_acs_13_17
+  ,coalesce(females_acs_13_17,1035) as females_acs_13_17
+  ,coalesce(median_age_acs_13_17,40.2860906050171) as median_age_acs_13_17
+  ,coalesce(nh_aian_alone_acs_13_17,10) as nh_aian_alone_acs_13_17
+  ,coalesce(nh_asian_alone_acs_13_17,119) as nh_asian_alone_acs_13_17
+  ,coalesce(nh_nhopi_alone_acs_13_17,2) as nh_nhopi_alone_acs_13_17
+  ,coalesce(nh_sor_alone_acs_13_17,4) as nh_sor_alone_acs_13_17
+  ,coalesce(pop_5yrs_over_acs_13_17,1901) as pop_5yrs_over_acs_13_17
+  ,coalesce(othr_lang_acs_13_17,382) as othr_lang_acs_13_17
+  ,coalesce(pop_25yrs_over_acs_13_17,1362) as pop_25yrs_over_acs_13_17
+  ,coalesce(not_hs_grad_acs_13_17,139) as not_hs_grad_acs_13_17
+  ,coalesce(pov_univ_acs_13_17,1990) as pov_univ_acs_13_17
+  ,coalesce(prs_blw_pov_lev_acs_13_17,237) as prs_blw_pov_lev_acs_13_17
+  ,coalesce(one_health_ins_acs_13_17,1507) as one_health_ins_acs_13_17
+  ,coalesce(two_plus_health_ins_acs_13_17,313) as two_plus_health_ins_acs_13_17
+  ,coalesce(no_health_ins_acs_13_17,185) as no_health_ins_acs_13_17
+  ,coalesce(pop_1yr_over_acs_13_17,2004) as pop_1yr_over_acs_13_17
+  ,coalesce(diff_hu_1yr_ago_acs_13_17,291) as diff_hu_1yr_ago_acs_13_17
+  ,coalesce(eng_vw_span_acs_13_17,15) as eng_vw_span_acs_13_17
+  ,coalesce(eng_vw_indo_euro_acs_13_17,4) as eng_vw_indo_euro_acs_13_17
+  ,coalesce(eng_vw_api_acs_13_17,6) as eng_vw_api_acs_13_17
+  ,coalesce(eng_vw_other_acs_13_17,1) as eng_vw_other_acs_13_17
+  ,coalesce(eng_vw_acs_13_17,27) as eng_vw_acs_13_17
+  ,coalesce(rel_family_hhd_acs_13_17,507) as rel_family_hhd_acs_13_17
+  ,coalesce(mrdcple_fmly_hhd_acs_13_17,388) as mrdcple_fmly_hhd_acs_13_17
+  ,coalesce(not_mrdcple_hhd_acs_13_17,353) as not_mrdcple_hhd_acs_13_17
+  ,coalesce(female_no_hb_acs_13_17,85) as female_no_hb_acs_13_17
+  ,coalesce(nonfamily_hhd_acs_13_17,235) as nonfamily_hhd_acs_13_17
+  ,coalesce(sngl_prns_hhd_acs_13_17,189) as sngl_prns_hhd_acs_13_17
+  ,coalesce(hhd_ppl_und_18_acs_13_17,247) as hhd_ppl_und_18_acs_13_17
+  ,coalesce(rel_child_under_6_acs_13_17,103) as rel_child_under_6_acs_13_17
+  ,coalesce(hhd_moved_in_acs_13_17,323) as hhd_moved_in_acs_13_17
+  ,coalesce(pub_asst_inc_acs_13_17,15) as pub_asst_inc_acs_13_17
+  ,coalesce(med_hhd_inc_tr_acs_13_17,66697) as med_hhd_inc_tr_acs_13_17
+  ,coalesce(tot_housing_units_acs_13_17,831) as tot_housing_units_acs_13_17
+  ,coalesce(tot_occp_units_acs_13_17,742) as tot_occp_units_acs_13_17
+  ,coalesce(tot_vacant_units_acs_13_17,89) as tot_vacant_units_acs_13_17
+  ,coalesce(renter_occp_hu_acs_13_17,239) as renter_occp_hu_acs_13_17
+  ,coalesce(owner_occp_hu_acs_13_17,502) as owner_occp_hu_acs_13_17
+  ,coalesce(single_unit_acs_13_17,589) as single_unit_acs_13_17
+  ,coalesce(mlt_u2_9_strc_acs_13_17,86) as mlt_u2_9_strc_acs_13_17
+  ,coalesce(mlt_u10p_acs_13_17,109) as mlt_u10p_acs_13_17
+  ,coalesce(mobile_homes_acs_13_17,45) as mobile_homes_acs_13_17
+  ,coalesce(crowd_occp_u_acs_13_17,20) as crowd_occp_u_acs_13_17
+  ,coalesce(occp_u_no_ph_srvc_acs_13_17,15) as occp_u_no_ph_srvc_acs_13_17
+  ,coalesce(no_plumb_acs_13_17,12) as no_plumb_acs_13_17
+  ,coalesce(recent_built_hu_acs_13_17,13) as recent_built_hu_acs_13_17
+  ,coalesce(med_house_value_tr_acs_13_17,255420) as med_house_value_tr_acs_13_17
+  ,coalesce(pct_one_health_ins_acs_13_17,73.0312943978964) as pct_one_health_ins_acs_13_17
+  ,coalesce(pct_twophealthins_acs_13_17,16.6232477562543) as pct_twophealthins_acs_13_17
+  ,coalesce(pct_pop_1yr_over_acs_13_17,98.8720575531394) as pct_pop_1yr_over_acs_13_17
+  ,coalesce(pct_eng_vw_other_acs_13_17,0.161400892051139) as pct_eng_vw_other_acs_13_17
+  */
+  
+  -- Neighborhooed effects and determinants of socioeconomic mobility 
+  ,coalesce(hhinc_mean2000,84608.8675030326) as hhinc_mean2000
+  ,coalesce(mean_commutetime2000,27.1511583146669) as mean_commutetime2000
+  ,coalesce(frac_coll_plus2010,0.293429982272959) as frac_coll_plus2010
+  ,coalesce(frac_coll_plus2000,0.257373987649339) as frac_coll_plus2000
+  ,coalesce(foreign_share2010,0.100118031983283) as foreign_share2010
+  ,coalesce(gsmn_math_g3_2013,3.37572107873095) as gsmn_math_g3_2013
+  ,coalesce(rent_twobed2015,966) as rent_twobed2015
+  ,coalesce(singleparent_share2010,0.309102713069427) as singleparent_share2010
+  ,coalesce(singleparent_share1990,0.206551891336751) as singleparent_share1990
+  ,coalesce(singleparent_share2000,0.271247529384927) as singleparent_share2000
+  ,coalesce(traveltime15_2010,0.285819197356473) as traveltime15_2010
+  ,coalesce(mail_return_rate2010,80.0162608373062) as mail_return_rate2010
+  ,coalesce(ln_wage_growth_hs_grad,0.0403462424119161) as ln_wage_growth_hs_grad
+  ,coalesce(jobs_total_5mi_2015,103216) as jobs_total_5mi_2015
+  ,coalesce(jobs_highpay_5mi_2015,54903) as jobs_highpay_5mi_2015
+  ,coalesce(popdensity2010,4823.57062538955) as popdensity2010
+  ,coalesce(ann_avg_job_growth_2004_2013,0.0181115701144405) as ann_avg_job_growth_2004_2013
+  ,coalesce(job_density_2013,1984.48679821812) as job_density_2013
+
+  -- Mean household income rank for children whose parents were at the 25th percentile of the national income distribution
+   /*
+  ,coalesce(kfr_pooled_pooled_p25,0.433407375913507) as kfr_pooled_pooled_p25
+  ,coalesce(jail_pooled_pooled_p25,0.0213830856711985) as jail_pooled_pooled_p25
+  ,coalesce(kfr_black_pooled_p25,0.35918603467439) as kfr_black_pooled_p25
+  ,coalesce(kfr_hisp_pooled_p25,0.437374508308422) as kfr_hisp_pooled_p25
+  ,coalesce(kfr_white_pooled_p25,0.464605602599441) as kfr_white_pooled_p25
+  ,coalesce(jail_black_pooled_p25,0.0446806953406881) as jail_black_pooled_p25
+  ,coalesce(jail_hisp_pooled_p25,0.0154079826628898) as jail_hisp_pooled_p25
+  ,coalesce(jail_white_pooled_p25,0.0168824963959682) as jail_white_pooled_p25
+  ,coalesce(kfr_pooled_female_p25,0.450062288593881) as kfr_pooled_female_p25
+  ,coalesce(kfr_pooled_male_p25,0.417754000394223) as kfr_pooled_male_p25
+  ,coalesce(jail_pooled_female_p25,0.00385537099132036) as jail_pooled_female_p25
+  ,coalesce(jail_pooled_male_p25,0.0403304433992196) as jail_pooled_male_p25
+  */
+  ,coalesce(kfr_black_female_p25,0.382206283736095) as kfr_black_female_p25
+  ,coalesce(kfr_hisp_female_p25,0.447209772710046) as kfr_hisp_female_p25
+  ,coalesce(kfr_white_female_p25,0.478709529962811) as kfr_white_female_p25
+  ,coalesce(kfr_black_male_p25,0.334165703430485) as kfr_black_male_p25
+  ,coalesce(kfr_hisp_male_p25,0.426604211724126) as kfr_hisp_male_p25
+  ,coalesce(kfr_white_male_p25,0.451330839800494) as kfr_white_male_p25
+  ,coalesce(jail_black_female_p25,0.00631471659606834) as jail_black_female_p25
+  ,coalesce(jail_hisp_female_p25,0.00310764332757126) as jail_hisp_female_p25
+  ,coalesce(jail_white_female_p25,0.00464152872385685) as jail_white_female_p25
+  ,coalesce(jail_black_male_p25,0.0892361528008483) as jail_black_male_p25
+  ,coalesce(jail_hisp_male_p25,0.0327939162010329) as jail_hisp_male_p25
+  ,coalesce(jail_white_male_p25,0.0300551823879225) as jail_white_male_p25
+ 
+  -- Determinants of socioeconomic mobility (county)
+  ,coalesce(cty_exposure_natl_hh_income_at_age_26_p25,-0.00116575193502995) as cty_exposure_natl_hh_income_at_age_26_p25
+  ,coalesce(cty_exposure_effects_natl_hh_income_at_age_26_p75,-0.00914190872321934) as cty_exposure_effects_natl_hh_income_at_age_26_p75
+  ,coalesce(cty_exposure_college_attendance_at_ages_18_23_p25,-0.0106601971605495) as cty_exposure_college_attendance_at_ages_18_23_p25
+  ,coalesce(cty_exposure_college_attendance_at_ages_18_23_p75,0.00404288046049372) as cty_exposure_college_attendance_at_ages_18_23_p75
+  ,coalesce(cty_exposure_value_of_hh_income_at_age_26_p25,-1.6164728901619) as cty_exposure_value_of_hh_income_at_age_26_p25
+  ,coalesce(cty_exposure_value_of_hh_income_at_age_26_p75,-2.39628461786069) as cty_exposure_value_of_hh_income_at_age_26_p75
+  ,coalesce(cty_exposure_marriage_rate_at_age_26_p25,0.00831731094751134) as cty_exposure_marriage_rate_at_age_26_p25
+  ,coalesce(cty_exposure_marriage_rate_at_age_26_p75,-0.00209350639976409) as cty_exposure_marriage_rate_at_age_26_p75
+  ,coalesce(racial_segregation,0.171863755227516) as racial_segregation
+  ,coalesce(income_segregation,0.0711031029332531) as income_segregation
+  ,coalesce(segregation_of_poverty_p25,0.0632798063417) as segregation_of_poverty_p25
+  ,coalesce(segregation_of_poverty_p75,0.0773876799842774) as segregation_of_poverty_p75
+  ,coalesce(fraction_with_commute_less15_mins,0.294810198323762) as fraction_with_commute_less15_mins
+  ,coalesce(household_income_per_capita,39765.3684302678) as household_income_per_capita
+  ,coalesce(gini,0.445165973890533) as gini
+  ,coalesce(top_1pct_income_share,0.00136530467373247) as top_1pct_income_share
+  ,coalesce(fraction_middle_class_between_p25_and_p75,0.498556746393662) as fraction_middle_class_between_p25_and_p75
+  ,coalesce(local_tax_rate,0.0245131597256442) as local_tax_rate
+  ,coalesce(local_tax_rate_per_capita,0.874316688348967) as local_tax_rate_per_capita
+  ,coalesce(local_govt_expenditures_per_capita,2.38913995258842) as local_govt_expenditures_per_capita
+  ,coalesce(state_eitc_exposure,1.9312584869822) as state_eitc_exposure
+  ,coalesce(tax_progressivity,0.700113017799344) as tax_progressivity
+  ,coalesce(school_expenditure_per_student,6.56856733641607) as school_expenditure_per_student
+  ,coalesce(student_teacher_ratio,17.9089800964499) as student_teacher_ratio
+  ,coalesce(test_score_percentile_income_adjusted,-3.42893630380351) as test_score_percentile_income_adjusted
+  ,coalesce(high_school_dropout_rate_income_adjusted,0.011010379642501) as high_school_dropout_rate_income_adjusted
+  ,coalesce(number_of_colleges_per_capita,0.0127898836217141) as number_of_colleges_per_capita
+  ,coalesce(college_tuition,5480.21990120936) as college_tuition
+  ,coalesce(college_graduation_rate_income_adjusted,0.00744872225522498) as college_graduation_rate_income_adjusted
+  ,coalesce(labor_force_participation,0.646471359028166) as labor_force_participation
+  ,coalesce(share_working_in_manufacturing,0.140205520832831) as share_working_in_manufacturing
+  ,coalesce(teenage_14_16_labor_force_participation,0.452254845437077) as teenage_14_16_labor_force_participation
+  ,coalesce(migration_inflow_rate,0.0402778500933353) as migration_inflow_rate
+  ,coalesce(migration_outlflow_rate,0.0376845754615703) as migration_outlflow_rate
+  ,coalesce(fraction_foreign_born,0.0885283698594889) as fraction_foreign_born
+  ,coalesce(social_capital_index,-0.32310404048882) as social_capital_index
+  ,coalesce(fraction_religious,0.503391600402358) as fraction_religious
+  ,coalesce(violent_crime_rate,0.00179317116792631) as violent_crime_rate
+  ,coalesce(total_crime_rate,0.00705892372461041) as total_crime_rate
+  ,coalesce(fraction_of_children_with_single_mothers,0.220423024748469) as fraction_of_children_with_single_mothers
+  ,coalesce(fraction_of_adults_divorced,0.0973050643676738) as fraction_of_adults_divorced
+  ,coalesce(fraction_of_adults_married,0.549051926141323) as fraction_of_adults_married
+  ,coalesce(median_house_price_for_below_median_income_families,111719.45713786) as median_house_price_for_below_median_income_families
+  ,coalesce(median_house_price_for_above_median_income_families,140790.018749115) as median_house_price_for_above_median_income_families
+  ,coalesce(median_house_rent_for_below_median_income_families,592.904223753325) as median_house_rent_for_below_median_income_families
+  ,coalesce(median_house_rent_for_above_median_income_families,669.260216430718) as median_house_rent_for_above_median_income_families
+  ,coalesce(log_population_density,6.12619867247722) as log_population_density
+  ,coalesce(location_affordability_of_very_low_income_individual,148.729604991793) as location_affordability_of_very_low_income_individual
+  ,coalesce(location_affordability_of_median_income_family,53.639155643285) as location_affordability_of_median_income_family
+  ,coalesce(unemployment_rate,0.0467524233687776) as unemployment_rate
+  ,coalesce(fraction_black,-0.0583997544016713) as fraction_black
+  ,coalesce(poverty_rate,-0.0614342101400683) as poverty_rate
+  ,coalesce(segregation_of_affluence_p75,-0.00107713826175978) as segregation_of_affluence_p75
+  ,coalesce(fraction_with_commute__15_mins,-0.0099986728359157) as fraction_with_commute__15_mins
+  ,coalesce(location_affordability_of_median_household,0.0156450285786106) as location_affordability_of_median_household
+  ,coalesce(no_college,0) as no_college
+
+  /*
+  ,coalesce(fraction_of_parents_in_1st_national_income_decile,0.0592356556168324) as fraction_of_parents_in_1st_national_income_decile
+  ,coalesce(fraction_of_parents_in_2nd_national_income_decile,0.0823170255208072) as fraction_of_parents_in_2nd_national_income_decile
+  ,coalesce(fraction_of_parents_in_3rd_national_income_decile,0.0904236007944681) as fraction_of_parents_in_3rd_national_income_decile
+  ,coalesce(fraction_of_parents_in_4th_national_income_decile,0.0934512150370768) as fraction_of_parents_in_4th_national_income_decile
+  ,coalesce(fraction_of_parents_in_5th_national_income_decile,0.0980693805411928) as fraction_of_parents_in_5th_national_income_decile
+  ,coalesce(fraction_of_parents_in_6th_national_income_decile,0.10558186962211) as fraction_of_parents_in_6th_national_income_decile
+  ,coalesce(fraction_of_parents_in_7th_national_income_decile,0.113377997998127) as fraction_of_parents_in_7th_national_income_decile
+  ,coalesce(fraction_of_parents_in_8th_national_income_decile,0.118968681619563) as fraction_of_parents_in_8th_national_income_decile
+  ,coalesce(fraction_of_parents_in_9th_national_income_decile,0.120493228521394) as fraction_of_parents_in_9th_national_income_decile
+  ,coalesce(fraction_of_parents_in_10th_national_income_decile,0.117994046920011) as fraction_of_parents_in_10th_national_income_decile
+  */
+  
+  -- An indicator for whether the child reports positive W-2 earnings with income quintile and gender
+  ,coalesce(w2_pos_30_q1_f,0.728292494647528) as w2_pos_30_q1_f
+  ,coalesce(w2_pos_30_q1_m,0.696787968406929) as w2_pos_30_q1_m
+  ,coalesce(w2_pos_30_q2_f,0.774017520106013) as w2_pos_30_q2_f
+  ,coalesce(w2_pos_30_q2_m,0.772397705924151) as w2_pos_30_q2_m
+  ,coalesce(w2_pos_30_q3_f,0.800166013866464) as w2_pos_30_q3_f
+  ,coalesce(w2_pos_30_q3_m,0.825697611883081) as w2_pos_30_q3_m
+  ,coalesce(w2_pos_30_q4_f,0.827237745177449) as w2_pos_30_q4_f
+  ,coalesce(w2_pos_30_q4_m,0.860967714537158) as w2_pos_30_q4_m
+  
+  -- 2016 primary returns by county
+  ,coalesce(primary16_clinton,0.5480444769384) as primary16_clinton
+  ,coalesce(primary16_sanders,0.434347726321799) as primary16_sanders
 
 -- TargetSmart Scores
   -- Turnout 
