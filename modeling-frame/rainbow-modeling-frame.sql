@@ -814,7 +814,7 @@ select p.person_id
   vote_pp_2012_method_absentee = 1 or
   vote_pp_2016_method_absentee = 1) then 1 else 0 end as pres_primary_absentee_voter_post04
 
-  case when (vote_pp_2008_novote_eligible = 1 and
+  ,case when (vote_pp_2008_novote_eligible = 1 and
   vote_pp_2016_novote_eligible = 1) then 1 else 0 end as pres_primary_novote_eligible_post08
 
   ,case when (vote_p_2016_novote_eligible = 1 and
@@ -864,16 +864,16 @@ select p.person_id
   
 from phoenix_analytics.person p 
 left join phoenix_analytics.person_votes pv using(person_id)
-left join phoenix_scores.all_scores_2020 score using(person_id) 
-left join phoenix_scores.all_scores_2018 score using(person_id) 
-left join phoenix_scores.all_scores_2016 score using(person_id) 
+left join phoenix_scores.all_scores_2020 score20 using(person_id) 
+left join phoenix_scores.all_scores_2018 score18 using(person_id) 
+left join phoenix_scores.all_scores_2016 score16 using(person_id) 
 left join phoenix_consumer.tsmart_consumer tc using(person_id) 
-left join bernie_nmarchio2.geo_county_covariates on left(census_block_group_2010,5) = county_fip_id
-left join bernie_nmarchio2.geotable_intermed_tract on left(census_block_group_2010,11) = tract_id
-left join bernie_nmarchio2.census_pdb_block on gidbg = census_block_group_2010
+left join bernie_nmarchio2.geo_county_covariates cty on left(census_block_group_2010,5) = county_fip_id
+left join bernie_nmarchio2.geotable_intermed_tract trct on left(census_block_group_2010,11) = tract_id
+left join bernie_nmarchio2.census_pdb_block blck on gidbg = census_block_group_2010
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
-left join phoenix_census.acs_current on block_group_id = p.census_block_group_2010
+left join phoenix_census.acs_current acs on block_group_id = p.census_block_group_2010
 left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(census_county_fips,'3') and p.state_fips = left(lpad(census_county_fips,5,'000'),2)
 
   where p.is_deceased = false -- is alive
