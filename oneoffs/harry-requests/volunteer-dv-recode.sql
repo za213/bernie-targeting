@@ -15,19 +15,21 @@ CREATE TABLE bernie_nmarchio2.iowa_volunteer_dvs distkey (person_id) sortkey (pe
 				--case when result_name = 'Canvassed' then 1 else 0 end contact_status,
 				CASE WHEN es.myc_van_id IS NOT NULL AND result_name = 'Canvassed' THEN 1 ELSE 0 END AS "recruit_status",
 				CASE WHEN es.myc_van_id IS NOT NULL AND result_name = 'Canvassed' AND current_status = 'Completed' THEN 1 ELSE 0 END AS "complete_status"
-			FROM (
-				SELECT c.datetime_created - interval '5 hours' AS "timestamp_c",
-					DATE (date_trunc('week', timestamp_c)) AS "week_of_contact",
-					DATE (timestamp_c) recruit_date,
-					*
-				FROM phoenix_demssanders20_vansync_derived.contacts_myc c
-				WHERE contact_type_name = 'Phone'
-					AND state_code = 'IA'
-					AND
-					--exclude political department users
-					canvassed_by_user_id NOT IN (1737931, 1738590, 1737929, 1811727, 1808647, 1799908)
-					AND committee_id = 73296
-				) handdials
+			FROM     (SELECT c.datetime_created - interval '5 hours' AS "timestamp_c",
+                        DATE (date_trunc('week', timestamp_c)) AS "week_of_contact",
+                        DATE (timestamp_c) recruit_date,
+                        coalesce(person_id, x.person_id) person_id,
+                           myc_van_id,
+                           result_name
+                    FROM phoenix_demssanders20_vansync_derived.contacts_myc c
+                    left join bernie_data_commons.master_xwalk_st_myv x on 'IA-' || c.myv_van_id
+                    WHERE contact_type_name = 'Phone'
+                        AND state_code = 'IA'
+                        AND
+                        --exclude political department users
+                        canvassed_by_user_id NOT IN (1737931, 1738590, 1737929, 1811727, 1808647, 1799908)
+                        AND committee_id = 73296
+                    ) handdials
 			LEFT JOIN (
 				SELECT DISTINCT orig.*
 				FROM (
