@@ -894,7 +894,7 @@ left join bernie_nmarchio2.geo_block_covariates blck on p.census_block_group_201
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
 left join phoenix_census.acs_current acs on p.census_block_group_2010 = acs.block_group_id 
-left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(pri.census_county_fips,'3') and p.state_fips = left(lpad(pri.census_county_fips,5,'000'),2)
+--left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(pri.census_county_fips,'3') and p.state_fips = left(lpad(pri.census_county_fips,5,'000'),2)
 
   where p.is_deceased = false -- is alive
   and p.reg_record_merged = false -- removes duplicated registration addresses
