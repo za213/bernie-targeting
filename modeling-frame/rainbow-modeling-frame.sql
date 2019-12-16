@@ -2,13 +2,12 @@
 
 set query_group to 'importers';
 
---drop table if exists bernie_data_commons.rainbow_modeling_frame; 
---create table bernie_data_commons.rainbow_modeling_frame
-
-drop view if exists bernie_data_commons.rainbow_modeling_frame cascade; 
-create view bernie_data_commons.rainbow_modeling_frame
---distkey(person_id)
---sortkey(person_id)
+drop table if exists bernie_data_commons.rainbow_modeling_frame; 
+create table bernie_data_commons.rainbow_modeling_frame
+--drop view if exists bernie_data_commons.rainbow_modeling_frame cascade; 
+--create view bernie_data_commons.rainbow_modeling_frame
+distkey(person_id)
+sortkey(person_id)
 as (
   
 select p.person_id
