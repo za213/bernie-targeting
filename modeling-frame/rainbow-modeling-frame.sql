@@ -781,7 +781,7 @@ select p.person_id
     when coalesce(p.party_name_dnc,l2.parties_description) = 'Other' then 1 else 0 end as party_other
   
 -- Voter history
-  ,case when state_code in ('AL','GA','HI','IL','IN','MI','MN','MO','MS','MT','OH','SC','TN','TX','VA','VT','WA','WI') then 1 
+  ,case when pv.state_code in ('AL','GA','HI','IL','IN','MI','MN','MO','MS','MT','OH','SC','TN','TX','VA','VT','WA','WI') then 1 
              else 0 end as non_party_reg_state
   
   ,vote_g_2018
