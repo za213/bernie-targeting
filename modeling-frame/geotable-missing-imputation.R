@@ -73,3 +73,59 @@ where tract_g is null or tract_p is null order by ppl desc'
 
 tract_join <- read_civis(x = sql(qcounts), database = "Bernie 2020")
 
+       
+# County
+#pca <- as.data.frame(prcomp(log(complete_data[, 2:77]),center = TRUE,scale. = TRUE)[["x"]])
+pca_county <- prcomp((complete_data[, 2:77]),center = TRUE,scale. = TRUE)
+plot(pca_county)
+
+pca_cty_reduced <- as.data.frame(pca_county[["x"]]) %>% select(PC1, PC2, PC3, PC4, PC5) 
+complete_data_embed <- merge(complete_data, pca_cty_reduced, by=0, all=TRUE) %>% select(-one_of(c('Row.names'))) 
+names(complete_data_embed)
+complete_data_embed <- complete_data_embed %>% 
+  rename(county_component_pc1 = PC1, 
+         county_component_pc2 = PC2, 
+         county_component_pc3 = PC3, 
+         county_component_pc4 = PC4, 
+         county_component_pc5 = PC5)
+
+# Tract
+complete_data_tract <- complete_data_tract %>% select(-one_of('tract_id_2')) 
+pca_tract <- prcomp((complete_data_tract[,2:75]),center = TRUE,scale. = TRUE)
+
+plot(pca_tract)
+
+pca_tract_reduced <- as.data.frame(pca_tract[["x"]]) %>% select(PC1, PC2, PC3, PC4, PC5) 
+complete_data_tract_embed <- merge(complete_data_tract , pca_tract_reduced, by=0, all=TRUE) %>% select(-one_of(c('Row.names'))) 
+names(complete_data_tract_embed)
+complete_data_tract_embed <- complete_data_tract_embed  %>% 
+  rename(tract_component_pc1 = PC1, 
+         tract_component_pc2 = PC2, 
+         tract_component_pc3 = PC3, 
+         tract_component_pc4 = PC4, 
+         tract_component_pc5 = PC5)
+
+# Block group
+drop_cols <- c('gidbg','state','state_name','county','county_name','tract','block_group','flag','land_area','aian_land')
+block_table_pca <- block_table %>% select(-one_of(drop_cols)) 
+names(block_table_pca )
+block_table_pca <- na.omit(block_table_pca)
+
+pca_block <- prcomp((block_table_pca[,2:115]),center = TRUE,scale. = TRUE)
+
+plot(pca_block)
+
+pca_block_reduced <- as.data.frame(pca_block[["x"]]) %>% select(PC1, PC2, PC3, PC4, PC5) 
+complete_data_block_embed <- merge(block_table_pca, pca_block_reduced, by=0, all=TRUE) %>% select(-one_of(c('Row.names'))) 
+names(complete_data_block_embed)
+complete_data_block_embed <- complete_data_block_embed %>% 
+  rename(block_component_pc1 = PC1, 
+         block_component_pc2 = PC2, 
+         block_component_pc3 = PC3, 
+         block_component_pc4 = PC4, 
+         block_component_pc5 = PC5)
+
+write_civis(x=complete_data_embed, tablename='bernie_nmarchio2.geo_county_covariates', database = 'Bernie 2020',if_exists = "drop")
+write_civis(x=complete_data_tract_embed, tablename='bernie_nmarchio2.geo_tract_covariates', database = 'Bernie 2020',if_exists = "drop")
+write_civis(x=complete_data_block_embed, tablename='bernie_nmarchio2.geo_block_covariates', database = 'Bernie 2020',if_exists = "drop")
+
