@@ -13,6 +13,7 @@ as (
   
 select p.person_id
   ,x.jsonid
+  ,p.state_code
   ,p.census_block_group_2010
   
 --All scores
