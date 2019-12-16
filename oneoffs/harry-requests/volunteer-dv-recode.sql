@@ -1,7 +1,7 @@
 
 DROP TABLE IF EXISTS bernie_nmarchio2.iowa_volunteer_dvs;
 CREATE TABLE bernie_nmarchio2.iowa_volunteer_dvs distkey (person_id) sortkey (person_id) AS (
-		SELECT person_id,
+				SELECT person_id,
 		CASE WHEN rsvp_count >= 1 THEN 1 ELSE 0 END AS rsvp_1plus,
 		CASE WHEN rsvp_count = 1 AND shift_count = 0 THEN 1 ELSE 0 END AS flaked_on_1plus_rsvps,
 		CASE WHEN shift_count >= 1 THEN 1 ELSE 0 END AS shift_1plus FROM (
@@ -18,13 +18,13 @@ CREATE TABLE bernie_nmarchio2.iowa_volunteer_dvs distkey (person_id) sortkey (pe
 			FROM     (SELECT c.datetime_created - interval '5 hours' AS "timestamp_c",
                         DATE (date_trunc('week', timestamp_c)) AS "week_of_contact",
                         DATE (timestamp_c) recruit_date,
-                        coalesce(person_id, x.person_id) person_id,
-                           myc_van_id,
+                        coalesce(c.person_id, x.person_id) person_id,
+                           c.myc_van_id,
                            result_name
                     FROM phoenix_demssanders20_vansync_derived.contacts_myc c
-                    left join bernie_data_commons.master_xwalk_st_myv x on 'IA-' || c.myv_van_id
+                    left join bernie_data_commons.master_xwalk_st_myv x on 'IA-' || c.myv_van_id = x.st_myv_van_id
                     WHERE contact_type_name = 'Phone'
-                        AND state_code = 'IA'
+                        AND c.state_code = 'IA'
                         AND
                         --exclude political department users
                         canvassed_by_user_id NOT IN (1737931, 1738590, 1737929, 1811727, 1808647, 1799908)
@@ -92,4 +92,5 @@ CREATE TABLE bernie_nmarchio2.iowa_volunteer_dvs distkey (person_id) sortkey (pe
 			)
 		GROUP BY 1
 		)
+		
 		);
