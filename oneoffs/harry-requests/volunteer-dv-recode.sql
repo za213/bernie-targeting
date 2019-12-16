@@ -90,7 +90,7 @@ CREATE TABLE bernie_nmarchio2.iowa_volunteer_dvs distkey (person_id) sortkey (pe
 			--limit to contact_status = 1 to filter to people who answered phone
 			WHERE result_name = 'Canvassed'
 			)
-		GROUP BY 1
+		where person_id is not null GROUP BY 1
 		)
 		
 		);
