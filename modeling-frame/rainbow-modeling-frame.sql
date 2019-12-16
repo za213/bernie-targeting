@@ -10,6 +10,7 @@ as (
   
 select p.person_id
   ,x.jsonid
+  ,p.census_block_group_2010
   
 --All scores
   -- Civis marriage, children, language, partisan/ideology scores
@@ -145,24 +146,24 @@ select p.person_id
   ,case when xp_occupation = 'K05' then 1 else 0 end as xp_occupation_k05
   ,case when xp_occupation = 'K06' then 1 else 0 end as xp_occupation_k06
   
-  -- Geographic embeddings (reduces 250+ block, tract, county features to 15 dimensions)
-  ,block_component_pc1
-  ,block_component_pc2
-  ,block_component_pc3
-  ,block_component_pc4
-  ,block_component_pc5
-
-  ,tract_component_pc1
-  ,tract_component_pc2
-  ,tract_component_pc3
-  ,tract_component_pc4
-  ,tract_component_pc5
-
-  ,county_component_pc1
-  ,county_component_pc2
-  ,county_component_pc3
-  ,county_component_pc4
-  ,county_component_pc5
+  -- Geographic embeddings (reduces 250+ block, tract, county features below to 15 dimensions)
+  ,coalesce(block_component_pc1,-2.83159373436281) as block_component_pc1
+  ,coalesce(block_component_pc2,0.829194370075463) as block_component_pc2
+  ,coalesce(block_component_pc3,0.398877839631647) as block_component_pc3
+  ,coalesce(block_component_pc4,0.234574919827233) as block_component_pc4
+  ,coalesce(block_component_pc5,-0.034273927424433) as block_component_pc5
+  
+  ,coalesce(tract_component_pc1,0.919401723259862) as tract_component_pc1
+  ,coalesce(tract_component_pc2,0.0290201188746687) as tract_component_pc2
+  ,coalesce(tract_component_pc3,-0.774097060714685) as tract_component_pc3
+  ,coalesce(tract_component_pc4,-0.292205220457999) as tract_component_pc4
+  ,coalesce(tract_component_pc5,0.135064039349648) as tract_component_pc5
+  
+  ,coalesce(county_component_pc1,4.39902115601863) as county_component_pc1
+  ,coalesce(county_component_pc2,-2.76221417613783) as county_component_pc2
+  ,coalesce(county_component_pc3,0.642546411645455) as county_component_pc3
+  ,coalesce(county_component_pc4,0.4890816974394) as county_component_pc4
+  ,coalesce(county_component_pc5,-0.0771120869396656) as county_component_pc5
   
   -- Industry and economic composition (block group) from phoenix_census.acs_current
   ,coalesce(xc_24070_e_10,10.5021808346473) as pct_prof_sci_mng
@@ -487,7 +488,7 @@ select p.person_id
   ,coalesce(fraction_of_parents_in_10th_national_income_decile,0.117994046920011) as fraction_of_parents_in_10th_national_income_decile
   */
   
-  -- Urban dynamics (county)
+  -- Macro properties of place (county)
   ,coalesce(log_population_density,6.12619867247722) as log_population_density
   ,coalesce(fraction_with_commute_less15_mins,0.294810198323762) as fraction_with_commute_less15_mins
   --,coalesce(fraction_with_commute__15_mins,-0.0099986728359157) as fraction_with_commute__15_mins
@@ -887,13 +888,13 @@ left join phoenix_scores.all_scores_2020 score20 using(person_id)
 left join phoenix_scores.all_scores_2018 score18 using(person_id) 
 left join phoenix_scores.all_scores_2016 score16 using(person_id) 
 left join phoenix_consumer.tsmart_consumer tc using(person_id) 
-left join bernie_nmarchio2.geo_county_covariates cty on left(census_block_group_2010,5) = county_fip_id
-left join bernie_nmarchio2.geotable_intermed_tract trct on left(census_block_group_2010,11) = tract_id
-left join bernie_nmarchio2.census_pdb_block blck on gidbg = census_block_group_2010
+left join bernie_nmarchio2.geo_county_covariates cty on left(p.census_block_group_2010,5) = lpad(cty.county_fip_id,5,'00000')
+left join bernie_nmarchio2.geotable_intermed_tract trct on left(p.census_block_group_2010,11) = lpad(trct.tract_id,11,'00000000000')
+left join bernie_nmarchio2.geo_block_covariates blck on p.census_block_group_2010 = lpad(blck.block_group_id, 12,'000000000000') 
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
-left join phoenix_census.acs_current acs on block_group_id = p.census_block_group_2010
-left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(census_county_fips,'3') and p.state_fips = left(lpad(census_county_fips,5,'000'),2)
+left join phoenix_census.acs_current acs on p.census_block_group_2010 = acs.block_group_id 
+left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(pri.census_county_fips,'3') and p.state_fips = left(lpad(pri.census_county_fips,5,'000'),2)
 
   where p.is_deceased = false -- is alive
   and p.reg_record_merged = false -- removes duplicated registration addresses
