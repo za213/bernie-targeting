@@ -1,5 +1,5 @@
 
-DROP TABLE IF EXISTS bernie_nmarchio2.iowa_volunteer_dvs;
+DROP TABLE IF EXISTS bernie_nmarchio2.iowa_volunteer_dvs cascade;
 CREATE TABLE bernie_nmarchio2.iowa_volunteer_dvs distkey (person_id) sortkey (person_id) AS (
 				SELECT person_id,
 		CASE WHEN rsvp_count >= 1 THEN 1 ELSE 0 END AS rsvp_1plus,
