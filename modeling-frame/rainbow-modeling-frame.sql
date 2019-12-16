@@ -145,6 +145,25 @@ select p.person_id
   ,case when xp_occupation = 'K05' then 1 else 0 end as xp_occupation_k05
   ,case when xp_occupation = 'K06' then 1 else 0 end as xp_occupation_k06
   
+  -- Geographic embeddings (reduces 250+ block, tract, county features to 15 dimensions)
+  ,block_component_pc1
+  ,block_component_pc2
+  ,block_component_pc3
+  ,block_component_pc4
+  ,block_component_pc5
+
+  ,tract_component_pc1
+  ,tract_component_pc2
+  ,tract_component_pc3
+  ,tract_component_pc4
+  ,tract_component_pc5
+
+  ,county_component_pc1
+  ,county_component_pc2
+  ,county_component_pc3
+  ,county_component_pc4
+  ,county_component_pc5
+  
   -- Industry and economic composition (block group) from phoenix_census.acs_current
   ,coalesce(xc_24070_e_10,10.5021808346473) as pct_prof_sci_mng
   ,coalesce(xc_24070_e_11,23.3169387120635) as pct_educ_health
