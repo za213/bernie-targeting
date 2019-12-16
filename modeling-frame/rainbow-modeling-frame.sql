@@ -1,6 +1,7 @@
 -- Data Dictionary: https://docs.google.com/spreadsheets/d/183LBmZGNbWdjmGxuBY8GrbtXuoUMobcm5BO331vs5Og/edit?usp=sharing
 
 set query_group to 'importers';
+set wlm_query_slot_count to 2;
 
 drop table if exists bernie_data_commons.rainbow_modeling_frame; 
 create table bernie_data_commons.rainbow_modeling_frame
