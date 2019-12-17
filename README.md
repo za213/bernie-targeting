@@ -12,7 +12,12 @@ https://github.com/Bernie-2020/fundraising/blob/master/ActionKit/donor_based/Mod
 * https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql
 * Data Dict: https://docs.google.com/spreadsheets/d/183LBmZGNbWdjmGxuBY8GrbtXuoUMobcm5BO331vs5Og/edit#gid=1099062733
 
-Spoke models 
+## List cutting resources
+https://github.com/Bernie-2020/data_adrian/blob/master/nat_dialer_pipeline/nat_topline_demos.sql
+https://github.com/Bernie-2020/data_adrian/blob/master/nat_dialer_pipeline/adriana_base_breakdown_1232019.sql
+https://github.com/Bernie-2020/civis-jobs/blob/188b95f4a21c665e51ea1c902a559d0e8612f38a/civis_jobs/tools/getthru/refresh_lists/phones_state_date.sql
+https://docs.google.com/spreadsheets/d/1Z_0kPxAhCsR7sp4I9KbHrjNnbGWvnee5dayx99D2GBU/edit#gid=862138946
+https://docs.google.com/spreadsheets/d/1CJ6cLoh2Z0Hia8RHLZ1jZEq5CLZUafNWXokt8jdEZWs/edit#gid=0
 
 ## Data Universes
 * MyVoters: all voters 
