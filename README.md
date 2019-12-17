@@ -13,11 +13,13 @@ Spoke models
 * ActionKit: events and emails, donors, rally attendees, volunteers (subset of MyCampaign)
 * Mobilize: events and signups into mobilize with email that gets (subset of ActionKit)
 
+## Contact tools
+* Bern
 * VAN 
-* Spoke: all voters mix
-* QuickBase: 
-* GoToWebinar/Zoom:
-* GetThru:
+* Spoke
+* QuickBase
+* GoToWebinar/Zoom
+* GetThru
 
 
 
