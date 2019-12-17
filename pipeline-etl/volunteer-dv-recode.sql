@@ -73,6 +73,6 @@ DROP TABLE IF EXISTS bernie_nmarchio2.vol_refresh_dvs;
 				AND person_id NOT IN (
 					SELECT DISTINCT person_id volunteer_temp_table
 					)
-				AND random() < .1 limit 100
+				AND random() < .1 limit 100000
 			)
 		);
