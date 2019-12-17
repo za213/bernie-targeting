@@ -7,4 +7,11 @@ https://github.com/Bernie-2020/fundraising/blob/master/ActionKit/donor_based/Mod
 
 Spoke models 
 
+# Data Sources
+* MyVoters: all voters 
+* MyCampaign: all volunteers, 1 Ids, donors, emails 
+* ActionKit: events and emails, donor, rally (subset of MyCampaign)
+* Mobilize: events and signups into mobilize with email that gets (subset of ActionKit)
+
+
 
