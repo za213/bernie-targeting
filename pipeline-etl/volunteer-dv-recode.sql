@@ -1,6 +1,9 @@
 -- Recode volunteer DVs
 DROP TABLE IF EXISTS bernie_nmarchio2.vol_refresh_dvs;
-CREATE TABLE bernie_nmarchio2.vol_refresh_dvs AS (
+CREATE TABLE bernie_nmarchio2.vol_refresh_dvs
+	distkey(person_id)
+	sortkey(person_id) a
+	AS (
 	SELECT person_id,
 	coalesce(activist_codes.donor, 0) donor,
 	coalesce(activist_codes.email_signup, 0) email_signup,
