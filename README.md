@@ -1,9 +1,12 @@
 # Centralized Repo for In-House Bernie Models
 
 ## Models
-
-ActionKit models (volunteering, events, donors):
+* Spoke model: 
+* ActionKit models (volunteering, events, donors):
 https://github.com/Bernie-2020/fundraising/blob/master/ActionKit/donor_based/Modeling/Volunteer%20Model.ipynb
+* Doors models: https://github.com/Bernie-2020/data_asna/blob/master/doors_model/ca_doors_model.ipynb
+* Volunteer model https://platform.civisanalytics.com/spa/#/projects/123281
+
 
 Spoke models 
 
