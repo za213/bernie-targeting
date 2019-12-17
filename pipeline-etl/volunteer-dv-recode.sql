@@ -1,5 +1,6 @@
 -- Recode volunteer DVs
-CREATE TEMP TABLE volunteer_temp_table AS (
+DROP TABLE IF EXISTS bernie_nmarchio2.vol_refresh_dvs;
+CREATE TABLE bernie_nmarchio2.vol_refresh_dvs AS (
 	SELECT person_id,
 	coalesce(activist_codes.donor, 0) donor,
 	coalesce(activist_codes.email_signup, 0) email_signup,
@@ -50,12 +51,7 @@ CREATE TEMP TABLE volunteer_temp_table AS (
 	);
 
 -- Combine volunteer DVs with random sample
-DROP TABLE IF EXISTS bernie_nmarchio2.vol_refresh_dvs;
-	CREATE TABLE bernie_nmarchio2.vol_refresh_dvs AS (
-		SELECT * FROM 
-    (SELECT * FROM volunteer_temp_table)
-    UNION ALL
-    (SELECT person_id,
+    SELECT person_id,
 	    0 AS donor,
 	    0 AS email_signup,
 	    0 AS event_signup,
@@ -69,4 +65,4 @@ DROP TABLE IF EXISTS bernie_nmarchio2.vol_refresh_dvs;
 	    0 AS vol_yes
     FROM phoenix_analytics.person
     WHERE is_deceased = false AND reg_record_merged = false AND reg_on_current_file = true AND reg_voter_flag = true AND person_id NOT IN 
-    (SELECT DISTINCT person_id volunteer_temp_table) AND random() < .1 limit 100000));
+    (SELECT DISTINCT person_id volunteer_temp_table) AND random() < .1 limit 100000)
