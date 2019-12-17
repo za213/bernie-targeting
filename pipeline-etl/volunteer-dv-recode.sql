@@ -54,25 +54,17 @@ DROP TABLE IF EXISTS bernie_nmarchio2.vol_refresh_dvs;
     (SELECT * FROM volunteer_temp_table)
     UNION ALL
     (SELECT person_id,
-				0 AS donor,
-				0 AS email_signup,
-				0 AS event_signup,
-				0 AS text_signup,
-				0 AS barnstorm,
-				0 AS rally,
-				0 AS event_or_barnstorm_or_rally,
-				0 AS bern_user,
-				0 AS supporter_16,
-				0 AS delegate_16,
-				0 AS vol_yes
-			FROM phoenix_analytics.person
-			WHERE is_deceased = false
-				AND reg_record_merged = false
-				AND reg_on_current_file = true
-				AND reg_voter_flag = true
-				AND person_id NOT IN (
-					SELECT DISTINCT person_id volunteer_temp_table
-					)
-				AND random() < .1 limit 100000
-			)
-		);
+    0 AS donor,
+    0 AS email_signup,
+    0 AS event_signup,
+    0 AS text_signup,
+    0 AS barnstorm,
+    0 AS rally,
+    0 AS event_or_barnstorm_or_rally,
+    0 AS bern_user,
+    0 AS supporter_16,
+    0 AS delegate_16,
+    0 AS vol_yes
+    FROM phoenix_analytics.person
+    WHERE is_deceased = false AND reg_record_merged = false AND reg_on_current_file = true AND reg_voter_flag = true AND person_id NOT IN 
+    (SELECT DISTINCT person_id volunteer_temp_table) AND random() < .1 limit 100000));
