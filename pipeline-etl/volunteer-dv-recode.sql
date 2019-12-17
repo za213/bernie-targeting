@@ -53,6 +53,7 @@ CREATE TABLE bernie_nmarchio2.vol_refresh_dvs
 	) activist_codes using (person_id) WHERE person_id IS NOT NULL
 	);
 
+/*
 -- Combine volunteer DVs with random sample
     SELECT person_id,
 	    0 AS donor,
@@ -69,3 +70,4 @@ CREATE TABLE bernie_nmarchio2.vol_refresh_dvs
     FROM phoenix_analytics.person
     WHERE is_deceased = false AND reg_record_merged = false AND reg_on_current_file = true AND reg_voter_flag = true AND person_id NOT IN 
     (SELECT DISTINCT person_id volunteer_temp_table) AND random() < .1 limit 100000)
+ */
