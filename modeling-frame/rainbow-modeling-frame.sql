@@ -18,12 +18,12 @@ insert into bernie_data_commons.rainbow_modeling_frame
 --All scores
   -- Civis marriage, children, language, partisan/ideology scores
   ,coalesce(civis_2020_marriage,0.566609551) as civis_2020_marriage
-  ,coalesce(dnc_2018_marriage,0.528516131) as dnc_2018_marriage
+  --,coalesce(dnc_2018_marriage,0.528516131) as dnc_2018_marriage
   ,coalesce(civis_2020_children_present,0.291702784) as civis_2020_children_present
   ,coalesce(civis_2020_partisanship,0.5836077) as civis_2020_partisanship
   ,coalesce(civis_2020_ideology_liberal,0.412724049) as civis_2020_ideology_liberal
   ,coalesce(civis_2020_spanish_language_preference,0.025251928) as civis_2020_spanish_language_preference
-  ,coalesce(civis_2018_spanish_language_preference,0.02299987) as civis_2018_spanish_language_preference
+  --,coalesce(civis_2018_spanish_language_preference,0.02299987) as civis_2018_spanish_language_preference
 
   -- Civis 2018 support, turnout, gotv
   ,coalesce(civis_2018_turnout,0.464239577) as civis_2018_turnout
