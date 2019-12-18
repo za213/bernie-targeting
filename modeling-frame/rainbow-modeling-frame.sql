@@ -797,11 +797,14 @@ insert into bernie_data_commons.rainbow_modeling_frame
   ,CASE WHEN coalesce(p.party_name_dnc,l2.parties_description) = 'Nonpartisan' or party_id = 7 THEN 1 ELSE 0 END as party_nopartypref
   ,CASE WHEN coalesce(p.party_name_dnc,l2.parties_description) = 'Unaffiliated' or party_id = 8 THEN 1 ELSE 0 END as party_unaffiliated
              
-  ,CASE WHEN p.is_permanent_absentee THEN 1 ELSE 0 END as is_permanent_absentee
-  ,CASE WHEN p.reg_voter_flag THEN 1 ELSE 0 END as reg_voter_flag
+-- Voting address
+  ,CASE WHEN is_permanent_absentee THEN 1 ELSE 0 END as is_permanent_absentee
   ,CASE WHEN voting_address_urbanicity in ('R1','R2') THEN 1 ELSE 0 END as voting_address_rural
   ,CASE WHEN voting_address_urbanicity in ('S3','S4') THEN 1 ELSE 0 END as voting_address_suburban
   ,CASE WHEN voting_address_urbanicity in ('U5','U6') THEN 1 ELSE 0 END as voting_address_urban
+                
+-- Voter registration history
+  ,CASE WHEN reg_voter_flag THEN 1 ELSE 0 END as reg_voter_flag
   ,CASE WHEN years_registered = 1 THEN 1 ELSE 0 END as years_registered_1year
   ,CASE WHEN years_registered IN (2,3) THEN 1 ELSE 0 END as years_registered_2_3years
   ,CASE WHEN years_registered IN (4,5) THEN 1 ELSE 0 END as years_registered_4_5years
@@ -809,15 +812,16 @@ insert into bernie_data_commons.rainbow_modeling_frame
   ,CASE WHEN years_registered >=10 AND years_registered <25 THEN 1 ELSE 0 END as years_registered_10_25years
   ,CASE WHEN years_registered >=25 THEN 1 ELSE 0 END as years_registered_25plusyears
              
--- Voter history
   ,case when pv.state_code in ('AL','GA','HI','IL','IN','MI','MN','MO','MS','MT','OH','SC','TN','TX','VA','VT','WA','WI') then 1 
              else 0 end as non_party_reg_state
   
+  -- General Elections
   ,vote_g_2018
   ,vote_g_2016
   ,vote_g_2014
   ,vote_g_2012
   
+  -- Dem Presidential Primaries
   ,vote_pp_2000_party_d
   ,vote_pp_2004_party_d
   ,vote_pp_2008_party_d
