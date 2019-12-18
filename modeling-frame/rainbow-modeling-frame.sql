@@ -653,11 +653,23 @@ insert into bernie_data_commons.rainbow_modeling_frame
     when tc.ts_tsmart_urbanicity in ('U5', 'U6') 
     then 1 else 0                 end as geo_urban
   
+-- Homeownership
+  ,CASE WHEN tb_homeowner_flg = 'N' THEN 1 ELSE 0 END as tb_homeowner_flg_no
+  ,CASE WHEN tb_homeowner_flg = 'Y' THEN 1 ELSE 0 END as tb_homeowner_flg_yes
+ 
 -- Gender
   ,case 
     when coalesce(p.gender_combined,l2.voters_gender)  = 'F' 
     then 1 else 0                 end as female 
   
+-- Marital Status
+  ,CASE WHEN tb_marital_cd = 'M' AND p.gender_combined = 'F' THEN 1 ELSE 0 END as married_female
+  ,CASE WHEN tb_marital_cd = 'M' AND p.gender_combined = 'M' THEN 1 ELSE 0 END as married_male
+  ,CASE WHEN tb_marital_cd = 'S' AND p.gender_combined = 'F' THEN 1 ELSE 0 END as single_female
+  ,CASE WHEN tb_marital_cd = 'S' AND p.gender_combined = 'M' THEN 1 ELSE 0 END as single_male
+  ,CASE WHEN tb_marital_cd = 'M' THEN 1 ELSE 0 END as married 
+  ,CASE WHEN tb_marital_cd = 'S' THEN 1 ELSE 0 END as single
+ 
 -- Ethnicity
   ,case 
     when civis_2020_likely_race = 'W' then 1
@@ -775,14 +787,28 @@ insert into bernie_data_commons.rainbow_modeling_frame
   ,case 
     when tc.tb_education_cd = 4 then 1 else 0 end as edu_grad_degree
     
--- Party ID 
-  ,case
-    when coalesce(p.party_name_dnc,l2.parties_description) = 'Democratic' then 1 else 0 end as party_dem
-  ,case  
-    when coalesce(p.party_name_dnc,l2.parties_description) = 'Republican' then 1 else 0 end as party_rep
-  ,case  
-    when coalesce(p.party_name_dnc,l2.parties_description) = 'Other' then 1 else 0 end as party_other
-  
+-- Party ID and Reg
+  ,CASE WHEN coalesce(p.party_name_dnc,l2.parties_description) = 'Democratic' or party_id = 1 THEN 1 ELSE 0 END as party_dem
+  ,CASE WHEN coalesce(p.party_name_dnc,l2.parties_description) = 'Republican' or party_id = 2 THEN 1 ELSE 0 END as party_rep
+  ,CASE WHEN coalesce(p.party_name_dnc,l2.parties_description) = 'Other' or party_id = 3 THEN 1 ELSE 0 END as party_other 
+  ,CASE WHEN coalesce(p.party_name_dnc,l2.parties_description) = 'Libertarian' or party_id = 4 THEN 1 ELSE 0 END as party_libertarian 
+  ,CASE WHEN coalesce(p.party_name_dnc,l2.parties_description) = 'Green' or party_id = 5 THEN 1 ELSE 0 END as party_green 
+  ,CASE WHEN coalesce(p.party_name_dnc,l2.parties_description) = 'Independent' or party_id = 6 THEN 1 ELSE 0 END as party_independent 
+  ,CASE WHEN coalesce(p.party_name_dnc,l2.parties_description) = 'Nonpartisan' or party_id = 7 THEN 1 ELSE 0 END as party_nopartypref
+  ,CASE WHEN coalesce(p.party_name_dnc,l2.parties_description) = 'Unaffiliated' or party_id = 8 THEN 1 ELSE 0 END as party_unaffiliated
+             
+  ,CASE WHEN p.is_permanent_absentee THEN 1 ELSE 0 END as is_permanent_absentee
+  ,CASE WHEN p.reg_voter_flag THEN 1 ELSE 0 END as reg_voter_flag
+  ,CASE WHEN voting_address_urbanicity in ('R1','R2') THEN 1 ELSE 0 END as voting_address_rural
+  ,CASE WHEN voting_address_urbanicity in ('S3','S4') THEN 1 ELSE 0 END as voting_address_suburban
+  ,CASE WHEN voting_address_urbanicity in ('U5','U6') THEN 1 ELSE 0 END as voting_address_urban
+  ,CASE WHEN years_registered = 1 THEN 1 ELSE 0 END as years_registered_1year
+  ,CASE WHEN years_registered IN (2,3) THEN 1 ELSE 0 END as years_registered_2_3years
+  ,CASE WHEN years_registered IN (4,5) THEN 1 ELSE 0 END as years_registered_4_5years
+  ,CASE WHEN years_registered IN (5,6,7,8,9) THEN 1 ELSE 0 END as years_registered_5_10years
+  ,CASE WHEN years_registered >=10 AND years_registered <25 THEN 1 ELSE 0 END as years_registered_10_25years
+  ,CASE WHEN years_registered >=25 THEN 1 ELSE 0 END as years_registered_25plusyears
+             
 -- Voter history
   ,case when pv.state_code in ('AL','GA','HI','IL','IN','MI','MN','MO','MS','MT','OH','SC','TN','TX','VA','VT','WA','WI') then 1 
              else 0 end as non_party_reg_state
