@@ -904,7 +904,7 @@ left join phoenix_census.acs_current acs on p.census_block_group_2010 = acs.bloc
   and p.reg_record_merged = false -- removes duplicated registration addresses
   and p.reg_on_current_file = true --  voter was on the last voter file that the DNC processed and not eligible to vote in primaries
   and p.reg_voter_flag = true -- voters who are registered to vote (i.e. have a registration status of active or inactive) even if they have moved states and their new state has not updated their file to reflect this yet
-  and p.state_code in ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA')
+  --and p.state_code in ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA')
                        
 );
 
