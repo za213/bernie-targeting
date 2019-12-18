@@ -1,5 +1,8 @@
 # Centralized Repo for In-House Bernie Models
 
+## Platform links
+* Nico Models: https://platform.civisanalytics.com/spa/#/projects/129243
+
 ## Models
 * Spoke model: https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/modeling-workflow-20191216.ipynb
 * Donor model: https://github.com/Bernie-2020/fundraising/blob/master/ActionKit/donor_based/Modeling/HPC%20Model.ipynb
