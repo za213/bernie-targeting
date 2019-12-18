@@ -1,0 +1,220 @@
+
+select 
+case when greatest(
+civis_2018_cultural_persuasion,
+civis_2018_economic_persuasion,
+civis_2018_political_persuasion) =civis_2018_cultural_persuasion then 'Cultural'
+ when greatest(
+civis_2018_cultural_persuasion,
+civis_2018_economic_persuasion,
+civis_2018_political_persuasion) =civis_2018_economic_persuasion then 'Economic'
+ when greatest(
+civis_2018_cultural_persuasion,
+civis_2018_economic_persuasion,
+civis_2018_political_persuasion) =civis_2018_political_persuasion then 'Political' end as fav_issue_category
+
+,CASE
+WHEN GREATEST(
+civis_2018_one_pct_persuasion
+,civis_2018_infrastructure_persuasion
+,civis_2018_aca_persuasion
+,civis_2018_skills_persuasion
+,civis_2018_college_persuasion
+,civis_2018_medicare_persuasion
+,civis_2018_progressive_persuasion)=civis_2018_one_pct_persuasion then 'Working to strengthen the middle class and make sure the wealthiest 1% pay their fair sahre'
+WHEN GREATEST(
+civis_2018_one_pct_persuasion
+,civis_2018_infrastructure_persuasion
+,civis_2018_aca_persuasion
+,civis_2018_skills_persuasion
+,civis_2018_college_persuasion
+,civis_2018_medicare_persuasion
+,civis_2018_progressive_persuasion)=civis_2018_infrastructure_persuasion then 'Supporting federal investments to rebuild our infrastructure and put millions of Americans back to work in decent paying jobs in both the public and private sectors'
+WHEN GREATEST(
+civis_2018_one_pct_persuasion
+,civis_2018_infrastructure_persuasion
+,civis_2018_aca_persuasion
+,civis_2018_skills_persuasion
+,civis_2018_college_persuasion
+,civis_2018_medicare_persuasion
+,civis_2018_progressive_persuasion)=civis_2018_medicare_persuasion then 'Strengthening programs like Medicare and Social Security that ensure seniors can afford to live with dignity and obtain the health care they need'
+WHEN GREATEST(
+civis_2018_one_pct_persuasion
+,civis_2018_infrastructure_persuasion
+,civis_2018_aca_persuasion
+,civis_2018_skills_persuasion
+,civis_2018_college_persuasion
+,civis_2018_medicare_persuasion
+,civis_2018_progressive_persuasion)=civis_2018_skills_persuasion then 'Building an economy that gives working Americans the tools and skills to succeed in the 21st century'
+WHEN GREATEST(
+civis_2018_one_pct_persuasion
+,civis_2018_infrastructure_persuasion
+,civis_2018_aca_persuasion
+,civis_2018_skills_persuasion
+,civis_2018_college_persuasion
+,civis_2018_medicare_persuasion
+,civis_2018_progressive_persuasion)=civis_2018_college_persuasion then 'Making tuition at public colleges free for students from middle-class families'
+WHEN GREATEST(
+civis_2018_one_pct_persuasion
+,civis_2018_infrastructure_persuasion
+,civis_2018_aca_persuasion
+,civis_2018_skills_persuasion
+,civis_2018_college_persuasion
+,civis_2018_medicare_persuasion
+,civis_2018_progressive_persuasion)=civis_2018_aca_persuasion then 'Protecting the Affordable Care Act and expanding Medicaid to ensure Americans have access to high-quality health care at an affordable price'
+WHEN GREATEST(
+civis_2018_one_pct_persuasion
+,civis_2018_infrastructure_persuasion
+,civis_2018_aca_persuasion
+,civis_2018_skills_persuasion
+,civis_2018_college_persuasion
+,civis_2018_medicare_persuasion
+,civis_2018_progressive_persuasion)=civis_2018_progressive_persuasion then 'Working to advance a progressive agenda in Washington' end as fav_econ_issue
+
+,case 
+WHEN GREATEST(
+civis_2018_growth_persuasion
+,civis_2018_bipartisan_persuasion
+,civis_2018_welcome_persuasion
+,civis_2018_trump_persuasion
+,civis_2018_gop_persuasion) =civis_2018_bipartisan_persuasion then 'Working with members of both parties to improve the lives of all Americans'
+WHEN GREATEST(
+civis_2018_growth_persuasion
+,civis_2018_bipartisan_persuasion
+,civis_2018_welcome_persuasion
+,civis_2018_trump_persuasion
+,civis_2018_gop_persuasion) =civis_2018_gop_persuasion then 'Standing up to Congressional Republicans policies that benefit the rich'
+WHEN GREATEST(
+civis_2018_growth_persuasion
+,civis_2018_bipartisan_persuasion
+,civis_2018_welcome_persuasion
+,civis_2018_trump_persuasion
+,civis_2018_gop_persuasion) =civis_2018_growth_persuasion then 'Working to promote growth and build an economic engine that creates jobs'
+WHEN GREATEST(
+civis_2018_growth_persuasion
+,civis_2018_bipartisan_persuasion
+,civis_2018_welcome_persuasion
+,civis_2018_trump_persuasion
+,civis_2018_gop_persuasion) =civis_2018_trump_persuasion then 'Standing up to Donald Trumps toxic politics'
+WHEN GREATEST(
+civis_2018_growth_persuasion
+,civis_2018_bipartisan_persuasion
+,civis_2018_welcome_persuasion
+,civis_2018_trump_persuasion
+,civis_2018_gop_persuasion) =civis_2018_welcome_persuasion then 'Working to build an America where people of all backgrounds are welcomed' end as fav_poli_issue
+
+,case
+WHEN GREATEST(
+civis_2018_climate_persuasion
+,civis_2018_sexual_assault_persuasion
+,civis_2018_wall_persuasion
+,civis_2018_marijuana_persuasion
+,civis_2018_race_persuasion
+,civis_2018_lgbt_persuasion
+,civis_2018_guns_persuasion
+,civis_2018_dreamers_persuasion
+,civis_2018_military_persuasion
+,civis_2018_choice_persuasion)  =civis_2018_choice_persuasion then 'Ensuring every woman has access to safe and legal abortion services'
+WHEN GREATEST(
+civis_2018_climate_persuasion
+,civis_2018_sexual_assault_persuasion
+,civis_2018_wall_persuasion
+,civis_2018_marijuana_persuasion
+,civis_2018_race_persuasion
+,civis_2018_lgbt_persuasion
+,civis_2018_guns_persuasion
+,civis_2018_dreamers_persuasion
+,civis_2018_military_persuasion
+,civis_2018_choice_persuasion)  =civis_2018_sexual_assault_persuasion then 'Fighting to prevent sexual assault and ensure that sexual abusers face consequences'
+WHEN GREATEST(
+civis_2018_climate_persuasion
+,civis_2018_sexual_assault_persuasion
+,civis_2018_wall_persuasion
+,civis_2018_marijuana_persuasion
+,civis_2018_race_persuasion
+,civis_2018_lgbt_persuasion
+,civis_2018_guns_persuasion
+,civis_2018_dreamers_persuasion
+,civis_2018_military_persuasion
+,civis_2018_choice_persuasion)  =civis_2018_wall_persuasion then 'Fighting against an unnecessary and divisive wall on the border with Mexico'
+WHEN GREATEST(
+civis_2018_climate_persuasion
+,civis_2018_sexual_assault_persuasion
+,civis_2018_wall_persuasion
+,civis_2018_marijuana_persuasion
+,civis_2018_race_persuasion
+,civis_2018_lgbt_persuasion
+,civis_2018_guns_persuasion
+,civis_2018_dreamers_persuasion
+,civis_2018_military_persuasion
+,civis_2018_choice_persuasion)  =civis_2018_marijuana_persuasion then 'Legalizing the use of recreational marijuana'
+WHEN GREATEST(
+civis_2018_climate_persuasion
+,civis_2018_sexual_assault_persuasion
+,civis_2018_wall_persuasion
+,civis_2018_marijuana_persuasion
+,civis_2018_race_persuasion
+,civis_2018_lgbt_persuasion
+,civis_2018_guns_persuasion
+,civis_2018_dreamers_persuasion
+,civis_2018_military_persuasion
+,civis_2018_choice_persuasion)  =civis_2018_race_persuasion then 'Protecting the civil rights of racial and ethnic minorities and fighting to end discrimination'
+WHEN GREATEST(
+civis_2018_climate_persuasion
+,civis_2018_sexual_assault_persuasion
+,civis_2018_wall_persuasion
+,civis_2018_marijuana_persuasion
+,civis_2018_race_persuasion
+,civis_2018_lgbt_persuasion
+,civis_2018_guns_persuasion
+,civis_2018_dreamers_persuasion
+,civis_2018_military_persuasion
+,civis_2018_choice_persuasion)  =civis_2018_climate_persuasion then 'Working to protect the environment against climate change while expanding the clean energy economy'
+WHEN GREATEST(
+civis_2018_climate_persuasion
+,civis_2018_sexual_assault_persuasion
+,civis_2018_wall_persuasion
+,civis_2018_marijuana_persuasion
+,civis_2018_race_persuasion
+,civis_2018_lgbt_persuasion
+,civis_2018_guns_persuasion
+,civis_2018_dreamers_persuasion
+,civis_2018_military_persuasion
+,civis_2018_choice_persuasion)  =civis_2018_lgbt_persuasion then 'Protection the civil rights of LGBT Americans and fighting to end discrimination'
+WHEN GREATEST(
+civis_2018_climate_persuasion
+,civis_2018_sexual_assault_persuasion
+,civis_2018_wall_persuasion
+,civis_2018_marijuana_persuasion
+,civis_2018_race_persuasion
+,civis_2018_lgbt_persuasion
+,civis_2018_guns_persuasion
+,civis_2018_dreamers_persuasion
+,civis_2018_military_persuasion
+,civis_2018_choice_persuasion)  =civis_2018_guns_persuasion then 'Support common sense gun safety measures like universal background checks for gun sales and banning the sale of high capacity ammunition cartridges for semi-automatic weapons'
+WHEN GREATEST(
+civis_2018_climate_persuasion
+,civis_2018_sexual_assault_persuasion
+,civis_2018_wall_persuasion
+,civis_2018_marijuana_persuasion
+,civis_2018_race_persuasion
+,civis_2018_lgbt_persuasion
+,civis_2018_guns_persuasion
+,civis_2018_dreamers_persuasion
+,civis_2018_military_persuasion
+,civis_2018_choice_persuasion)  =civis_2018_dreamers_persuasion then 'Fighting to protect DREAMers, immigrant children who were brought to this country illegally as children'
+WHEN GREATEST(
+civis_2018_climate_persuasion
+,civis_2018_sexual_assault_persuasion
+,civis_2018_wall_persuasion
+,civis_2018_marijuana_persuasion
+,civis_2018_race_persuasion
+,civis_2018_lgbt_persuasion
+,civis_2018_guns_persuasion
+,civis_2018_dreamers_persuasion
+,civis_2018_military_persuasion
+,civis_2018_choice_persuasion)  =civis_2018_military_persuasion then 'Investing in the military and defense to keep America safe from terrorism'
+end as fav_cultural_issue
+
+from
+phoenix_scores.all_scores_2018
