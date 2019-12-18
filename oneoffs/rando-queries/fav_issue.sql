@@ -1,6 +1,7 @@
 
 select 
-case when greatest(
+person_id
+,case when greatest(
 civis_2018_cultural_persuasion,
 civis_2018_economic_persuasion,
 civis_2018_political_persuasion) =civis_2018_cultural_persuasion then 'Cultural'
