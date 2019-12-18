@@ -9,9 +9,8 @@ truncate bernie_data_commons.rainbow_modeling_frame;
 insert into bernie_data_commons.rainbow_modeling_frame
 --distkey(person_id)
 --sortkey(person_id)
-as (
-  
-select p.person_id
+--as 
+(select p.person_id
   ,x.jsonid
   ,p.state_code
   ,p.census_block_group_2010
