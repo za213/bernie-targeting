@@ -43,6 +43,3 @@ LEFT JOIN
 WHERE RANDOM() < .3
 LIMIT 250000)
 ;
-
-case when n_donations  > 1 then 1 else 0 end as donor 
-,case when lifetime_value >= 27 then 1 else 0 end as donor_27plus 
