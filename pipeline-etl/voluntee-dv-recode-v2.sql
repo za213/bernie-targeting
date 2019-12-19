@@ -36,7 +36,7 @@ LEFT JOIN
                               
 	sum(case when ec.title ilike '%Canvass%'
 	or ec.title ilike '%Bernie on the Ballot%'
-	or ec.title ilike '%Bernie-Journey%' then 1 else 0 end) as cavasser
+	or ec.title ilike '%Bernie-Journey%' then 1 else 0 end) as canvasser
 	
 	,sum(case when ec.title ilike '%Volunteer Training%'
 	or ec.title ilike '%Plan to Win Party%'
