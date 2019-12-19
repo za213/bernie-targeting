@@ -5,7 +5,7 @@ create temp table action_pop AS
 	   WHEN attendee = 1 THEN 1
        ELSE 0 END AS attendee_host_ever
 , CASE WHEN attendee = 1 THEN 1 ELSE 0 END AS attendee_ever
-, CASE when n_donations  > 1 then 1 else 0 end as donor_ever
+, CASE when n_donations  > 0 then 1 else 0 end as donor_ever
 , CASE when lifetime_value >= 27 then 1 else 0 end as donor_27plus_ever
 , CASE when n_events_attended > 0 then 1 else 0 end as eventattend_ever
 , CASE when  n_event_signups > 0 then 1 else 0 end as eventsignup_ever
@@ -76,5 +76,5 @@ sortkey(person_id) AS
   and reg_record_merged = false 
   and reg_on_current_file = true 
   and reg_voter_flag = true
-  limit 300000)
+  limit 500000)
   );
