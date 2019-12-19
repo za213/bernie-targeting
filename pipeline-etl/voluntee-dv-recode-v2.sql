@@ -3,9 +3,17 @@ create temp table action_pop AS
  p.person_id 
 , CASE WHEN host = 1 THEN 1 
 	   WHEN attendee = 1 THEN 1
-       ELSE 0 END AS attendee_host_ever
-, CASE WHEN attendee = 1 THEN 1 ELSE 0 END AS attendee_ever
-, CASE WHEN rally_attendee = 1 THEN 1 ELSE 0 END AS rally_attendee_ever
+       ELSE 0 END AS attendee_or_host
+, CASE WHEN attendee = 1 THEN 1 ELSE 0 END AS attendee
+, case when kickoff_party > 0 then 1 else 0 end as kickoff_party_attendee
+, case when canvasser > 0 then 1 else 0 end as canvasser_attendee 
+, case when phonebank > 0 then 1 else 0 end as phonebank_attendee
+, case when rally_barnstorm_event > 0 then 1 else 0 end as rally_barnstorm_attendee
+, case when rally_barnstorm_event > 0 then 1 
+ 	when kickoff_party_attendee > 0 then 1
+ else 0 end as kickoff_party_rally_barnstorm_attendee
+, case when canvasser > 0 then 1 
+ 	when phonebank > 0 then 1 else 0 end as canvasser_phonebank_attendee
 , CASE when n_donations  > 0 then 1 else 0 end as donor_ever
 , CASE when lifetime_value >= 27 then 1 else 0 end as donor_27plus_ever
 FROM bernie_jshuman.donor_basetable base
@@ -17,22 +25,9 @@ LEFT JOIN
         JOIN ak_bernie.core_eventcreateaction eca ON ca.id = eca.action_ptr_id
         JOIN ak_bernie.events_event ee ON eca.event_id = ee.id
         JOIN ak_bernie.events_campaign ec ON ee.campaign_id = ec.id
-        WHERE TRIM(ec.title) <> 'Event with Bernie Sanders'
     ) hosts ON hosts.user_id = base.user_id
 LEFT JOIN 
-    (
-        SELECT DISTINCT ca.user_id, 1 as attendee
-        FROM ak_bernie.core_action ca
-        JOIN ak_bernie.core_eventsignupaction ces ON ces.action_ptr_id = ca.id
-        JOIN ak_bernie.events_eventsignup es ON es.id = ces.signup_id
-        JOIN ak_bernie.events_event ee ON es.event_id = ee.id
-        JOIN ak_bernie.events_campaign ec ON ee.campaign_id = ec.id
-        WHERE TRIM(ec.title) <> 'Event with Bernie Sanders'
-        AND es.role = 'attendee'
-    ) attendees ON attendees.user_id = base.user_id
- LEFT JOIN 
-    ( 
-    	SELECT ca.user_id, 1 as attendee,
+    (SELECT ca.user_id, 1 as attendee,
                               
 	sum(case when ec.title ilike '%Canvass%'
 	or ec.title ilike '%Bernie on the Ballot%'
@@ -66,12 +61,8 @@ LEFT JOIN
 	JOIN ak_bernie.events_eventsignup es ON es.id = ces.signup_id
 	JOIN ak_bernie.events_event ee ON es.event_id = ee.id
 	JOIN ak_bernie.events_campaign ec ON ee.campaign_id = ec.id
-	where es.role = 'attendee' group by 1,2 ) attendees ON rally_attendees.user_id = base.user_id
-WHERE 
-  (lifetime_value > 0 
-or n_donations > 0
-or host > 0 
-or attendee > 0));
+	where es.role = 'attendee' group by 1,2 ) attendees ON attendees.user_id = base.user_id
+WHERE (lifetime_value > 0 or n_donations > 0 or host > 0 or attendee > 0));
 
 DROP TABLE IF EXISTS bernie_nmarchio2.action_pop_dvs CASCADE;
 CREATE TABLE bernie_nmarchio2.action_pop_dvs 
