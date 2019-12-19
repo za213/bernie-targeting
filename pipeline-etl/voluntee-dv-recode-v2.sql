@@ -71,10 +71,10 @@ sortkey(person_id) AS
   ,0 as action_ever
   from phoenix_analytics.person p
   where p.person_id not in (select distinct person_id from action_pop)
-  and random() < .05
+  and random() < .1
   and is_deceased = false 
   and reg_record_merged = false 
   and reg_on_current_file = true 
   and reg_voter_flag = true
-  limit 500000)
+  limit 1000000)
   );
