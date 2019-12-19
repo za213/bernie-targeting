@@ -32,20 +32,46 @@ LEFT JOIN
     ) attendees ON attendees.user_id = base.user_id
  LEFT JOIN 
     ( 
-    	SELECT DISTINCT ca.user_id, 1 as rally_attendee
-        FROM ak_bernie.core_action ca
-        JOIN ak_bernie.core_eventsignupaction ces ON ces.action_ptr_id = ca.id
-        JOIN ak_bernie.events_eventsignup es ON es.id = ces.signup_id
-        JOIN ak_bernie.events_event ee ON es.event_id = ee.id
-        JOIN ak_bernie.events_campaign ec ON ee.campaign_id = ec.id
-        WHERE TRIM(ec.title) = 'Event with Bernie Sanders'
-        AND es.role = 'attendee') rally_attendees ON rally_attendees.user_id = base.user_id
+    	SELECT ca.user_id, 1 as attendee,
+                              
+	sum(case when ec.title ilike '%Canvass%'
+	or ec.title ilike '%Bernie on the Ballot%'
+	or ec.title ilike '%Bernie-Journey%' then 1 else 0 end) as cavasser
+	
+	,sum(case when ec.title ilike '%Volunteer Training%'
+	or ec.title ilike '%Plan to Win Party%'
+	or ec.title ilike '%House Party%'
+	or ec.title ilike '%Debate Watch Party%'
+	or ec.title ilike '%Organizing Kickoff%' 
+	or ec.title ilike '%Office Opening%' then 1 else 0 end) as kickoff_party
+	
+	,sum(case when ec.title ilike '%Phonebank%'
+	or ec.title ilike '%Call for Bernie%'
+	or ec.title ilike '%Friend-to-Friend%'
+	or ec.title ilike '%Postcards for Bernie%' then 1 else 0 end) as phonebank
+	
+	,sum(case when ec.title ilike '%Solidarity Event%'
+	or ec.title ilike '%Event with Bernie Sanders%'
+	or ec.title ilike '%Bernie 2020 Event%'
+	or ec.title ilike '%Bernie 2020%'
+	or ec.title ilike '%Bernie Town Hall%'
+	or ec.title ilike '%Bernie Rally%'
+	or ec.title ilike '%Official Events%'
+	or ec.title ilike '%Rally%'
+	or ec.title ilike '%Get Out The Vote for %'
+	or ec.title ilike '%Barnstorm%' then 1 else 0 end) as rally_barnstorm_event
+                                       
+	FROM ak_bernie.core_action ca
+	JOIN ak_bernie.core_eventsignupaction ces ON ces.action_ptr_id = ca.id
+	JOIN ak_bernie.events_eventsignup es ON es.id = ces.signup_id
+	JOIN ak_bernie.events_event ee ON es.event_id = ee.id
+	JOIN ak_bernie.events_campaign ec ON ee.campaign_id = ec.id
+	where es.role = 'attendee' group by 1,2 ) attendees ON rally_attendees.user_id = base.user_id
 WHERE 
   (lifetime_value > 0 
 or n_donations > 0
 or host > 0 
-or attendee > 0
-or rally_attendee > 0));
+or attendee > 0));
 
 DROP TABLE IF EXISTS bernie_nmarchio2.action_pop_dvs CASCADE;
 CREATE TABLE bernie_nmarchio2.action_pop_dvs 
