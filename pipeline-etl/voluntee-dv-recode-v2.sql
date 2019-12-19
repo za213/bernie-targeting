@@ -57,8 +57,7 @@ sortkey(person_id) AS
                       ,donor_ever
                       ,donor_27plus_ever
                       ,eventattend_ever
-                      ,eventsignup_ever
-                      ,action_ever) > 0 then 1 else 0 end as action_ever
+                      ,eventsignup_ever) > 0 then 1 else 0 end as action_ever
   from action_pop)
  union all
  (select 
