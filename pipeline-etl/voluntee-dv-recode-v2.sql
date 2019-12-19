@@ -6,6 +6,9 @@ CREATE TABLE bernie_nmarchio2.volunteer_dvs distkey(person_id) sortkey(person_id
        ELSE 0 END AS attendee_host_ever
 , CASE WHEN attendees.user_id IS NOT NULL THEN 1 ELSE 0 END AS attendee_ever
 , CASE WHEN event.user_id IS NOT NULL THEN 1 ELSE 0 END as event_ever
+,case when n_donations  > 1 then 1 else 0 end as donor_ever
+,case when lifetime_value >= 27 then 1 else 0 end as donor_27plus_ever
+
 FROM bernie_jshuman.donor_basetable base
 LEFT JOIN phoenix_analytics.person p ON p.person_id = base.person_id
 LEFT JOIN 
@@ -35,17 +38,11 @@ LEFT JOIN
         JOIN ak_bernie.core_eventcreateaction eca ON ca.id = eca.action_ptr_id
         JOIN ak_bernie.events_event ee ON eca.event_id = ee.id
         JOIN ak_bernie.events_campaign ec ON ee.campaign_id = ec.id
-        WHERE TRIM(ec.title) <> 'Event with Bernie Sanders'
-    ) hosts ON hosts.user_id = base.user_id 
- LEFT JOIN 
-    (
-        SELECT DISTINCT ca.user_id
-        FROM ak_bernie.core_action ca
-        JOIN ak_bernie.core_eventcreateaction eca ON ca.id = eca.action_ptr_id
-        JOIN ak_bernie.events_event ee ON eca.event_id = ee.id
-        JOIN ak_bernie.events_campaign ec ON ee.campaign_id = ec.id
         WHERE TRIM(ec.title) = 'Event with Bernie Sanders'
     ) event ON event.user_id = base.user_id 
 WHERE RANDOM() < .3
 LIMIT 250000)
 ;
+
+case when n_donations  > 1 then 1 else 0 end as donor 
+,case when lifetime_value >= 27 then 1 else 0 end as donor_27plus 
