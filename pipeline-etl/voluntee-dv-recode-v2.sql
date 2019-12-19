@@ -1,23 +1,18 @@
 create temp table action_pop AS
 (SELECT 
  p.person_id 
-, CASE WHEN host = 1 THEN 1 
-	   WHEN attendee = 1 THEN 1
-       ELSE 0 END AS attendee_or_host
+, CASE WHEN host = 1 THEN 1 WHEN attendee = 1 THEN 1 ELSE 0 END AS attendee_or_host
 , CASE WHEN attendee = 1 THEN 1 ELSE 0 END AS attendee
 , case when kickoff_party > 0 then 1 else 0 end as kickoff_party_attendee
 , case when canvasser > 0 then 1 else 0 end as canvasser_attendee 
 , case when phonebank > 0 then 1 else 0 end as phonebank_attendee
 , case when rally_barnstorm_event > 0 then 1 else 0 end as rally_barnstorm_attendee
-, case when rally_barnstorm_event > 0 then 1 
- 	when kickoff_party_attendee > 0 then 1
- else 0 end as kickoff_party_rally_barnstorm_attendee
-, case when canvasser > 0 then 1 
- 	when phonebank > 0 then 1 else 0 end as canvasser_phonebank_attendee
-, CASE when n_donations  > 0 then 1 else 0 end as donor_ever
-, CASE when lifetime_value >= 27 then 1 else 0 end as donor_27plus_ever
+, case when rally_barnstorm_event > 0 then 1 when kickoff_party_attendee > 0 then 1 else 0 end as kickoff_party_rally_barnstorm_attendee
+, case when canvasser > 0 then 1 when phonebank > 0 then 1 else 0 end as canvasser_phonebank_attendee
+, CASE when n_donations  > 0 then 1 else 0 end as donor_1plus_times
+, CASE when lifetime_value >= 27 then 1 else 0 end as donor_27plus_usd
 FROM bernie_jshuman.donor_basetable base
-LEFT JOIN phoenix_analytics.person p ON p.person_id = base.person_id
+INNER JOIN phoenix_analytics.person p ON p.person_id = base.person_id
 LEFT JOIN 
     (
         SELECT DISTINCT ca.user_id, 1 as host 
@@ -71,27 +66,41 @@ sortkey(person_id) AS
 (select * from
  (select 
    person_id 
-  ,attendee_host_ever
-  ,attendee_ever
-  ,donor_ever
-  ,donor_27plus_ever
-  ,rally_attendee_ever
-  ,case when greatest(attendee_host_ever
-                      ,attendee_ever
-                      ,donor_ever
-                      ,donor_27plus_ever
-                      ,rally_attendee_ever) > 0 then 1 else 0 end as action_ever
+,attendee_or_host
+,attendee
+,kickoff_party_attendee
+,canvasser_attendee 
+,phonebank_attendee
+,rally_barnstorm_attendee
+,kickoff_party_rally_barnstorm_attendee
+,canvasser_phonebank_attendee
+,donor_1plus_times
+,donor_27plus_usd
+  ,case when greatest(attendee_or_host
+,attendee
+,kickoff_party_attendee
+,canvasser_attendee 
+,phonebank_attendee
+,rally_barnstorm_attendee
+,kickoff_party_rally_barnstorm_attendee
+,canvasser_phonebank_attendee
+,donor_1plus_times
+,donor_27plus_usd) > 0 then 1 else 0 end as bernie_action
   from action_pop)
  union all
  (select 
    p.person_id 
-  ,0 AS attendee_host_ever
-  ,0 AS attendee_ever
-  ,0 as donor_ever
-  ,0 as donor_27plus_ever
-  ,0 as eventattend_ever
-  ,0 as eventsignup_ever
-  ,0 as action_ever
+,0 as attendee_or_host
+,0 as attendee
+,0 as kickoff_party_attendee
+,0 as canvasser_attendee 
+,0 as phonebank_attendee
+,0 as rally_barnstorm_attendee
+,0 as kickoff_party_rally_barnstorm_attendee
+,0 as canvasser_phonebank_attendee
+,0 as donor_1plus_times
+,0 as donor_27plus_usd
+,0 as bernie_action 
   from phoenix_analytics.person p
   where p.person_id not in (select distinct person_id from action_pop)
   and random() < .1
