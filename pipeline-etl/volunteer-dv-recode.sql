@@ -52,7 +52,7 @@ CREATE TABLE bernie_nmarchio2.vol_refresh_dvs
 	GROUP BY 1, 2, 3
 	) activist_codes using (person_id) WHERE person_id IS NOT NULL
 	);
-
+--select distinct activist_code_type from phoenix_demssanders20_vansync.activist_codes
 /*
 -- Combine volunteer DVs with random sample
     SELECT person_id,
