@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS bernie_nmarchio2.volunteer_dvs CASCADE;
-CREATE TABLE bernie_nmarchio2.volunteer_dvs distkey(user_id) sortkey(user_id) AS
+CREATE TABLE bernie_nmarchio2.volunteer_dvs distkey(person_id) sortkey(person_id) AS
 (SELECT base.*
 , CASE WHEN hosts.user_id IS NOT NULL THEN 1 
 	   WHEN attendees.user_id IS NOT NULL THEN 1
