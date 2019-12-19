@@ -28,6 +28,6 @@ LEFT JOIN
         AND es.role = 'attendee'
     ) attendees ON attendees.user_id = base.user_id
 JOIN bernie_jshuman.fifteen_day_actives fda on base.user_id = fda.user_id
-ORDER BY RANDOM()
+WHERE RANDOM() < .3
 LIMIT 250000)
 ;
