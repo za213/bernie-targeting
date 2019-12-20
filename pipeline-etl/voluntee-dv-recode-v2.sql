@@ -86,6 +86,7 @@ sortkey(person_id) AS
 ,canvasser_phonebank_attendee
 ,donor_1plus_times
 ,donor_27plus_usd) > 0 then 1 else 0 end as bernie_action
+,0 as nontarget_group 
   from action_pop)
  union all
  (select 
@@ -101,6 +102,7 @@ sortkey(person_id) AS
 ,0 as donor_1plus_times
 ,0 as donor_27plus_usd
 ,0 as bernie_action 
+,1 as nontarget_group 
   from phoenix_analytics.person p
   where p.person_id not in (select distinct person_id from action_pop)
   and random() < .1
