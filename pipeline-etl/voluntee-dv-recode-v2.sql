@@ -1,3 +1,5 @@
+
+
 create temp table action_pop AS
 (SELECT 
   person_id 
@@ -116,7 +118,10 @@ sortkey(person_id) AS
 ,0 as bernie_action 
 ,1 as nontarget_group 
   from phoenix_analytics.person p
-  where p.person_id not in (select distinct person_id from action_pop)
+  LEFT JOIN 
+  (select person_id from action_pop) ap 
+  ON p.person_id = ap.person_id
+  where ap.person_id is null
   and random() < .1
   and is_deceased = false 
   and reg_record_merged = false 
