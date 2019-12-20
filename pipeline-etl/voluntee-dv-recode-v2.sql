@@ -70,7 +70,7 @@ LEFT JOIN
 	JOIN ak_bernie.events_event ee ON es.event_id = ee.id
 	JOIN ak_bernie.events_campaign ec ON ee.campaign_id = ec.id
 	where es.role = 'attendee' group by 1,2 ) attendees ON attendees.user_id = base.user_id 
-WHERE (lifetime_value > 0 or n_donations > 0 or host > 0 or attendee > 0 and p.person_id is not null)  
+WHERE (lifetime_value > 0 or n_donations > 0 or host > 0 or attendee > 0 and p.person_id is not null and is_deceased = false and reg_record_merged = false and reg_on_current_file = true and reg_voter_flag = true)  
 group by 1));
 
 DROP TABLE IF EXISTS bernie_nmarchio2.action_pop_dvs CASCADE;
