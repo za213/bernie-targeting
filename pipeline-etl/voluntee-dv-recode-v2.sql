@@ -1,16 +1,27 @@
 create temp table action_pop AS
 (SELECT 
- p.person_id 
-, max(CASE WHEN host = 1 THEN 1 WHEN attendee = 1 THEN 1 ELSE 0 END) AS attendee_or_host
-, max(CASE WHEN attendee = 1 THEN 1 ELSE 0 END) AS attendee
-, max(case when kickoff_party > 0 then 1 else 0 end) as kickoff_party_attendee
-, max(case when canvasser > 0 then 1 else 0 end) as canvasser_attendee 
-, max(case when phonebank > 0 then 1 else 0 end) as phonebank_attendee
-, max(case when rally_barnstorm_event > 0 then 1 else 0 end) as rally_barnstorm_attendee
-, max(case when rally_barnstorm_event > 0 then 1 when kickoff_party_attendee > 0 then 1 else 0 end) as kickoff_party_rally_barnstorm_attendee
-, max(case when canvasser > 0 then 1 when phonebank > 0 then 1 else 0 end) as canvasser_phonebank_attendee
-, max(CASE when n_donations  > 0 then 1 else 0 end) as donor_1plus_times
-, max(CASE when lifetime_value >= 27 then 1 else 0 end) as donor_27plus_usd
+  person_id 
+, CASE WHEN host = 1 THEN 1 WHEN attendee = 1 THEN 1 ELSE 0 END AS attendee_or_host
+, CASE WHEN attendee = 1 THEN 1 ELSE 0 END AS attendee
+, case when kickoff_party > 0 then 1 else 0 end as kickoff_party_attendee
+, case when canvasser > 0 then 1 else 0 end as canvasser_attendee 
+, case when phonebank > 0 then 1 else 0 end as phonebank_attendee
+, case when rally_barnstorm_event > 0 then 1 else 0 end as rally_barnstorm_attendee
+, case when rally_barnstorm_event > 0 then 1 when kickoff_party_attendee > 0 then 1 else 0 end as kickoff_party_rally_barnstorm_attendee
+, case when canvasser > 0 then 1 when phonebank > 0 then 1 else 0 end as canvasser_phonebank_attendee
+, CASE when n_donations  > 0 then 1 else 0 end as donor_1plus_times
+, CASE when lifetime_value >= 27 then 1 else 0 end as donor_27plus_usd 
+from 
+(select 
+p.person_id
+,sum(host) as host
+,sum(attendee) as attendee
+,sum(kickoff_party) as kickoff_party
+,sum(canvasser) as canvasser
+,sum(phonebank ) as phonebank
+,sum(rally_barnstorm_event) as rally_barnstorm_event
+,sum(n_donations) as n_donations
+,sum(lifetime_value) as lifetime_value
 FROM bernie_jshuman.donor_basetable base
 INNER JOIN phoenix_analytics.person p ON p.person_id = base.person_id
 LEFT JOIN 
@@ -56,8 +67,9 @@ LEFT JOIN
 	JOIN ak_bernie.events_eventsignup es ON es.id = ces.signup_id
 	JOIN ak_bernie.events_event ee ON es.event_id = ee.id
 	JOIN ak_bernie.events_campaign ec ON ee.campaign_id = ec.id
-	where es.role = 'attendee' group by 1,2 ) attendees ON attendees.user_id = base.user_id
-WHERE (lifetime_value > 0 or n_donations > 0 or host > 0 or attendee > 0) group by 1);
+	where es.role = 'attendee' group by 1,2 ) attendees ON attendees.user_id = base.user_id 
+WHERE (lifetime_value > 0 or n_donations > 0 or host > 0 or attendee > 0 and p.person_id is not null)  
+group by 1));
 
 DROP TABLE IF EXISTS bernie_nmarchio2.action_pop_dvs CASCADE;
 CREATE TABLE bernie_nmarchio2.action_pop_dvs 
