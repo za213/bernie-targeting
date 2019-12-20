@@ -924,9 +924,10 @@ left join phoenix_consumer.tsmart_consumer tc using(person_id)
 left join bernie_nmarchio2.geo_county_covariates cty on left(p.census_block_group_2010,5) = lpad(cty.county_fip_id,5,'00000')
 left join bernie_nmarchio2.geo_tract_covariates trct on left(p.census_block_group_2010,11) = lpad(trct.tract_id,11,'00000000000')
 left join bernie_nmarchio2.geo_block_covariates blck on p.census_block_group_2010 = lpad(blck.block_group_id, 12,'000000000000') 
+left join phoenix_census.acs_current acs on p.census_block_group_2010 = acs.block_group_id 
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
-left join phoenix_census.acs_current acs on p.census_block_group_2010 = acs.block_group_id 
+
 --left join bernie_nmarchio2.primaryreturns16 pri on p.county_fips = right(pri.census_county_fips,'3') and p.state_fips = left(lpad(pri.census_county_fips,5,'000'),2)
 
   where p.is_deceased = false -- is alive
