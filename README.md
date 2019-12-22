@@ -1,6 +1,6 @@
 # Organizing Modeling Workflows
 
-## Platform workflow links:
+## Platform Links:
 * [Project Folder](https://platform.civisanalytics.com/spa/#/projects/129243)
 
 ## Modeling Frame:
