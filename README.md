@@ -24,3 +24,7 @@
 * Validation metrics: `bernie_nmarchio2.spoke_validation_20191221`
 
 ## Analytics
+
+
+## Developers
+Organizing Analytics Team. Nico Marchio, Data Science Engineer.
