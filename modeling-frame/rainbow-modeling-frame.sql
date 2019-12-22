@@ -1,4 +1,5 @@
--- Data Dictionary: https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit?usp=sharing
+-- Data dictionary: https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit?usp=sharing
+-- Feature list and dictionary import: https://platform.civisanalytics.com/spa/#/imports/53801807
 
 set query_group to 'importers';
 set wlm_query_slot_count to 3;
