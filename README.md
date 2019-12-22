@@ -8,7 +8,7 @@
 * Script to create [modeling frame](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql)
 * [Data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) 
 * Raw data [archived on S3](https://github.com/Bernie-2020/bernie-targeting/blob/master/s3-files/modeling-frame-source-data.R) and [dev scripts for imputating missing data](https://github.com/Bernie-2020/bernie-targeting/tree/master/modeling-frame/dev)
-* Dependencies: <sup>`phoenix_analytics.person`, `phoenix_analytics.person_votes`, `phoenix_scores.all_scores_2020`, `phoenix_scores.all_scores_2018`, `phoenix_scores.all_scores_2016`, `phoenix_consumer.tsmart_consumer`, `bernie_nmarchio2.geo_county_covariates`, `bernie_nmarchio2.geo_tract_covariates`, `bernie_nmarchio2.geo_block_covariates`, `phoenix_census.acs_current`, `bernie_data_commons.master_xwalk_dnc`, `l2.demographics`</sup> 
+* Dependencies: <sup>```phoenix_analytics.person, phoenix_analytics.person_votes, phoenix_scores.all_scores_2020, phoenix_scores.all_scores_2018, phoenix_scores.all_scores_2016, phoenix_consumer.tsmart_consumer, bernie_nmarchio2.geo_county_covariates, bernie_nmarchio2.geo_tract_covariates, bernie_nmarchio2.geo_block_covariates, phoenix_census.acs_current, bernie_data_commons.master_xwalk_dnc, l2.demographics```</sup> 
 
 ## Modeling Pipelines:
 
