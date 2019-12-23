@@ -19,7 +19,7 @@
 
 | Score column | Description | 
 | :--- | :--- | 
-| `attendee` | Probability to be an attendee at any kind of event |
+| `attendee` | Probability to be an attendee of any kind of event |
 | `kickoff_party_attendee` | Probability to attend a kickoff party |
 | `canvasser_attendee` | Probability to be a canvass volunteer |
 | `phonebank_attendee` | Probability to be a phonebank volunteer |
