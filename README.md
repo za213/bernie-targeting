@@ -9,6 +9,9 @@
 * Table with three default feature lists for modeling `bernie_nmarchio2.feature_list` and [import script](https://platform.civisanalytics.com/spa/#/imports/53801807)
 * County, tract, and block group features: <small>```bernie_nmarchio2.geo_county_covariates, bernie_nmarchio2.geo_tract_covariates, bernie_nmarchio2.geo_block_covariates```</small> 
 * Raw data [archived on S3](https://github.com/Bernie-2020/bernie-targeting/blob/master/s3-files/modeling-frame-source-data.R) and [dev scripts for cleaning and imputing missing data](https://github.com/Bernie-2020/bernie-targeting/tree/master/modeling-frame/dev)
+* Data projects: 
+  * Add covariates from `phoenix_electionbase.ebase_census_blocks`
+  * Add 
 
 
 ## Modeling Pipelines:
