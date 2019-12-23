@@ -16,19 +16,20 @@
 * [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/voluntee-dv-recode-v2.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/volunteer-modeling-workflow-20191219.ipynb)
 * Scores table: `bernie_nmarchio2.actionpop_output_20191220` 
 * Validation metrics: `bernie_nmarchio2.actionpop_validation_20191220`
-
+ 
 | Score column | Description | 
 | --- | --- | 
-| `attendee` | Prob of having an attendee role in AK |
-| `kickoff_party_attendee` | Prob of attending a kickoff party |
-| `canvasser_attendee` | Prob of volunteering to canvass |
-| `phonebank_attendee` | Prob of volunteering to phonebank |
-| `rally_barnstorm_attendee` | Prob of attending a rally or barnstorm event |
-| `kickoff_party_rally_barnstorm_attendee` | Prob of attending a kickoff party, rally, or barnstorm event |
-| `canvasser_phonebank_attendee` | Prob of volunteering to canvass or phonebank |
-| `donor_1plus_times` | Prob of donating at least once |
-| `donor_27plus_usd` | Prob of donating more than $27 |
-| `bernie_action` | Prob of taking any of the above actions |
+| `attendee` | Probability to be an attendee of any kind of event |
+| `kickoff_party_attendee` | Probability to attend a kickoff party |
+| `canvasser_attendee` | Probability to volunteer to canvass |
+| `phonebank_attendee` | Probability to volunteer to phonebank |
+| `rally_barnstorm_attendee` | Probability to attend a rally or barnstorm event |
+| `kickoff_party_rally_barnstorm_attendee` | Probability to attend a kickoff party, rally, or barnstorm event |
+| `canvasser_phonebank_attendee` | Probability to volunteer to canvass or phonebank |
+| `donor_1plus_times` | Probability to donate at least once |
+| `donor_27plus_usd` | Probability to donate more than $27 |
+| `bernie_action` | Probability to take any of the above actions |
+*Note* `_100` represent percentiled scores where the top decile is all values >= 90 
 
 #### Spoke Persuasion Models:
 * [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/spoke-dv-recode.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/spoke-modeling-workflow-20191221.ipynb)
@@ -37,9 +38,10 @@
 
 | Score column | Description |
 | --- | --- |
-| `spoke_support_1box` | Prob of 1 support ID |
-| `spoke_persuasion_1plus` | Prob of moving 1 or more in favor of Bernie |
-| `spoke_persuasion_1minus` | Prob of moving 1 or more against Bernie |
+| `spoke_support_1box` | Probability to respond with 1 support |
+| `spoke_persuasion_1plus` | Probability of moving 1 or more in favor of Bernie |
+| `spoke_persuasion_1minus` | Probability of moving 1 or more against Bernie |
+*Note* `_100` represent percentiled scores where the top decile is all values >= 90 
 
 ## Analytics
 
