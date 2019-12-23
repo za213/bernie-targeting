@@ -3,16 +3,6 @@
 ## Platform Links:
 * [Project Folder](https://platform.civisanalytics.com/spa/#/projects/129243)
 
-|             |          Grouping           ||
-First Header  | Second Header | Third Header |
- ------------ | :-----------: | -----------: |
-Content       |          *Long Cell*        ||
-Content       |   **Cell**    |         Cell |
-
-New section   |     More      |         Data |
-And more      | With an escaped '\|'         ||  
-
-
 ## Modeling Frame:
 * Platform table: `bernie_data_commons.rainbow_modeling_frame`
 * Script to create [modeling frame](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) of features
