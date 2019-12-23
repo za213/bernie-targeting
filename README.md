@@ -2,6 +2,7 @@
 
 ## Platform Links:
 * [Project Folder](https://platform.civisanalytics.com/spa/#/projects/129243)
+* To do: YAML workflow, parameterized pipeline scripts
 
 ## Modeling Frame:
 * Platform table: `bernie_data_commons.rainbow_modeling_frame`
