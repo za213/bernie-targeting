@@ -1,3 +1,13 @@
+SELECT cc.person_id::VARCHAR,
+		max(CASE WHEN srt.surveyresponsetext = 'Volunteer Yes' THEN 1 ELSE 0 END) AS vol_yes
+FROM contacts.contactscontact cc
+JOIN contacts.surveyresponses sr ON cc.contactcontact_id = sr.contactcontact_id
+JOIN contacts.surveyquestiontext sqt ON sqt.surveyquestionid = sr.surveyquestionid
+JOIN contacts.surveyresponsetext srt ON srt.surveyresponseid = sr.surveyresponseid
+WHERE sqt.surveyquestiontext ilike '%volunteer%'
+GROUP BY 1;
+
+
 select
 person_id
 ,sum(case when 
