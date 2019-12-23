@@ -17,10 +17,29 @@
 * Scores table: `bernie_nmarchio2.actionpop_output_20191220` 
 * Validation metrics: `bernie_nmarchio2.actionpop_validation_20191220`
 
+| Score column | Description | 
+| --- | --- | 
+| `attendee` | Prob of having an attendee role in AK |
+| `kickoff_party_attendee` | Prob of attending a kickoff party |
+| `canvasser_attendee` | Prob of volunteering to canvass |
+| `phonebank_attendee` | Prob of volunteering to phonebank |
+| `rally_barnstorm_attendee` | Prob of attending a rally or barnstorm event |
+| `kickoff_party_rally_barnstorm_attendee` | Prob of attending a kickoff party, rally, or barnstorm event |
+| `canvasser_phonebank_attendee` | Prob of volunteering to canvass or phonebank |
+| `donor_1plus_times` | Prob of donating at least once |
+| `donor_27plus_usd` | Prob of donating more than $27 |
+| `bernie_action` | Prob of taking any of the above actions |
+
 #### Spoke Persuasion Models:
 * [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/spoke-dv-recode.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/spoke-modeling-workflow-20191221.ipynb)
 * Scores table: `bernie_nmarchio2.spoke_output_20191221` 
 * Validation metrics: `bernie_nmarchio2.spoke_validation_20191221`
+
+| Score column | Description |
+| --- | --- |
+| `spoke_support_1box` | Prob of 1 support ID |
+| `spoke_persuasion_1plus` | Prob of moving 1 or more in favor of Bernie |
+| `spoke_persuasion_1minus` | Prob of moving 1 or more against Bernie |
 
 ## Analytics
 
