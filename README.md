@@ -47,7 +47,9 @@
 | `spoke_persuasion_1minus` | Probability of moving 1 or more against Bernie |
  
 ## Analytics
-
+* Under construction
+  * Crosstab generation script and visualizations
+  * Tools to assist with list cutting
 
 ## Developers
 Organizing Analytics Team. Nico Marchio, Data Science Engineer.
