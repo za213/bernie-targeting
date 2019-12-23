@@ -1,3 +1,4 @@
+
 library(civis)
 library(tidyverse)
 library(ggplot2)
@@ -28,7 +29,7 @@ demo_query <- "create temp table list_xtab as (
       
       ,rank.spoke_persuasion_1minus_100
       
-      from (select * from bernie_nmarchio2.scored_output_20191216 
+      from (select * from bernie_nmarchio2.spoke_output_20191221
             where spoke_support_1box_100 >= 50 and 
             spoke_persuasion_1plus_100 >= 80 and 
             spoke_persuasion_1minus_100 <= 50  
@@ -71,37 +72,40 @@ demo_query <- "create temp table list_xtab as (
         group by 1 
       )
       
-      and phx.state_code = 'SC'
+      and phx.state_code in ('NV','SC','IA','CA','NH')
       order by 1) a left join 
 bernie_data_commons.national_constituency_table nct using(person_id));
       
-select * from (
-(select 'Race' as demogroup, case when demo_ethnicity4way = 'A' then '4 - Asian'
+select * from 
+(
+(select state_code,'Race' as demogroup, case when demo_ethnicity4way = 'A' then '4 - Asian'
 when  demo_ethnicity4way = 'B' then '2 - Black'
 when demo_ethnicity4way = 'H' then '3 - Latinx'
-when demo_ethnicity4way = 'W' then '1 - White' end as subgroup, count(*) from list_xtab group by 1,2)
+when demo_ethnicity4way = 'W' then '1 - White' end as subgroup, count(*) from list_xtab group by 1,2,3)
 union all
-(select 'Gender' as demogroup, case when gender_combined = 'M' then '2 - Men'
+(select state_code,'Gender' as demogroup, case when gender_combined = 'M' then '2 - Men'
 when gender_combined = 'F' then '1 - Women'
-else 'U' end as subgroup, count(*) from list_xtab group by 1,2)
+else 'U' end as subgroup, count(*) from list_xtab group by 1,2,3)
 union all
-(select 'Age' as demogroup, case when age_combined <= 35 then '1 - 18-35'
+(select state_code,'Age' as demogroup, case when age_combined <= 35 then '1 - 18-35'
 when age_combined >35 and age_combined <= 50 then '2 - 35-50'
 when age_combined > 50 and age_combined <= 65 then '3 - 50-65'
 when age_combined > 65 then '4 - 65+'
-else 'U' end as subgroup, count(*) from list_xtab group by 1,2)
+else 'U' end as subgroup, count(*) from list_xtab group by 1,2,3)
 union all
-(select 'Education' as demogroup, case when college_status = 'College' then '1 - College'
+(select state_code,'Education' as demogroup, case when college_status = 'College' then '1 - College'
 when college_status = 'Non-College' then '2 - Non-College'
-else 'U' end as subgroup, count(*) from list_xtab group by 1,2)) order by demogroup, subgroup;"
+else 'U' end as subgroup, count(*) from list_xtab group by 1,2,3)
+) order by state_code, demogroup, subgroup;"
 
 df <- civis::read_civis(sql(demo_query), database = 'Bernie 2020') 
 
 df_sub <- df %>% filter(subgroup != 'U') %>%
   tidyr::separate(subgroup, c("order","subgroup"), sep = " - ", extra = "merge") %>%
-  group_by(demogroup) %>%
+  group_by(state_code,demogroup) %>%
   mutate(total = sum(count))%>%
   ungroup() %>%
   mutate(share = paste0(sprintf("%.00f", round(count/total, digits = 2)*100),"%"))
+
 
 
