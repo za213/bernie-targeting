@@ -21,11 +21,11 @@
 | :--- | :--- | 
 | `attendee` | Probability to be an attendee at any kind of event |
 | `kickoff_party_attendee` | Probability to attend a kickoff party |
-| `canvasser_attendee` | Probability to volunteer to canvass |
-| `phonebank_attendee` | Probability to volunteer to phonebank |
+| `canvasser_attendee` | Probability to be a canvass volunteer |
+| `phonebank_attendee` | Probability to be a phonebank volunteer |
 | `rally_barnstorm_attendee` | Probability to attend a rally or barnstorm event |
 | `kickoff_party_rally_barnstorm_attendee` | Probability to attend a kickoff party, rally, or barnstorm event |
-| `canvasser_phonebank_attendee` | Probability to volunteer to canvass or phonebank |
+| `canvasser_phonebank_attendee` | Probability to be a canvass or phonebank volunteer |
 | `donor_1plus_times` | Probability to donate at least once |
 | `donor_27plus_usd` | Probability to donate more than $27 |
 | `bernie_action` | Probability to take any of the above actions |
@@ -37,7 +37,7 @@
 
 | Score column | Description |
 | :--- | :--- |
-| `spoke_support_1box` | Probability to respond with 1 support |
+| `spoke_support_1box` | Probability of responding with 1 support |
 | `spoke_persuasion_1plus` | Probability of moving 1 or more in favor of Bernie |
 | `spoke_persuasion_1minus` | Probability of moving 1 or more against Bernie |
  
