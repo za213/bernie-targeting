@@ -41,7 +41,7 @@
 | `spoke_support_1box` | Probability to respond with 1 support |
 | `spoke_persuasion_1plus` | Probability of moving 1 or more in favor of Bernie |
 | `spoke_persuasion_1minus` | Probability of moving 1 or more against Bernie |
-<sub> *Note* `_100` represent percentiled scores where the top decile is all values >= 90 </sub> 
+| <sub> *Note* `_100` represent percentiled scores where the top decile is all values >= 90 </sub> ||
 
 ## Analytics
 
