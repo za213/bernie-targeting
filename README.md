@@ -9,7 +9,7 @@
 * Platform table: `bernie_data_commons.rainbow_modeling_frame`
 * [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) to create modeling frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) of features
 * Table with three default feature lists for modeling `bernie_nmarchio2.feature_list` and [import script](https://platform.civisanalytics.com/spa/#/imports/53801807)
-* County, tract, and block group features: <small>```bernie_nmarchio2.geo_county_covariates, bernie_nmarchio2.geo_tract_covariates, bernie_nmarchio2.geo_block_covariates```</small> 
+* County (`bernie_nmarchio2.geo_county_covariates`), tract (`bernie_nmarchio2.geo_tract_covariates`, and block group `bernie_nmarchio2.geo_block_covariates` features
 * Raw data [archived on S3](https://github.com/Bernie-2020/bernie-targeting/blob/master/s3-files/modeling-frame-source-data.R) and [dev scripts for cleaning and imputing missing data](https://github.com/Bernie-2020/bernie-targeting/tree/master/modeling-frame/dev)
 * Data projects: 
   * Engineer features from `phoenix_electionbase.ebase_census_blocks` 
