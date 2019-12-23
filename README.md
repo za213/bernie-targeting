@@ -11,7 +11,7 @@ Content       |   **Cell**    |         Cell |
 
 New section   |     More      |         Data |
 And more      | With an escaped '\|'         ||  
-[Prototype table]
+
 
 ## Modeling Frame:
 * Platform table: `bernie_data_commons.rainbow_modeling_frame`
