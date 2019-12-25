@@ -191,19 +191,19 @@ else '6 - Other' end as party_6way
 
 ,case 
 when as20.civis_2020_partisanship >= .66 then '1 - Democrat'
-when as20.civis_2020_partisanship >= .33 and as20.civis_2020_partisanship < .66 then '2 - Moderate'
-when as20.civis_2020_partisanship < 0.33 then '3 - Republican' 
+when as20.civis_2020_partisanship > .33 and as20.civis_2020_partisanship < .66 then '2 - Moderate'
+when as20.civis_2020_partisanship <= 0.33 then '3 - Republican' 
 when tc.ts_tsmart_partisan_score >= 66 then '1 - Democrat'
-when tc.ts_tsmart_partisan_score >= 33 and tc.ts_tsmart_partisan_score < 66 then '2 - Moderate'
-when tc.ts_tsmart_partisan_score < 33 then '3 - Republican' 
+when tc.ts_tsmart_partisan_score > 33 and tc.ts_tsmart_partisan_score < 66 then '2 - Moderate'
+when tc.ts_tsmart_partisan_score <= 33 then '3 - Republican' 
 else '2 - Moderate' end as party_3way
 
 ,case
 when as20.civis_2020_ideology_liberal >= .8 then '1 - Very liberal'
 when as20.civis_2020_ideology_liberal >= .6 and as20.civis_2020_ideology_liberal < .8 then '2 - Somewhat liberal'
 when as20.civis_2020_ideology_liberal >= .4 and as20.civis_2020_ideology_liberal < .6 then '3 - Centrist'
-when as20.civis_2020_ideology_liberal >= .2 and as20.civis_2020_ideology_liberal < .4 then '4 - Somewhat conservative' 
-when as20.civis_2020_ideology_liberal < .2 then '5 - Very conservative'
+when as20.civis_2020_ideology_liberal > .2 and as20.civis_2020_ideology_liberal < .4 then '4 - Somewhat conservative' 
+when as20.civis_2020_ideology_liberal <= .2 then '5 - Very conservative'
 else '3 - Centrist' end as ideology_5way
 
 ,case 
