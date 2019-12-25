@@ -159,8 +159,9 @@ else 'O - Other' end as race_detailed_20way
 
 ,case 
 when as20.civis_2020_spanish_language_preference >= .8 then '1 - Prefers Spanish' 
-when as20.civis_2020_spanish_language_preference >= .66 and (acs.xc_16001_e_3 >= .3 or bg.pct_eng_vw_span_acs_13_17 >= .3) then '1 - Prefers Spanish' 
-when as20.civis_2020_spanish_language_preference >= .5 and (acs.xc_16001_e_3 >= .5 or bg.pct_eng_vw_span_acs_13_17 >= .5) then '1 - Prefers Spanish' 
+when as20.civis_2020_spanish_language_preference >= .6 and (acs.xc_16001_e_3 >= .4 or bg.pct_eng_vw_span_acs_13_17 >= .4) then '1 - Prefers Spanish' 
+when as20.civis_2020_spanish_language_preference >= .5 and (acs.xc_16001_e_3 >= .3 or bg.pct_eng_vw_span_acs_13_17 >= .3) then '1 - Prefers Spanish' 
+when as20.civis_2020_spanish_language_preference >= .55 then '1 - Prefers Spanish' 
 else '2 - Prefers English' end as spanish_language_2way
 
 ,case when as20.civis_2020_children_present > .3 then '1 - Child present'
