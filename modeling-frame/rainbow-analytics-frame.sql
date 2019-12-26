@@ -22,7 +22,7 @@ when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int) between 36 and 4
 when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int) between 50 and 64 then '3 - 50-64'
 when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int) >= 65 then '4 - 65+'
 else '5 - Unknown'
-end as age_bucket
+end as age_5way
 
 ,case
 when tc.tb_education_cd in (3,4) then '1 - Bachelors or higher'
