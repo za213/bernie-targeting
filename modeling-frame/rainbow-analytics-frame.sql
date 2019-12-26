@@ -1,6 +1,6 @@
+
 set query_group to 'importers';
 set wlm_query_slot_count to 3;
-
 
 drop table if exists bernie_data_commons.rainbow_analytics_frame; 
 create table bernie_data_commons.rainbow_analytics_frame
