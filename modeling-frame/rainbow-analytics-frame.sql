@@ -501,7 +501,13 @@ left join bernie_nmarchio2.geo_block_covariates bg on p.census_block_group_2010 
 left join phoenix_census.acs_current acs on p.census_block_group_2010 = acs.block_group_id 
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
-where p.is_deceased = false 
-and p.reg_record_merged = false
-and p.reg_on_current_file = true 
-and p.reg_voter_flag = true);    
+where p.is_deceased = false -- is alive
+and p.reg_record_merged = false -- removes duplicated registration addresses
+and p.reg_on_current_file = true --  voter was on the last voter file that the DNC processed and not eligible to vote in primaries
+and p.reg_voter_flag = true -- voters who are registered to vote (i.e. have a registration status of active or inactive) even if they have moved states and their new state has not updated their file to reflect this yet
+and p.state_code in ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA'));
+
+
+
+
+            
