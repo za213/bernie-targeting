@@ -10,6 +10,7 @@ as
 (select
 
 p.person_id
+,p.reg_voter_flag
 ,p.state_code
 ,left(p.census_block_group_2010,5) as county_fips
 ,p.census_block_group_2010
