@@ -17,10 +17,10 @@ p.person_id
 ,p.voting_city
     
 ,case
-when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int) between 18 and 34 then '1 - 18-34'
-when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int) between 36 and 49 then '2 - 35-49'
-when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int) between 50 and 64 then '3 - 50-64'
-when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int) >= 65 then '4 - 65+'
+when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) between 18 and 34 then '1 - 18-34'
+when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) between 36 and 49 then '2 - 35-49'
+when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) between 50 and 64 then '3 - 50-64'
+when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) >= 65 then '4 - 65+'
 else '5 - Unknown'
 end as age_5way
 
@@ -41,9 +41,9 @@ else '3 - Unknown'
 end as education_2way
 
 ,case 
-when bg.pct_college_acs_13_17 < .25 then '1 - Under 25% hold BAs'
-when bg.pct_college_acs_13_17 >= .25 and bg.pct_college_acs_13_17 < .5 then '2 - 25-50% hold BAs'
-when bg.pct_college_acs_13_17 >= .5 then '3 - 50%+ hold BAs'
+when bg.pct_college_acs_13_17 < 25 then '1 - Under 25% hold BAs'
+when bg.pct_college_acs_13_17 >= 25 and bg.pct_college_acs_13_17 < 50 then '2 - 25-50% hold BAs'
+when bg.pct_college_acs_13_17 >= 50 then '3 - 50%+ hold BAs'
 else '4 - Unknown'
 end as education_blockgroup_3way
 
@@ -159,10 +159,8 @@ when tc.ts_tsmart_p_natam >= .66 then 'N - Native'
 else 'O - Other' end as race_detailed_20way
 
 ,case 
-when as20.civis_2020_spanish_language_preference >= .8 then '1 - Prefers Spanish' 
-when as20.civis_2020_spanish_language_preference >= .6 and (acs.xc_16001_e_3 >= .4 or bg.pct_eng_vw_span_acs_13_17 >= .4) then '1 - Prefers Spanish' 
-when as20.civis_2020_spanish_language_preference >= .5 and (acs.xc_16001_e_3 >= .3 or bg.pct_eng_vw_span_acs_13_17 >= .3) then '1 - Prefers Spanish' 
 when as20.civis_2020_spanish_language_preference >= .55 then '1 - Prefers Spanish' 
+when as20.civis_2020_spanish_language_preference >= .5 and (acs.xc_16001_e_3 >= .2 or bg.pct_eng_vw_span_acs_13_17 >= .2) then '1 - Prefers Spanish' 
 else '2 - Prefers English' end as spanish_language_2way
 
 ,case when as20.civis_2020_children_present > .3 then '1 - Child present'
@@ -170,8 +168,7 @@ else '2 - No child present' end as child_in_hh_2way
 
 ,case 
 when as20.civis_2020_marriage > 0.66 or tc.ts_tsmart_marriage_score > 66 then '2 - Married'
-when as20.civis_2020_marriage > 0.5 and tc.ts_tsmart_marriage_score > 50 then '2 - Married'
-when as20.civis_2020_marriage > 0.55 then '2 - Married'
+when as20.civis_2020_marriage > 0.5 and tc.ts_tsmart_marriage_score > 50 and right(tc.xpg_ind_lvl_marital_status,1) = 'M' then '2 - Married'
 else '1 - Single' end as marital_2way
 
 ,case
@@ -183,11 +180,11 @@ when coalesce(p.party_name_dnc,l2.parties_description) = 'Republican' or p.party
 when coalesce(p.party_name_dnc,l2.parties_description) = 'Other' or p.party_id = 3 then '6 - Other'
 when coalesce(p.party_name_dnc,l2.parties_description) = 'Other' or p.party_id = 7 then '6 - Other'
 when coalesce(p.party_name_dnc,l2.parties_description) = 'Other' or p.party_id = 8 then '6 - Other'
-when as20.civis_2020_partisanship > .84 then '1 - Democrat'
-when as20.civis_2020_partisanship > .7 then '2 - Green'
-when as20.civis_2020_partisanship > .6 then '3 - Independent'
-when as20.civis_2020_partisanship > .4 then '4 - Libertarian'
-when as20.civis_2020_partisanship <= .4 then '5 - Republican'
+when as20.civis_2020_partisanship >= .85 then '1 - Democrat'
+when as20.civis_2020_partisanship >= .7 and as20.civis_2020_partisanship < .85 then '2 - Green'
+when as20.civis_2020_partisanship >= .6 and as20.civis_2020_partisanship < .7 then '3 - Independent'
+when as20.civis_2020_partisanship >= .4 and as20.civis_2020_partisanship < .6 then '4 - Libertarian'
+when as20.civis_2020_partisanship < .4 then '5 - Republican'
 else '6 - Other' end as party_6way
 
 ,case 
@@ -203,12 +200,12 @@ else '2 - Moderate' end as party_3way
 when as20.civis_2020_ideology_liberal >= .8 then '1 - Very liberal'
 when as20.civis_2020_ideology_liberal >= .6 and as20.civis_2020_ideology_liberal < .8 then '2 - Somewhat liberal'
 when as20.civis_2020_ideology_liberal >= .4 and as20.civis_2020_ideology_liberal < .6 then '3 - Centrist'
-when as20.civis_2020_ideology_liberal > .2 and as20.civis_2020_ideology_liberal < .4 then '4 - Somewhat conservative' 
-when as20.civis_2020_ideology_liberal <= .2 then '5 - Very conservative'
+when as20.civis_2020_ideology_liberal >= .2 and as20.civis_2020_ideology_liberal < .4 then '4 - Somewhat conservative' 
+when as20.civis_2020_ideology_liberal < .2 then '5 - Very conservative'
 else '3 - Centrist' end as ideology_5way
 
 ,case 
-when coalesce(cty.primary16_sanders,0.434347726321799) >= coalesce(cty.primary16_clinton,0.5480444769384) then '1 - Sanders county'
+when cty.primary16_sanders > cty.primary16_clinton then '1 - Sanders county'
 else '2 - Clinton county' end as primary_vote_2016_2way
 
 ,case 
@@ -227,47 +224,47 @@ when (pv.vote_p_2008_party_d = 1 or
 	  pv.vote_pp_2000_party_d = 1 or
 	  pv.vote_pp_2004_party_d = 1 or 
 	  pv.vote_pp_2008_party_d = 1 or
-	  pv.vote_pp_2016_party_d = 1) then '2 - Voted in any Dem Primary (2008-18)'
+	  pv.vote_pp_2016_party_d = 1) then '2 - Voted in a Dem Primary (2008-18)'
 when (pv.vote_g_2008_novote_eligible = 1 or
 	  pv.vote_g_2010_novote_eligible = 1 or 
 	  pv.vote_g_2012_novote_eligible = 1 or
 	  pv.vote_g_2014_novote_eligible = 1 or
 	  pv.vote_g_2016_novote_eligible = 1 or
-	  pv.vote_g_2018_novote_eligible = 1) then '3 - Eligible but did not vote in any General (2008-18)'
+	  pv.vote_g_2018_novote_eligible = 1) then '3 - Eligible but did not vote in a General (2008-18)'
 when (pv.vote_g_2018 = 1 or 
 	  pv.vote_g_2016 = 1 or
 	  pv.vote_g_2014 = 1 or
 	  pv.vote_g_2012 = 1 or
 	  pv.vote_g_2010 = 1 or
-	  pv.vote_g_2008 = 1) then '4 - Voted only in Generals (2008-18)'
+	  pv.vote_g_2008 = 1) then '4 - Voted only in a General (2008-18)'
 else '5 - Other' end as vote_history_5way
 
 ,case 
 when (pv.vote_pp_2016_method_early = 1 or
   pv.vote_p_2017_method_early = 1 or
-  pv.vote_p_2018_method_early = 1) then '1 - Voted early in Primary (2016-18)'
+  pv.vote_p_2018_method_early = 1) then '1 - Voted early in a Primary (2016-18)'
 when (pv.vote_pp_2016 = 1 or
   pv.vote_p_2017 = 1 or
-  pv.vote_p_2018 = 1) then '2 - Voted in Primary (2016-18)'
+  pv.vote_p_2018 = 1) then '2 - Voted in a Primary (2016-18)'
 when (pv.vote_g_2016 = 1 or
   pv.vote_g_2017 = 1 or
-  pv.vote_g_2018 = 1) then '2 - Voted in General only (2016-18)'
+  pv.vote_g_2018 = 1) then '2 - Voted only in a General (2016-18)'
 else '3 - Did not vote (2016-18)' end as early_voting_3way
 
 ,case 
 when (pv.vote_pp_2008_method_absentee = 1 or
   pv.vote_pp_2012_method_absentee = 1 or
-  pv.vote_pp_2016_method_absentee = 1) then '1 - Voted absentee in Presidential Primary (2008-16)'
+  pv.vote_pp_2016_method_absentee = 1) then '1 - Voted absentee in a Presidential Primary (2008-16)'
 when (pv.vote_p_2014_method_absentee = 1 or
   pv.vote_p_2015_method_absentee = 1 or
   pv.vote_p_2016_method_absentee = 1 or
   pv.vote_p_2017_method_absentee = 1 or
-  pv.vote_p_2018_method_absentee = 1) then '2 - Voted absentee in Primary (2014-2018)'
+  pv.vote_p_2018_method_absentee = 1) then '2 - Voted absentee in a Primary (2014-2018)'
 when (pv.vote_g_2014_method_absentee = 1 or
   pv.vote_g_2015_method_absentee = 1 or
   pv.vote_g_2016_method_absentee = 1 or
   pv.vote_g_2017_method_absentee = 1 or
-  pv.vote_g_2018_method_absentee = 1) then '3 - Voted absentee in General (2014-2018)'
+  pv.vote_g_2018_method_absentee = 1) then '3 - Voted absentee in a General (2014-2018)'
 else '4 - Did not vote absentee (2014-18)' end as absentee_voting_4way
 
 ,case 
@@ -283,7 +280,7 @@ when greatest(
 as18.civis_2018_cultural_persuasion,
 as18.civis_2018_economic_persuasion,
 as18.civis_2018_political_persuasion) = as18.civis_2018_political_persuasion then '3 - Political' 
-end as fav_issue_area_3way
+else '4 - Undecided' end as fav_issue_area_3way
 
 ,CASE
 WHEN GREATEST(
@@ -342,7 +339,7 @@ WHEN GREATEST(
 ,as18.civis_2018_college_persuasion
 ,as18.civis_2018_medicare_persuasion
 ,as18.civis_2018_progressive_persuasion)= as18.civis_2018_progressive_persuasion then 'Working to advance a progressive agenda in Washington' 
-end as fav_econ_issue_7way
+else 'Undecided' end as fav_econ_issue_7way
 
 ,case 
 WHEN GREATEST(
@@ -375,7 +372,7 @@ WHEN GREATEST(
 ,as18.civis_2018_welcome_persuasion
 ,as18.civis_2018_trump_persuasion
 ,as18.civis_2018_gop_persuasion) = as18.civis_2018_welcome_persuasion then 'Working to build an America where people of all backgrounds are welcomed' 
-end as fav_poli_issue_5way
+else 'Undecided' end as fav_poli_issue_5way
 
 ,case
 WHEN GREATEST(
@@ -488,7 +485,7 @@ WHEN GREATEST(
 ,as18.civis_2018_dreamers_persuasion
 ,as18.civis_2018_military_persuasion
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_military_persuasion then 'Investing in the military and defense to keep America safe from terrorism'
-end as fav_cultural_issue_10way
+else 'Undecided' end as fav_cultural_issue_10way
 
 from phoenix_analytics.person p 
 left join phoenix_analytics.person_votes pv using(person_id)
@@ -502,13 +499,11 @@ left join bernie_nmarchio2.geo_block_covariates bg on p.census_block_group_2010 
 left join phoenix_census.acs_current acs on p.census_block_group_2010 = acs.block_group_id 
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
+
 where p.is_deceased = false -- is alive
 and p.reg_record_merged = false -- removes duplicated registration addresses
 and p.reg_on_current_file = true --  voter was on the last voter file that the DNC processed and not eligible to vote in primaries
 and p.reg_voter_flag = true -- voters who are registered to vote (i.e. have a registration status of active or inactive) even if they have moved states and their new state has not updated their file to reflect this yet
 and p.state_code in ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA'));
 
-
-
-
-            
+grant select on table bernie_data_commons.rainbow_analytics_frame to group bernie_data;
