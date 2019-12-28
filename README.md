@@ -2,7 +2,7 @@
 
 ## Platform Links:
 * [Project Folder](https://platform.civisanalytics.com/spa/#/projects/129243)
-  * To do: YAML workflow, parameterized pipeline scripts
+  * Workflow to [build modeling and analytics frame](https://platform.civisanalytics.com/spa/#/workflows/10551)
 * To request a model, issue a [Jira ticket](https://berniesanders.atlassian.net/jira/software/projects/MOD/boards/12) and tag Nico Marchio and Michael Futch.
 
 ## Modeling Frame:
@@ -15,8 +15,10 @@
   * Engineer features from `phoenix_electionbase.ebase_census_blocks` 
   * Synthesize party switching behavior from `phoenix_voter_file.registration_scd`
   * Test predictive power of `phoenix_consumer.tsmart_consumer`
-* [Compression script](https://platform.civisanalytics.com/spa/#/scripts/custom/54403061)
 
+## Analytics Frame:
+* Platform table: `bernie_data_commons.rainbow_analytics_frame`
+* [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-analytics-frame.sql) to create analytics frame and [data dictionary]
 
 ## Modeling Pipelines:
 
