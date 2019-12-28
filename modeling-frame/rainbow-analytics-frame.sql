@@ -12,6 +12,8 @@ as
 p.person_id
 ,p.reg_voter_flag
 ,p.state_code
+,p.voting_address_latitude as v_latitude
+,p.voting_address_longitude as v_longitude
 ,left(p.census_block_group_2010,5) as county_fips
 ,p.census_block_group_2010
 ,p.voting_city
