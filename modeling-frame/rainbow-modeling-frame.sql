@@ -805,7 +805,7 @@ as
   ,case when coalesce(p.party_name_dnc,l2.parties_description) = 'Unaffiliated' or party_id = 8 then 1 
   else 0 end as party_unaffiliated
   ,case when pv.state_code in ('AL','GA','HI','IL','IN','MI','MN','MO','MS','MT','OH','SC','TN','TX','VA','VT','WA','WI') then 1 
-  else 0 end as non_party_reg_sthen            
+  else 0 end as non_party_reg_state           
   
 -- Voter registration history
   ,case when p.reg_voter_flag then 1
