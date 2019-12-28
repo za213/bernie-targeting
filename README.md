@@ -15,6 +15,7 @@
   * Engineer features from `phoenix_electionbase.ebase_census_blocks` 
   * Synthesize party switching behavior from `phoenix_voter_file.registration_scd`
   * Test predictive power of `phoenix_consumer.tsmart_consumer`
+* [Compression script](https://platform.civisanalytics.com/spa/#/scripts/custom/54403061)
 
 
 ## Modeling Pipelines:
