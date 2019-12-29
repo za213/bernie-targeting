@@ -16,7 +16,7 @@ as
   ,p.state_code
   ,p.census_block_group_2010
   
---All scores
+--Individual scores
   -- Marital status, children in household, spanish language preference, partisan/ideology scores
   ,coalesce(as20.civis_2020_marriage,0.566609551) as civis_2020_marriage
   --,coalesce(as18.dnc_2018_marriage,0.528516131) as dnc_2018_marriage
@@ -166,7 +166,7 @@ as
   ,coalesce(as16.dnc_2016_income_rank,55) as dnc_2016_income_rank
   ,coalesce(as16.tsmart_2016_donor_likelihood,0.325387388) as tsmart_2016_donor_likelihood
   
--- Experian occupation groups
+  -- Experian occupation groups
   ,case when tc.xp_occupation = 'K01' or tc.xpg_ind_lvl_occupation_group in ('I1','K1') then 1 else 0 end as xp_occupation_k01_manager
   ,case when tc.xp_occupation = 'K02' or tc.xpg_ind_lvl_occupation_group in ('I2','K2') then 1 else 0 end as xp_occupation_k02_technical
   ,case when tc.xp_occupation = 'K03' or tc.xpg_ind_lvl_occupation_group in ('I3','K3') then 1 else 0 end as xp_occupation_k03_professional
@@ -199,6 +199,7 @@ as
   ,case when tc.xpg_ind_lvl_occupation_code = '14' then 1 else 0 end as xpg_occupation_public_admin
   ,case when tc.xpg_ind_lvl_occupation_code = '13' then 1 else 0 end as xpg_occupation_military
 
+-- County, Tract, and Block Group Geographic Data
   -- Geographic embeddings (reduces 250+ block, tract, county features below to 15 dimensions)
   ,coalesce(bg.block_component_pc1,-2.83159373436281) as block_component_pc1
   ,coalesce(bg.block_component_pc2,0.829194370075463) as block_component_pc2
@@ -595,6 +596,7 @@ as
   ,coalesce(cty.primary16_clinton,0.5480444769384) as primary16_clinton
   ,coalesce(cty.primary16_sanders,0.434347726321799) as primary16_sanders
   
+-- Individual scores
   -- TargetSmart turnout 
   ,coalesce(tc.ts_tsmart_partisan_score,53.615874715767) as ts_tsmart_partisan_score
   ,coalesce(tc.ts_tsmart_presidential_general_turnout_score,72.1139112743012) as ts_tsmart_presidential_general_turnout_score
@@ -690,7 +692,8 @@ as
   ,coalesce(tc.gsyn_synth_zip5_total_fec_contributions,141) as gsyn_synth_zip5_total_fec_contributions
   */
   
--- Residential area
+-- Individual Binaries
+  -- Residential area
   ,case 
   when tc.ts_tsmart_urbanicity in ('U5', 'U6') then 1
   when p.voting_address_urbanicity in ('U5','U6') then 1
@@ -707,13 +710,13 @@ as
   when p.census_density_rural then 1
   else 0 end geo_rural
 
--- Homeownership binaries
+  -- Homeownership binaries
   ,case when tc.tb_homeowner_flg = 'N' then 1 
   else 0 end as tb_homeowner_flg_no
   ,case when tc.tb_homeowner_flg = 'Y' then 1 
   else 0 end as tb_homeowner_flg_yes
  
--- Gender binaries
+  -- Gender binaries
   ,case 
   when p.gender_combined = 'F' then 1
   when l2.voters_gender = 'F' then 1
@@ -727,7 +730,7 @@ as
   when tc.xpg_ind_lvl_gender = 'M' then 1
   else 0 end as male
   
--- Marital status binaries
+  -- Marital status binaries
   ,case when (as20.civis_2020_marriage > 0.5 and tc.ts_tsmart_marriage_score > 50 and right(tc.xpg_ind_lvl_marital_status,1) = 'M')
   and (coalesce(p.gender_combined, l2.voters_gender, tc.tb_gender, tc.xpg_ind_lvl_gender) = 'F') then 1 
   else 0 end as married_female
@@ -737,7 +740,7 @@ as
   ,case when (as20.civis_2020_marriage > 0.5 and tc.ts_tsmart_marriage_score > 50 and right(tc.xpg_ind_lvl_marital_status,1) = 'M') then 1 
   else 0 end as married 
 
--- Race and ethnicity binaries
+  -- Race and ethnicity binaries
   ,case 
   when as20.civis_2020_likely_race = 'W' then 1
   when p.ethnicity_combined = 'W' then 1
