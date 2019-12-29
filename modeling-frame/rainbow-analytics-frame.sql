@@ -110,17 +110,6 @@ when tc.ts_tsmart_p_natam >= .66 then '5 - Native'
 else '6 - Other' end as race_5way
 
 ,case
-when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_jewish and as20.civis_2020_cultural_religion_jewish >= 0.8 then '4 - Jewish'
-when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_mormon and as20.civis_2020_cultural_religion_mormon >= 0.8 then '6 - Mormon'
-when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_muslim and as20.civis_2020_cultural_religion_muslim >= 0.8 then '5 - Muslim'
-when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_catholic and as20.civis_2020_cultural_religion_catholic >= 0.8 then '3 - Catholic'
-when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_evangelical and as20.civis_2020_cultural_religion_evangelical >= 0.8 then '2 - Evangelical'
-when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_mainline_protestant and as20.civis_2020_cultural_religion_mainline_protestant >= 0.8 then '1 - Protestant'
-when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_hindu and as20.civis_2020_cultural_religion_hindu >= 0.8 then '7 - Hindu'
-when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_buddhist and as20.civis_2020_cultural_religion_buddhist >= 0.8 then '8 - Buddhist'
-else '9 - Other' end as religion_9way
-
-,case
 when greatest(as20.civis_2020_subeth_african_american,as20.civis_2020_subeth_west_indian,as20.civis_2020_subeth_haitian,as20.civis_2020_subeth_african,as20.civis_2020_subeth_other_black) = as20.civis_2020_subeth_african_american and as20.civis_2020_likely_race = 'B' then 'B1 - African American'
 when greatest(as20.civis_2020_subeth_african_american,as20.civis_2020_subeth_west_indian,as20.civis_2020_subeth_haitian,as20.civis_2020_subeth_african,as20.civis_2020_subeth_other_black) = as20.civis_2020_subeth_west_indian and as20.civis_2020_likely_race = 'B' then 'B2 - West Indian'
 when greatest(as20.civis_2020_subeth_african_american,as20.civis_2020_subeth_west_indian,as20.civis_2020_subeth_haitian,as20.civis_2020_subeth_african,as20.civis_2020_subeth_other_black) = as20.civis_2020_subeth_haitian and as20.civis_2020_likely_race = 'B' then 'B3 - Haitian'
@@ -172,6 +161,17 @@ else '2 - No child present' end as child_in_hh_2way
 when as20.civis_2020_marriage > 0.66 or tc.ts_tsmart_marriage_score > 66 then '2 - Married'
 when as20.civis_2020_marriage > 0.5 and tc.ts_tsmart_marriage_score > 50 and right(tc.xpg_ind_lvl_marital_status,1) = 'M' then '2 - Married'
 else '1 - Single' end as marital_2way
+
+,case
+when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_jewish and as20.civis_2020_cultural_religion_jewish >= 0.8 then '4 - Jewish'
+when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_mormon and as20.civis_2020_cultural_religion_mormon >= 0.8 then '6 - Mormon'
+when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_muslim and as20.civis_2020_cultural_religion_muslim >= 0.8 then '5 - Muslim'
+when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_catholic and as20.civis_2020_cultural_religion_catholic >= 0.8 then '3 - Catholic'
+when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_evangelical and as20.civis_2020_cultural_religion_evangelical >= 0.8 then '2 - Evangelical'
+when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_mainline_protestant and as20.civis_2020_cultural_religion_mainline_protestant >= 0.8 then '1 - Protestant'
+when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_hindu and as20.civis_2020_cultural_religion_hindu >= 0.8 then '7 - Hindu'
+when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_buddhist and as20.civis_2020_cultural_religion_buddhist >= 0.8 then '8 - Buddhist'
+else '9 - Other' end as religion_9way
 
 ,case
 when coalesce(p.party_name_dnc,l2.parties_description) = 'Democratic' or p.party_id = 1 then '1 - Democrat'
@@ -284,16 +284,16 @@ as18.civis_2018_economic_persuasion,
 as18.civis_2018_political_persuasion) = as18.civis_2018_political_persuasion then '3 - Political' 
 else '4 - Undecided' end as fav_issue_area_3way
 
-,CASE
-WHEN GREATEST(
+,case 
+when greatest(
  as18.civis_2018_one_pct_persuasion
 ,as18.civis_2018_infrastructure_persuasion
 ,as18.civis_2018_aca_persuasion
 ,as18.civis_2018_skills_persuasion
 ,as18.civis_2018_college_persuasion
 ,as18.civis_2018_medicare_persuasion
-,as18.civis_2018_progressive_persuasion)= as18.civis_2018_one_pct_persuasion then 'Working to strengthen the middle class and make sure the wealthiest 1% pay their fair sahre'
-WHEN GREATEST(
+,as18.civis_2018_progressive_persuasion)= as18.civis_2018_one_pct_persuasion then 'Working to strengthen the middle class and make sure the wealthiest 1% pay their fair share'
+when greatest(
  as18.civis_2018_one_pct_persuasion
 ,as18.civis_2018_infrastructure_persuasion
 ,as18.civis_2018_aca_persuasion
@@ -301,7 +301,7 @@ WHEN GREATEST(
 ,as18.civis_2018_college_persuasion
 ,as18.civis_2018_medicare_persuasion
 ,as18.civis_2018_progressive_persuasion)= as18.civis_2018_infrastructure_persuasion then 'Supporting federal investments to rebuild our infrastructure and put millions of Americans back to work in decent paying jobs in both the public and private sectors'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_one_pct_persuasion
 ,as18.civis_2018_infrastructure_persuasion
 ,as18.civis_2018_aca_persuasion
@@ -309,7 +309,7 @@ WHEN GREATEST(
 ,as18.civis_2018_college_persuasion
 ,as18.civis_2018_medicare_persuasion
 ,as18.civis_2018_progressive_persuasion)= as18.civis_2018_medicare_persuasion then 'Strengthening programs like Medicare and Social Security that ensure seniors can afford to live with dignity and obtain the health care they need'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_one_pct_persuasion
 ,as18.civis_2018_infrastructure_persuasion
 ,as18.civis_2018_aca_persuasion
@@ -317,7 +317,7 @@ WHEN GREATEST(
 ,as18.civis_2018_college_persuasion
 ,as18.civis_2018_medicare_persuasion
 ,as18.civis_2018_progressive_persuasion)= as18.civis_2018_skills_persuasion then 'Building an economy that gives working Americans the tools and skills to succeed in the 21st century'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_one_pct_persuasion
 ,as18.civis_2018_infrastructure_persuasion
 ,as18.civis_2018_aca_persuasion
@@ -325,7 +325,7 @@ WHEN GREATEST(
 ,as18.civis_2018_college_persuasion
 ,as18.civis_2018_medicare_persuasion
 ,as18.civis_2018_progressive_persuasion)= as18.civis_2018_college_persuasion then 'Making tuition at public colleges free for students from middle-class families'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_one_pct_persuasion
 ,as18.civis_2018_infrastructure_persuasion
 ,as18.civis_2018_aca_persuasion
@@ -333,7 +333,7 @@ WHEN GREATEST(
 ,as18.civis_2018_college_persuasion
 ,as18.civis_2018_medicare_persuasion
 ,as18.civis_2018_progressive_persuasion)= as18.civis_2018_aca_persuasion then 'Protecting the Affordable Care Act and expanding Medicaid to ensure Americans have access to high-quality health care at an affordable price'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_one_pct_persuasion
 ,as18.civis_2018_infrastructure_persuasion
 ,as18.civis_2018_aca_persuasion
@@ -344,31 +344,31 @@ WHEN GREATEST(
 else 'Undecided' end as fav_econ_issue_7way
 
 ,case 
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_growth_persuasion
 ,as18.civis_2018_bipartisan_persuasion
 ,as18.civis_2018_welcome_persuasion
 ,as18.civis_2018_trump_persuasion
 ,as18.civis_2018_gop_persuasion) = as18.civis_2018_bipartisan_persuasion then 'Working with members of both parties to improve the lives of all Americans'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_growth_persuasion
 ,as18.civis_2018_bipartisan_persuasion
 ,as18.civis_2018_welcome_persuasion
 ,as18.civis_2018_trump_persuasion
 ,as18.civis_2018_gop_persuasion) = as18.civis_2018_gop_persuasion then 'Standing up to Congressional Republicans policies that benefit the rich'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_growth_persuasion
 ,as18.civis_2018_bipartisan_persuasion
 ,as18.civis_2018_welcome_persuasion
 ,as18.civis_2018_trump_persuasion
 ,as18.civis_2018_gop_persuasion) = as18.civis_2018_growth_persuasion then 'Working to promote growth and build an economic engine that creates jobs'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_growth_persuasion
 ,as18.civis_2018_bipartisan_persuasion
 ,as18.civis_2018_welcome_persuasion
 ,as18.civis_2018_trump_persuasion
 ,as18.civis_2018_gop_persuasion) = as18.civis_2018_trump_persuasion then 'Standing up to Donald Trumps toxic politics'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_growth_persuasion
 ,as18.civis_2018_bipartisan_persuasion
 ,as18.civis_2018_welcome_persuasion
@@ -377,7 +377,7 @@ WHEN GREATEST(
 else 'Undecided' end as fav_poli_issue_5way
 
 ,case
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_climate_persuasion
 ,as18.civis_2018_sexual_assault_persuasion
 ,as18.civis_2018_wall_persuasion
@@ -388,7 +388,7 @@ WHEN GREATEST(
 ,as18.civis_2018_dreamers_persuasion
 ,as18.civis_2018_military_persuasion
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_choice_persuasion then 'Ensuring every woman has access to safe and legal abortion services'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_climate_persuasion
 ,as18.civis_2018_sexual_assault_persuasion
 ,as18.civis_2018_wall_persuasion
@@ -399,7 +399,7 @@ WHEN GREATEST(
 ,as18.civis_2018_dreamers_persuasion
 ,as18.civis_2018_military_persuasion
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_sexual_assault_persuasion then 'Fighting to prevent sexual assault and ensure that sexual abusers face consequences'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_climate_persuasion
 ,as18.civis_2018_sexual_assault_persuasion
 ,as18.civis_2018_wall_persuasion
@@ -410,7 +410,7 @@ WHEN GREATEST(
 ,as18.civis_2018_dreamers_persuasion
 ,as18.civis_2018_military_persuasion
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_wall_persuasion then 'Fighting against an unnecessary and divisive wall on the border with Mexico'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_climate_persuasion
 ,as18.civis_2018_sexual_assault_persuasion
 ,as18.civis_2018_wall_persuasion
@@ -421,7 +421,7 @@ WHEN GREATEST(
 ,as18.civis_2018_dreamers_persuasion
 ,as18.civis_2018_military_persuasion
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_marijuana_persuasion then 'Legalizing the use of recreational marijuana'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_climate_persuasion
 ,as18.civis_2018_sexual_assault_persuasion
 ,as18.civis_2018_wall_persuasion
@@ -432,7 +432,7 @@ WHEN GREATEST(
 ,as18.civis_2018_dreamers_persuasion
 ,as18.civis_2018_military_persuasion
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_race_persuasion then 'Protecting the civil rights of racial and ethnic minorities and fighting to end discrimination'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_climate_persuasion
 ,as18.civis_2018_sexual_assault_persuasion
 ,as18.civis_2018_wall_persuasion
@@ -443,7 +443,7 @@ WHEN GREATEST(
 ,as18.civis_2018_dreamers_persuasion
 ,as18.civis_2018_military_persuasion
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_climate_persuasion then 'Working to protect the environment against climate change while expanding the clean energy economy'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_climate_persuasion
 ,as18.civis_2018_sexual_assault_persuasion
 ,as18.civis_2018_wall_persuasion
@@ -454,7 +454,7 @@ WHEN GREATEST(
 ,as18.civis_2018_dreamers_persuasion
 ,as18.civis_2018_military_persuasion
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_lgbt_persuasion then 'Protection the civil rights of LGBT Americans and fighting to end discrimination'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_climate_persuasion
 ,as18.civis_2018_sexual_assault_persuasion
 ,as18.civis_2018_wall_persuasion
@@ -465,7 +465,7 @@ WHEN GREATEST(
 ,as18.civis_2018_dreamers_persuasion
 ,as18.civis_2018_military_persuasion
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_guns_persuasion then 'Support common sense gun safety measures like universal background checks for gun sales and banning the sale of high capacity ammunition cartridges for semi-automatic weapons'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_climate_persuasion
 ,as18.civis_2018_sexual_assault_persuasion
 ,as18.civis_2018_wall_persuasion
@@ -476,7 +476,7 @@ WHEN GREATEST(
 ,as18.civis_2018_dreamers_persuasion
 ,as18.civis_2018_military_persuasion
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_dreamers_persuasion then 'Fighting to protect DREAMers,immigrant children who were brought to this country illegally as children'
-WHEN GREATEST(
+when greatest(
  as18.civis_2018_climate_persuasion
 ,as18.civis_2018_sexual_assault_persuasion
 ,as18.civis_2018_wall_persuasion
