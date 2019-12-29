@@ -165,6 +165,101 @@ as
   ,coalesce(as16.dnc_2016_high_school_only,0.232407721) as dnc_2016_high_school_only
   ,coalesce(as16.dnc_2016_income_rank,55) as dnc_2016_income_rank
   ,coalesce(as16.tsmart_2016_donor_likelihood,0.325387388) as tsmart_2016_donor_likelihood
+ 
+  -- TargetSmart turnout 
+  ,coalesce(tc.ts_tsmart_partisan_score,53.615874715767) as ts_tsmart_partisan_score
+  ,coalesce(tc.ts_tsmart_presidential_general_turnout_score,72.1139112743012) as ts_tsmart_presidential_general_turnout_score
+  ,coalesce(tc.ts_tsmart_midterm_general_turnout_score,49.2156783912222) as ts_tsmart_midterm_general_turnout_score
+  ,coalesce(tc.ts_tsmart_offyear_general_turnout_score,15.2742025259369) as ts_tsmart_offyear_general_turnout_score
+  ,coalesce(tc.ts_tsmart_presidential_primary_turnout_score,37.3231147653052) as ts_tsmart_presidential_primary_turnout_score
+  ,coalesce(tc.ts_tsmart_non_presidential_primary_turnout_score,17.8722169888302) as ts_tsmart_non_presidential_primary_turnout_score
+  ,coalesce(tc.ts_tsmart_midterm_general_enthusiasm_score,40.6038213693376) as ts_tsmart_midterm_general_enthusiasm_score
+  ,coalesce(tc.ts_tsmart_local_voter_score,35.6934520560535) as ts_tsmart_local_voter_score
+  
+  -- TargetSmart ideology and issue scores
+  ,coalesce(tc.ts_tsmart_tea_party_score,46.0826663961952) as ts_tsmart_tea_party_score
+  ,coalesce(tc.ts_tsmart_ideology_score,58.2238378150888) as ts_tsmart_ideology_score
+  ,coalesce(tc.ts_tsmart_moral_authority_score,40.7086519676708) as ts_tsmart_moral_authority_score
+  ,coalesce(tc.ts_tsmart_moral_care_score,48.4815620568045) as ts_tsmart_moral_care_score
+  ,coalesce(tc.ts_tsmart_moral_equality_score,52.5460436289233) as ts_tsmart_moral_equality_score
+  ,coalesce(tc.ts_tsmart_moral_equity_score,48.5739288914354) as ts_tsmart_moral_equity_score
+  ,coalesce(tc.ts_tsmart_moral_loyalty_score,49.7838475335626) as ts_tsmart_moral_loyalty_score
+  ,coalesce(tc.ts_tsmart_moral_purity_score,46.0161865880091) as ts_tsmart_moral_purity_score
+  ,coalesce(tc.ts_tsmart_college_graduate_score,42.7505476530988) as ts_tsmart_college_graduate_score
+  ,coalesce(tc.ts_tsmart_high_school_only_score,50.8139362209521) as ts_tsmart_high_school_only_score
+  ,coalesce(tc.ts_tsmart_prochoice_score,56.2537590536877) as ts_tsmart_prochoice_score
+  ,coalesce(tc.ts_tsmart_path_to_citizen_score,54.5802946861594) as ts_tsmart_path_to_citizen_score
+  ,coalesce(tc.ts_tsmart_climate_change_score,57.5431390157507) as ts_tsmart_climate_change_score
+  ,coalesce(tc.ts_tsmart_gun_control_score,54.7735550919433) as ts_tsmart_gun_control_score
+  ,coalesce(tc.ts_tsmart_gunowner_score,54.0492868926705) as ts_tsmart_gunowner_score
+  ,coalesce(tc.ts_tsmart_trump_resistance_score,39.8009590035495) as ts_tsmart_trump_resistance_score
+  ,coalesce(tc.ts_tsmart_trump_support_score,48.8257967230227) as ts_tsmart_trump_support_score
+  ,coalesce(tc.ts_tsmart_veteran_score,38.026382268614) as ts_tsmart_veteran_score
+  ,coalesce(tc.ts_tsmart_activist_score,42.7382851129463) as ts_tsmart_activist_score
+  ,coalesce(tc.ts_tsmart_working_class_score,58.6177878423767) as ts_tsmart_working_class_score
+  
+  -- PredictWise scores
+  ,coalesce(tc.predictwise_authoritarianism_score,71) as predictwise_authoritarianism_score
+  ,coalesce(tc.predictwise_compassion_score,55) as predictwise_compassion_score
+  ,coalesce(tc.predictwise_economic_populism_score,43) as predictwise_economic_populism_score
+  ,coalesce(tc.predictwise_free_trade_score,43) as predictwise_free_trade_score
+  ,coalesce(tc.predictwise_globalism_score,46) as predictwise_globalism_score
+  ,coalesce(tc.predictwise_guns_score,42) as predictwise_guns_score
+  ,coalesce(tc.predictwise_healthcare_women_score,53) as predictwise_healthcare_women_score
+  ,coalesce(tc.predictwise_healthcare_score,45) as predictwise_healthcare_score
+  ,coalesce(tc.predictwise_immigrants_score,41) as predictwise_immigrants_score
+  ,coalesce(tc.predictwise_military_score,53) as predictwise_military_score
+  ,coalesce(tc.predictwise_populism_score,38) as predictwise_populism_score
+  ,coalesce(tc.predictwise_poor_score,51) as predictwise_poor_score
+  ,coalesce(tc.predictwise_racial_resentment_score,66) as predictwise_racial_resentment_score
+  ,coalesce(tc.predictwise_regulation_score,59) as predictwise_regulation_score
+  ,coalesce(tc.predictwise_religious_freedom_score,49) as predictwise_religious_freedom_score
+  ,coalesce(tc.predictwise_taxes_score,44) as predictwise_taxes_score
+  ,coalesce(tc.predictwise_traditionalism_score,52) as predictwise_traditionalism_score
+  ,coalesce(tc.predictwise_trust_in_institutions_score,45) as predictwise_trust_in_institutions_score
+  ,coalesce(tc.predictwise_environmentalism_score,53) as predictwise_environmentalism_score
+  ,coalesce(tc.predictwise_presidential_score,55) as predictwise_presidential_score
+  
+   -- Synthetic registration 
+  ,coalesce(tc.gsyn_synth_hh_pct_registered,95.974742397142) as gsyn_synth_hh_pct_registered
+  ,coalesce(tc.gsyn_synth_hh_total_primary_votes_person,1.62222639559819) as gsyn_synth_hh_total_primary_votes_person
+  ,coalesce(tc.gsyn_synth_zip5_pct_dem_primary_votes,0.233256642021729) as gsyn_synth_zip5_pct_dem_primary_votes
+  ,coalesce(tc.gsyn_synth_zip5_pct_of_dem_fec_contributions,0.529875692892941) as gsyn_synth_zip5_pct_of_dem_fec_contributions
+  ,coalesce(tc.gsyn_synth_zip5_pct_of_dems_per_reg_count,0.494239755293577) as gsyn_synth_zip5_pct_of_dems_per_reg_count
+  ,coalesce(tc.gsyn_synth_zip5_sum_dem_primary_votes_cast_count,7515) as gsyn_synth_zip5_sum_dem_primary_votes_cast_count
+  ,coalesce(tc.gsyn_synth_zip5_sum_fec_contribution_count_democrat,85) as gsyn_synth_zip5_sum_fec_contribution_count_democrat
+  ,coalesce(tc.gsyn_synth_zip9_pct_dem_primary_votes,0.24470400461151) as gsyn_synth_zip9_pct_dem_primary_votes
+  ,coalesce(tc.gsyn_synth_zip5_sum_registered,19430) as gsyn_synth_zip5_sum_registered
+  ,coalesce(tc.gsyn_synth_zip5_sum_unregistered,5666) as gsyn_synth_zip5_sum_unregistered
+  ,coalesce(tc.gsyn_synth_zip5_sum_zip5_democrat,10504) as gsyn_synth_zip5_sum_zip5_democrat
+  ,coalesce(tc.gsyn_synth_zip5_sum_zip5_republican,7051) as gsyn_synth_zip5_sum_zip5_republican
+ 
+  -- FEC contributions 
+  ,coalesce(tc.fec_zip_contribution_category_democrat,514867) as fec_zip_contribution_category_democrat
+  ,coalesce(tc.fec_zip_contribution_category_labor_organization,14300) as fec_zip_contribution_category_labor_organization
+  ,coalesce(tc.fec_zip_contribution_category_presidential,184526) as fec_zip_contribution_category_presidential
+  ,coalesce(tc.fec_zip_contribution_category_republican,400768) as fec_zip_contribution_category_republican
+  ,coalesce(tc.fec_zip_contribution_category_senate,223010) as fec_zip_contribution_category_senate
+  ,coalesce(tc.fec_zip_contribution_category_trade_association,49267) as fec_zip_contribution_category_trade_association
+  /*
+  ,coalesce(tc.enh_addr_size,40) as enh_addr_size
+  ,coalesce(tc.fec_zip_avg_contribution_amount,285.292351174354) as fec_zip_avg_contribution_amount
+  ,coalesce(tc.fec_zip_contribution_category_corporation,92676) as fec_zip_contribution_category_corporation
+  ,coalesce(tc.fec_zip_contribution_category_house,289501) as fec_zip_contribution_category_house
+  ,coalesce(tc.fec_zip_contribution_category_membership_organization,40105) as fec_zip_contribution_category_membership_organization
+  ,coalesce(tc.fec_zip_contribution_category_qualified_party,225967) as fec_zip_contribution_category_qualified_party
+  ,coalesce(tc.fec_zip_contribution_category_unaffiliated,487791) as fec_zip_contribution_category_unaffiliated
+  ,coalesce(tc.fec_zip_total_contribution_amount,1408448) as fec_zip_total_contribution_amount
+  ,coalesce(tc.fec_zip_total_contributions,3919) as fec_zip_total_contributions
+  ,coalesce(tc.gsyn_synth_hh_average_age,50.3527862005709) as gsyn_synth_hh_average_age
+  ,coalesce(tc.gsyn_synth_hh_total_votes_per_person,5.47473457667572) as gsyn_synth_hh_total_votes_per_person
+  ,coalesce(tc.gsyn_synth_zip5_pct_catholic,14.4101302276016) as gsyn_synth_zip5_pct_catholic
+  ,coalesce(tc.gsyn_synth_zip5_pct_jewish,1.10422757474685) as gsyn_synth_zip5_pct_jewish
+  ,coalesce(tc.gsyn_synth_zip5_sum_fec_contribution_count_republican,51) as gsyn_synth_zip5_sum_fec_contribution_count_republican
+  ,coalesce(tc.gsyn_synth_zip5_sum_individuals_in_zip5,25065) as gsyn_synth_zip5_sum_individuals_in_zip5
+  ,coalesce(tc.gsyn_synth_zip5_sum_primary_votes_cast_count,33423) as gsyn_synth_zip5_sum_primary_votes_cast_count
+  ,coalesce(tc.gsyn_synth_zip5_total_fec_contributions,141) as gsyn_synth_zip5_total_fec_contributions
+  */
   
   -- Experian occupation groups
   ,case when tc.xp_occupation = 'K01' or tc.xpg_ind_lvl_occupation_group in ('I1','K1') then 1 else 0 end as xp_occupation_k01_manager
@@ -596,102 +691,6 @@ as
   ,coalesce(cty.primary16_clinton,0.5480444769384) as primary16_clinton
   ,coalesce(cty.primary16_sanders,0.434347726321799) as primary16_sanders
   
--- Individual scores
-  -- TargetSmart turnout 
-  ,coalesce(tc.ts_tsmart_partisan_score,53.615874715767) as ts_tsmart_partisan_score
-  ,coalesce(tc.ts_tsmart_presidential_general_turnout_score,72.1139112743012) as ts_tsmart_presidential_general_turnout_score
-  ,coalesce(tc.ts_tsmart_midterm_general_turnout_score,49.2156783912222) as ts_tsmart_midterm_general_turnout_score
-  ,coalesce(tc.ts_tsmart_offyear_general_turnout_score,15.2742025259369) as ts_tsmart_offyear_general_turnout_score
-  ,coalesce(tc.ts_tsmart_presidential_primary_turnout_score,37.3231147653052) as ts_tsmart_presidential_primary_turnout_score
-  ,coalesce(tc.ts_tsmart_non_presidential_primary_turnout_score,17.8722169888302) as ts_tsmart_non_presidential_primary_turnout_score
-  ,coalesce(tc.ts_tsmart_midterm_general_enthusiasm_score,40.6038213693376) as ts_tsmart_midterm_general_enthusiasm_score
-  ,coalesce(tc.ts_tsmart_local_voter_score,35.6934520560535) as ts_tsmart_local_voter_score
-  
-  -- TargetSmart ideology and issue scores
-  ,coalesce(tc.ts_tsmart_tea_party_score,46.0826663961952) as ts_tsmart_tea_party_score
-  ,coalesce(tc.ts_tsmart_ideology_score,58.2238378150888) as ts_tsmart_ideology_score
-  ,coalesce(tc.ts_tsmart_moral_authority_score,40.7086519676708) as ts_tsmart_moral_authority_score
-  ,coalesce(tc.ts_tsmart_moral_care_score,48.4815620568045) as ts_tsmart_moral_care_score
-  ,coalesce(tc.ts_tsmart_moral_equality_score,52.5460436289233) as ts_tsmart_moral_equality_score
-  ,coalesce(tc.ts_tsmart_moral_equity_score,48.5739288914354) as ts_tsmart_moral_equity_score
-  ,coalesce(tc.ts_tsmart_moral_loyalty_score,49.7838475335626) as ts_tsmart_moral_loyalty_score
-  ,coalesce(tc.ts_tsmart_moral_purity_score,46.0161865880091) as ts_tsmart_moral_purity_score
-  ,coalesce(tc.ts_tsmart_college_graduate_score,42.7505476530988) as ts_tsmart_college_graduate_score
-  ,coalesce(tc.ts_tsmart_high_school_only_score,50.8139362209521) as ts_tsmart_high_school_only_score
-  ,coalesce(tc.ts_tsmart_prochoice_score,56.2537590536877) as ts_tsmart_prochoice_score
-  ,coalesce(tc.ts_tsmart_path_to_citizen_score,54.5802946861594) as ts_tsmart_path_to_citizen_score
-  ,coalesce(tc.ts_tsmart_climate_change_score,57.5431390157507) as ts_tsmart_climate_change_score
-  ,coalesce(tc.ts_tsmart_gun_control_score,54.7735550919433) as ts_tsmart_gun_control_score
-  ,coalesce(tc.ts_tsmart_gunowner_score,54.0492868926705) as ts_tsmart_gunowner_score
-  ,coalesce(tc.ts_tsmart_trump_resistance_score,39.8009590035495) as ts_tsmart_trump_resistance_score
-  ,coalesce(tc.ts_tsmart_trump_support_score,48.8257967230227) as ts_tsmart_trump_support_score
-  ,coalesce(tc.ts_tsmart_veteran_score,38.026382268614) as ts_tsmart_veteran_score
-  ,coalesce(tc.ts_tsmart_activist_score,42.7382851129463) as ts_tsmart_activist_score
-  ,coalesce(tc.ts_tsmart_working_class_score,58.6177878423767) as ts_tsmart_working_class_score
-  
-  -- PredictWise scores
-  ,coalesce(tc.predictwise_authoritarianism_score,71) as predictwise_authoritarianism_score
-  ,coalesce(tc.predictwise_compassion_score,55) as predictwise_compassion_score
-  ,coalesce(tc.predictwise_economic_populism_score,43) as predictwise_economic_populism_score
-  ,coalesce(tc.predictwise_free_trade_score,43) as predictwise_free_trade_score
-  ,coalesce(tc.predictwise_globalism_score,46) as predictwise_globalism_score
-  ,coalesce(tc.predictwise_guns_score,42) as predictwise_guns_score
-  ,coalesce(tc.predictwise_healthcare_women_score,53) as predictwise_healthcare_women_score
-  ,coalesce(tc.predictwise_healthcare_score,45) as predictwise_healthcare_score
-  ,coalesce(tc.predictwise_immigrants_score,41) as predictwise_immigrants_score
-  ,coalesce(tc.predictwise_military_score,53) as predictwise_military_score
-  ,coalesce(tc.predictwise_populism_score,38) as predictwise_populism_score
-  ,coalesce(tc.predictwise_poor_score,51) as predictwise_poor_score
-  ,coalesce(tc.predictwise_racial_resentment_score,66) as predictwise_racial_resentment_score
-  ,coalesce(tc.predictwise_regulation_score,59) as predictwise_regulation_score
-  ,coalesce(tc.predictwise_religious_freedom_score,49) as predictwise_religious_freedom_score
-  ,coalesce(tc.predictwise_taxes_score,44) as predictwise_taxes_score
-  ,coalesce(tc.predictwise_traditionalism_score,52) as predictwise_traditionalism_score
-  ,coalesce(tc.predictwise_trust_in_institutions_score,45) as predictwise_trust_in_institutions_score
-  ,coalesce(tc.predictwise_environmentalism_score,53) as predictwise_environmentalism_score
-  ,coalesce(tc.predictwise_presidential_score,55) as predictwise_presidential_score
-  
-  -- FEC contributions 
-  ,coalesce(tc.fec_zip_contribution_category_democrat,514867) as fec_zip_contribution_category_democrat
-  ,coalesce(tc.fec_zip_contribution_category_labor_organization,14300) as fec_zip_contribution_category_labor_organization
-  ,coalesce(tc.fec_zip_contribution_category_presidential,184526) as fec_zip_contribution_category_presidential
-  ,coalesce(tc.fec_zip_contribution_category_republican,400768) as fec_zip_contribution_category_republican
-  ,coalesce(tc.fec_zip_contribution_category_senate,223010) as fec_zip_contribution_category_senate
-  ,coalesce(tc.fec_zip_contribution_category_trade_association,49267) as fec_zip_contribution_category_trade_association
-  
-  -- Synthetic registration 
-  ,coalesce(tc.gsyn_synth_hh_pct_registered,95.974742397142) as gsyn_synth_hh_pct_registered
-  ,coalesce(tc.gsyn_synth_hh_total_primary_votes_person,1.62222639559819) as gsyn_synth_hh_total_primary_votes_person
-  ,coalesce(tc.gsyn_synth_zip5_pct_dem_primary_votes,0.233256642021729) as gsyn_synth_zip5_pct_dem_primary_votes
-  ,coalesce(tc.gsyn_synth_zip5_pct_of_dem_fec_contributions,0.529875692892941) as gsyn_synth_zip5_pct_of_dem_fec_contributions
-  ,coalesce(tc.gsyn_synth_zip5_pct_of_dems_per_reg_count,0.494239755293577) as gsyn_synth_zip5_pct_of_dems_per_reg_count
-  ,coalesce(tc.gsyn_synth_zip5_sum_dem_primary_votes_cast_count,7515) as gsyn_synth_zip5_sum_dem_primary_votes_cast_count
-  ,coalesce(tc.gsyn_synth_zip5_sum_fec_contribution_count_democrat,85) as gsyn_synth_zip5_sum_fec_contribution_count_democrat
-  ,coalesce(tc.gsyn_synth_zip9_pct_dem_primary_votes,0.24470400461151) as gsyn_synth_zip9_pct_dem_primary_votes
-  ,coalesce(tc.gsyn_synth_zip5_sum_registered,19430) as gsyn_synth_zip5_sum_registered
-  ,coalesce(tc.gsyn_synth_zip5_sum_unregistered,5666) as gsyn_synth_zip5_sum_unregistered
-  ,coalesce(tc.gsyn_synth_zip5_sum_zip5_democrat,10504) as gsyn_synth_zip5_sum_zip5_democrat
-  ,coalesce(tc.gsyn_synth_zip5_sum_zip5_republican,7051) as gsyn_synth_zip5_sum_zip5_republican
-  /*
-  ,coalesce(tc.enh_addr_size,40) as enh_addr_size
-  ,coalesce(tc.fec_zip_avg_contribution_amount,285.292351174354) as fec_zip_avg_contribution_amount
-  ,coalesce(tc.fec_zip_contribution_category_corporation,92676) as fec_zip_contribution_category_corporation
-  ,coalesce(tc.fec_zip_contribution_category_house,289501) as fec_zip_contribution_category_house
-  ,coalesce(tc.fec_zip_contribution_category_membership_organization,40105) as fec_zip_contribution_category_membership_organization
-  ,coalesce(tc.fec_zip_contribution_category_qualified_party,225967) as fec_zip_contribution_category_qualified_party
-  ,coalesce(tc.fec_zip_contribution_category_unaffiliated,487791) as fec_zip_contribution_category_unaffiliated
-  ,coalesce(tc.fec_zip_total_contribution_amount,1408448) as fec_zip_total_contribution_amount
-  ,coalesce(tc.fec_zip_total_contributions,3919) as fec_zip_total_contributions
-  ,coalesce(tc.gsyn_synth_hh_average_age,50.3527862005709) as gsyn_synth_hh_average_age
-  ,coalesce(tc.gsyn_synth_hh_total_votes_per_person,5.47473457667572) as gsyn_synth_hh_total_votes_per_person
-  ,coalesce(tc.gsyn_synth_zip5_pct_catholic,14.4101302276016) as gsyn_synth_zip5_pct_catholic
-  ,coalesce(tc.gsyn_synth_zip5_pct_jewish,1.10422757474685) as gsyn_synth_zip5_pct_jewish
-  ,coalesce(tc.gsyn_synth_zip5_sum_fec_contribution_count_republican,51) as gsyn_synth_zip5_sum_fec_contribution_count_republican
-  ,coalesce(tc.gsyn_synth_zip5_sum_individuals_in_zip5,25065) as gsyn_synth_zip5_sum_individuals_in_zip5
-  ,coalesce(tc.gsyn_synth_zip5_sum_primary_votes_cast_count,33423) as gsyn_synth_zip5_sum_primary_votes_cast_count
-  ,coalesce(tc.gsyn_synth_zip5_total_fec_contributions,141) as gsyn_synth_zip5_total_fec_contributions
-  */
-  
 -- Individual Binaries
   -- Residential area
   ,case 
@@ -979,7 +978,6 @@ as
   when pv.vote_g_2018 != 1 and pv.vote_g_2016 != 1 and (pv.vote_g_2014 = 1 or pv.vote_g_2012 = 1 or pv.vote_g_2008 = 1) then 1 
   else 0 end as vote_lapsed_voter
 
-  
 from phoenix_analytics.person p 
 left join phoenix_analytics.person_votes pv using(person_id)
 left join phoenix_scores.all_scores_2020 as20 using(person_id) 
