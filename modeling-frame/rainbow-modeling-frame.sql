@@ -84,29 +84,59 @@ as
   ,coalesce(as18.civis_2018_cultural_persuasion,-0.005461805) as civis_2018_cultural_persuasion
   ,coalesce(as18.civis_2018_economic_persuasion,0.006528537) as civis_2018_economic_persuasion
   ,coalesce(as18.civis_2018_political_persuasion,0.003801198) as civis_2018_political_persuasion
-  ,coalesce(as18.civis_2018_one_pct_persuasion,0.00611318) as civis_2018_one_pct_persuasion
   ,coalesce(as18.civis_2018_infrastructure_persuasion,0.006191701) as civis_2018_infrastructure_persuasion
-  ,coalesce(as18.civis_2018_bipartisan_persuasion,0.006445597) as civis_2018_bipartisan_persuasion
   ,coalesce(as18.civis_2018_aca_persuasion,0.005342091) as civis_2018_aca_persuasion
+  ,coalesce(as18.civis_2018_one_pct_persuasion,0.00611318) as civis_2018_one_pct_persuasion
+  ,coalesce(as18.civis_2018_progressive_persuasion,0.004168864) as civis_2018_progressive_persuasion
+  ,coalesce(as18.civis_2018_college_persuasion,0.005387874) as civis_2018_college_persuasion
+  ,coalesce(as18.civis_2018_medicare_persuasion,0.011460919) as civis_2018_medicare_persuasion
   ,coalesce(as18.civis_2018_growth_persuasion,0.005146488) as civis_2018_growth_persuasion
+  ,coalesce(as18.civis_2018_bipartisan_persuasion,0.006445597) as civis_2018_bipartisan_persuasion
+  ,coalesce(as18.civis_2018_gop_persuasion,0.003132949) as civis_2018_gop_persuasion
+  ,coalesce(as18.civis_2018_skills_persuasion,0.004798559) as civis_2018_skills_persuasion
+  ,coalesce(as18.civis_2018_trump_persuasion,-0.000755541) as civis_2018_trump_persuasion
   ,coalesce(as18.civis_2018_sexual_assault_persuasion,0.009672641) as civis_2018_sexual_assault_persuasion
   ,coalesce(as18.civis_2018_wall_persuasion,-0.001512978) as civis_2018_wall_persuasion
   ,coalesce(as18.civis_2018_marijuana_persuasion,-0.00030366) as civis_2018_marijuana_persuasion
   ,coalesce(as18.civis_2018_race_persuasion,0.002819312) as civis_2018_race_persuasion
   ,coalesce(as18.civis_2018_welcome_persuasion,0.003711122) as civis_2018_welcome_persuasion
-  ,coalesce(as18.civis_2018_trump_persuasion,-0.000755541) as civis_2018_trump_persuasion
-  ,coalesce(as18.civis_2018_skills_persuasion,0.004798559) as civis_2018_skills_persuasion
-  ,coalesce(as18.civis_2018_gop_persuasion,0.003132949) as civis_2018_gop_persuasion
+  ,coalesce(as18.civis_2018_guns_persuasion,0.00400441) as civis_2018_guns_persuasion
   ,coalesce(as18.civis_2018_climate_persuasion,0.003127991) as civis_2018_climate_persuasion
   ,coalesce(as18.civis_2018_lgbt_persuasion,0.004011263) as civis_2018_lgbt_persuasion
-  ,coalesce(as18.civis_2018_college_persuasion,0.005387874) as civis_2018_college_persuasion
-  ,coalesce(as18.civis_2018_guns_persuasion,0.00400441) as civis_2018_guns_persuasion
   ,coalesce(as18.civis_2018_dreamers_persuasion,-0.004672808) as civis_2018_dreamers_persuasion
   ,coalesce(as18.civis_2018_military_persuasion,0.00572671) as civis_2018_military_persuasion
-  ,coalesce(as18.civis_2018_progressive_persuasion,0.004168864) as civis_2018_progressive_persuasion
   ,coalesce(as18.civis_2018_choice_persuasion,0.004149563) as civis_2018_choice_persuasion
-  ,coalesce(as18.civis_2018_medicare_persuasion,0.011460919) as civis_2018_medicare_persuasion
   ,coalesce(as18.civis_2018_ballot_completion,0.463701714) as civis_2018_ballot_completion
+ 
+  -- Persuasion dummies
+  -- Economic messaging
+  ,case 
+  when greatest(as18.civis_2018_one_pct_persuasion,as18.civis_2018_progressive_persuasion) = as18.civis_2018_one_pct_persuasion then 1
+  else 0 end as tax_the_1pct_voter
+  ,case 
+  when greatest(
+  as18.civis_2018_one_pct_persuasion,as18.civis_2018_progressive_persuasion) = as18.civis_2018_progressive_persuasion then 1
+  else 0 end as generic_progressive_voter
+  -- Culture messaging
+  ,case 
+  when greatest(as18.civis_2018_choice_persuasion,as18.civis_2018_sexual_assault_persuasion,as18.civis_2018_race_persuasion,as18.civis_2018_climate_persuasion) = as18.civis_2018_sexual_assault_persuasion then 1
+  else 0 end as metoo_voter
+  ,case 
+  when greatest(as18.civis_2018_choice_persuasion,as18.civis_2018_sexual_assault_persuasion,as18.civis_2018_race_persuasion,as18.civis_2018_climate_persuasion) = as18.civis_2018_choice_persuasion then 1
+  else 0 end as reproductive_rights_voter
+  ,case 
+  when greatest(as18.civis_2018_choice_persuasion,as18.civis_2018_sexual_assault_persuasion,as18.civis_2018_race_persuasion,as18.civis_2018_climate_persuasion) = as18.civis_2018_race_persuasion then 1
+  else 0 end as end_discrimination_voter
+  ,case 
+  when greatest(as18.civis_2018_choice_persuasion,as18.civis_2018_sexual_assault_persuasion,as18.civis_2018_race_persuasion,as18.civis_2018_climate_persuasion) = as18.civis_2018_climate_persuasion then 1
+  else 0 end as climate_change_voter
+  -- Political messaging
+  ,case 
+  when greatest(as18.civis_2018_trump_persuasion,as18.civis_2018_gop_persuasion) = as18.civis_2018_trump_persuasion then 1
+  else 0 end as anti_trump_voter
+  ,case 
+  when greatest(as18.civis_2018_bipartisan_persuasion,as18.civis_2018_gop_persuasion) = as18.civis_2018_bipartisan_persuasion then 1
+  else 0 end as restore_unity_voter
 
   -- DNC party and ideology
   ,coalesce(as18.dnc_2018_party_support_score,0.543546793) as dnc_2018_party_support_score
@@ -143,12 +173,37 @@ as
   ,coalesce(as16.tsmart_2016_donor_likelihood,0.325387388) as tsmart_2016_donor_likelihood
   
 -- Experian occupation codes  
-  ,case when tc.xp_occupation = 'K01' then 1 else 0 end as xp_occupation_k01_manager
-  ,case when tc.xp_occupation = 'K02' then 1 else 0 end as xp_occupation_k02_technical
-  ,case when tc.xp_occupation = 'K03' then 1 else 0 end as xp_occupation_k03_professional
-  ,case when tc.xp_occupation = 'K04' then 1 else 0 end as xp_occupation_k04_sales
-  ,case when tc.xp_occupation = 'K05' then 1 else 0 end as xp_occupation_k05_office
-  ,case when tc.xp_occupation = 'K06' then 1 else 0 end as xp_occupation_k06_bluecollar
+  ,case when tc.xp_occupation = 'K01' or tc.xpg_ind_lvl_occupation_group in ('I1','K1') then 1 else 0 end as xp_occupation_k01_manager
+  ,case when tc.xp_occupation = 'K02' or tc.xpg_ind_lvl_occupation_group in ('I2','K2') then 1 else 0 end as xp_occupation_k02_technical
+  ,case when tc.xp_occupation = 'K03' or tc.xpg_ind_lvl_occupation_group in ('I3','K3') then 1 else 0 end as xp_occupation_k03_professional
+  ,case when tc.xp_occupation = 'K04' or tc.xpg_ind_lvl_occupation_group in ('I4','K4') then 1 else 0 end as xp_occupation_k04_sales
+  ,case when tc.xp_occupation = 'K05' or tc.xpg_ind_lvl_occupation_group in ('I5','K5') then 1 else 0 end as xp_occupation_k05_office
+  ,case when tc.xp_occupation = 'K06' or tc.xpg_ind_lvl_occupation_group in ('I6','K6') then 1 else 0 end as xp_occupation_k06_bluecollar
+  ,case when tc.xpg_ind_lvl_occupation_code in ('I7','K7') or tc.xpg_ind_lvl_occupation_code = '15' then 1 else 0 end as xpg_occupation_farmer
+  ,case when tc.xpg_ind_lvl_occupation_code in ('I9','K9') or tc.xpg_ind_lvl_occupation_code = '08' then 1 else 0 end as xpg_occupation_retiree
+  -- Office occupations
+  ,case when tc.xpg_ind_lvl_occupation_code in ('02','32') then 1 else 0 end as xpg_occupation_professional
+  ,case when tc.xpg_ind_lvl_occupation_code in ('03','10') then 1 else 0 end as xpg_occupation_manager
+  ,case when tc.xpg_ind_lvl_occupation_code in ('04','05','06') then 1 else 0 end as xpg_occupation_office
+  ,case when tc.xpg_ind_lvl_occupation_code in ('37','53','18','38') then 1 else 0 end as xpg_occupation_law_fin_accnt
+  ,case when tc.xpg_ind_lvl_occupation_code = '36' then 1 else 0 end as xpg_occupation_engineer
+  ,case when tc.xpg_ind_lvl_occupation_code = '23' then 1 else 0 end as xpg_occupation_tech
+  -- Healthcare occupations
+  ,case when tc.xpg_ind_lvl_occupation_code in ('44','45','46','47','49') then 1 else 0 end as xpg_occupation_physicians
+  ,case when tc.xpg_ind_lvl_occupation_code = '48' then 1 else 0 end as xpg_occupation_nurse
+  ,case when tc.xpg_ind_lvl_occupation_code in ('39','40','41','42','43') then 1 else 0 end as xpg_occupation_therapy_socialwork
+  -- Union occupations
+  ,case when tc.xpg_ind_lvl_occupation_code = '21' then 1 else 0 end as xpg_occupation_teacher
+  ,case when tc.xpg_ind_lvl_occupation_code in ('07','35') then 1 else 0 end as xpg_occupation_trades
+  -- Local service occupations
+  ,case when tc.xpg_ind_lvl_occupation_code = '30' then 1 else 0 end as xpg_occupation_barbers_salon
+  ,case when tc.xpg_ind_lvl_occupation_code = '12' then 1 else 0 end as xpg_occupation_driver
+  ,case when tc.xpg_ind_lvl_occupation_code = '31' then 1 else 0 end as xpg_occupation_real_estate
+  ,case when tc.xpg_ind_lvl_occupation_code in ('11','16') then 1 else 0 end as xpg_occupation_self
+  -- Public admin occupations
+  ,case when tc.xpg_ind_lvl_occupation_code = '14' then 1 else 0 end as xpg_occupation_public_admin
+  ,case when tc.xpg_ind_lvl_occupation_code = '13' then 1 else 0 end as xpg_occupation_military
+
 
   -- Geographic embeddings (reduces 250+ block, tract, county features below to 15 dimensions)
   ,coalesce(bg.block_component_pc1,-2.83159373436281) as block_component_pc1
