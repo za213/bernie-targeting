@@ -17,7 +17,7 @@ as
   ,p.census_block_group_2010
   
 --All scores
-  -- Civis marriage, children, language, partisan/ideology scores
+  -- Marital status, children in household, spanish language preference, partisan/ideology scores
   ,coalesce(as20.civis_2020_marriage,0.566609551) as civis_2020_marriage
   --,coalesce(as18.dnc_2018_marriage,0.528516131) as dnc_2018_marriage
   ,coalesce(as20.civis_2020_children_present,0.291702784) as civis_2020_children_present
@@ -26,7 +26,7 @@ as
   ,coalesce(as20.civis_2020_spanish_language_preference,0.025251928) as civis_2020_spanish_language_preference
   --,coalesce(as18.civis_2018_spanish_language_preference,0.02299987) as civis_2018_spanish_language_preference
 
-  -- Civis 2018 support, turnout, gotv
+  -- 2018 support, turnout, gotv
   ,coalesce(as18.civis_2018_turnout,0.464239577) as civis_2018_turnout
   ,coalesce(as18.civis_2018_partisanship,0.552657781) as civis_2018_partisanship
   ,coalesce(as18.civis_2018_gotv,0.444764104) as civis_2018_gotv
@@ -35,20 +35,20 @@ as
   ,coalesce(as18.civis_2018_congressional_support,0.547379039) as civis_2018_congressional_support
   ,coalesce(as18.civis_2018_avev,0.422649328) as civis_2018_avev
 
-  -- DNC education and income
+  -- Education and income
   ,coalesce(as18.dnc_2018_college_graduate,0.434772353) as dnc_2018_college_graduate
   ,coalesce(as18.dnc_2018_income_dollars,56053.269194657) as dnc_2018_income_dollars
   ,coalesce(as18.dnc_2018_high_school_only,0.234392294) as dnc_2018_high_school_only
   ,coalesce(as18.dnc_2018_income_rank,50) as dnc_2018_income_rank
 
-  -- Civis race
+  -- Race and ethnicity
   ,coalesce(as20.civis_2020_race_native,0.020016087) as civis_2020_race_native
   ,coalesce(as20.civis_2020_race_black,0.136500989) as civis_2020_race_black
   ,coalesce(as20.civis_2020_race_latinx,0.103369184) as civis_2020_race_latinx
   ,coalesce(as20.civis_2020_race_asian,0.044318742) as civis_2020_race_asian
   ,coalesce(as20.civis_2020_race_white,0.695794994) as civis_2020_race_white
 
-  -- Civis subethnicity
+  -- Subethnicity
   ,coalesce(as20.civis_2020_subeth_african_american,0.111452007) as civis_2020_subeth_african_american
   ,coalesce(as20.civis_2020_subeth_west_indian,0.006705198) as civis_2020_subeth_west_indian
   ,coalesce(as20.civis_2020_subeth_haitian,0.003665945) as civis_2020_subeth_haitian
@@ -69,7 +69,7 @@ as
   ,coalesce(as20.civis_2020_subeth_other_asian,0.004695813) as civis_2020_subeth_other_asian
   ,coalesce(as20.civis_2020_subeth_hmong,0.000988565) as civis_2020_subeth_hmong
 
-  -- Civis religion
+  -- Religion
   ,coalesce(as20.civis_2020_cultural_religion_jewish,0.039996867) as civis_2020_cultural_religion_jewish
   ,coalesce(as20.civis_2020_cultural_religion_mormon,0.019002679) as civis_2020_cultural_religion_mormon
   ,coalesce(as20.civis_2020_cultural_religion_muslim,0.013412685) as civis_2020_cultural_religion_muslim
@@ -80,12 +80,12 @@ as
   ,coalesce(as20.civis_2020_cultural_religion_buddhist,0.019066914) as civis_2020_cultural_religion_buddhist
   ,case when l2.religions_description = 'Islamic' then 1 else 0 end as religion_muslim 
 
-  -- Civis persuasion
+  -- Message persuasion in terms of average treatment effects (ATEs)
   ,coalesce(as18.civis_2018_gotv_raw,0.003834102) as civis_2018_gotv_raw
   ,coalesce(as18.civis_2018_cultural_persuasion,-0.005461805) as civis_2018_cultural_persuasion
   ,coalesce(as18.civis_2018_economic_persuasion,0.006528537) as civis_2018_economic_persuasion
   ,coalesce(as18.civis_2018_political_persuasion,0.003801198) as civis_2018_political_persuasion
-  -- Economic message ATEs
+  -- Economic messages ATEs
   ,coalesce(as18.civis_2018_infrastructure_persuasion,0.006191701) as civis_2018_infrastructure_persuasion
   ,coalesce(as18.civis_2018_aca_persuasion,0.005342091) as civis_2018_aca_persuasion
   ,coalesce(as18.civis_2018_one_pct_persuasion,0.00611318) as civis_2018_one_pct_persuasion
@@ -93,13 +93,7 @@ as
   ,coalesce(as18.civis_2018_college_persuasion,0.005387874) as civis_2018_college_persuasion
   ,coalesce(as18.civis_2018_medicare_persuasion,0.011460919) as civis_2018_medicare_persuasion
   ,coalesce(as18.civis_2018_skills_persuasion,0.004798559) as civis_2018_skills_persuasion
-  -- Political message ATEs
-  ,coalesce(as18.civis_2018_growth_persuasion,0.005146488) as civis_2018_growth_persuasion
-  ,coalesce(as18.civis_2018_bipartisan_persuasion,0.006445597) as civis_2018_bipartisan_persuasion
-  ,coalesce(as18.civis_2018_gop_persuasion,0.003132949) as civis_2018_gop_persuasion
-  ,coalesce(as18.civis_2018_welcome_persuasion,0.003711122) as civis_2018_welcome_persuasion
-  ,coalesce(as18.civis_2018_trump_persuasion,-0.000755541) as civis_2018_trump_persuasion
-  -- Cultural message ATEs
+  -- Cultural messages ATEs
   ,coalesce(as18.civis_2018_sexual_assault_persuasion,0.009672641) as civis_2018_sexual_assault_persuasion
   ,coalesce(as18.civis_2018_wall_persuasion,-0.001512978) as civis_2018_wall_persuasion
   ,coalesce(as18.civis_2018_marijuana_persuasion,-0.00030366) as civis_2018_marijuana_persuasion
@@ -111,13 +105,19 @@ as
   ,coalesce(as18.civis_2018_military_persuasion,0.00572671) as civis_2018_military_persuasion
   ,coalesce(as18.civis_2018_choice_persuasion,0.004149563) as civis_2018_choice_persuasion
   ,coalesce(as18.civis_2018_ballot_completion,0.463701714) as civis_2018_ballot_completion
+  -- Political messages ATEs
+  ,coalesce(as18.civis_2018_growth_persuasion,0.005146488) as civis_2018_growth_persuasion
+  ,coalesce(as18.civis_2018_bipartisan_persuasion,0.006445597) as civis_2018_bipartisan_persuasion
+  ,coalesce(as18.civis_2018_gop_persuasion,0.003132949) as civis_2018_gop_persuasion
+  ,coalesce(as18.civis_2018_welcome_persuasion,0.003711122) as civis_2018_welcome_persuasion
+  ,coalesce(as18.civis_2018_trump_persuasion,-0.000755541) as civis_2018_trump_persuasion
  
-  -- Economic voters
+  -- Most salient economic message
   ,case when greatest(as18.civis_2018_one_pct_persuasion,as18.civis_2018_progressive_persuasion) = as18.civis_2018_one_pct_persuasion then 1
   else 0 end as tax_the_1pct_voter
   ,case when greatest(as18.civis_2018_one_pct_persuasion,as18.civis_2018_progressive_persuasion) = as18.civis_2018_progressive_persuasion then 1
   else 0 end as generic_progressive_voter
-  -- Cultural voters
+  -- Most salient cultural message
   ,case when greatest(as18.civis_2018_choice_persuasion,as18.civis_2018_sexual_assault_persuasion,as18.civis_2018_race_persuasion,as18.civis_2018_climate_persuasion) = as18.civis_2018_sexual_assault_persuasion then 1
   else 0 end as metoo_voter
   ,case when greatest(as18.civis_2018_choice_persuasion,as18.civis_2018_sexual_assault_persuasion,as18.civis_2018_race_persuasion,as18.civis_2018_climate_persuasion) = as18.civis_2018_choice_persuasion then 1
@@ -126,7 +126,7 @@ as
   else 0 end as end_discrimination_voter
   ,case when greatest(as18.civis_2018_choice_persuasion,as18.civis_2018_sexual_assault_persuasion,as18.civis_2018_race_persuasion,as18.civis_2018_climate_persuasion) = as18.civis_2018_climate_persuasion then 1
   else 0 end as climate_change_voter
-  -- Political voters
+  -- Most salient political message
   ,case when greatest(as18.civis_2018_trump_persuasion,as18.civis_2018_gop_persuasion) = as18.civis_2018_trump_persuasion then 1
   else 0 end as anti_trump_voter
   ,case when greatest(as18.civis_2018_bipartisan_persuasion,as18.civis_2018_gop_persuasion) = as18.civis_2018_bipartisan_persuasion then 1
@@ -155,7 +155,7 @@ as
   ,coalesce(as18.dnc_2018_volprop_phone_rank,50) as dnc_2018_volprop_phone_rank
   ,coalesce(as18.dnc_2018_volprop_walk_rank,51) as dnc_2018_volprop_walk_rank
 
-  -- DNC 2016 
+  -- DNC 2016 scores
   ,coalesce(as16.pres_2016_support,0.529941755) as pres_2016_support
   ,coalesce(as16.dnc_2016_party_support_score,0.540886883) as dnc_2016_party_support_score
   ,coalesce(as16.dnc_2016_turnout,0.740073165) as dnc_2016_turnout
@@ -273,7 +273,7 @@ as
   ,coalesce(acs.xb_05007_e_69,17.2102764107977) as pct_foreign_born_south_america
   --,coalesce(acs.xb_05007_e_82,10.1881488482489) as pct_foreign_born_other_areas
 
-  -- Size demographics of age, race, education (block group) from Census 
+  -- Demographic age, race, education quantities (block group) from Census 
   -- Source: https://www.census.gov/topics/research/guidance/planning-databases/2019.html
   ,coalesce(acs.xb_13008_e_2,5.28599158612465) as pct_had_birth_in_last_year
   ,coalesce(bg.pop_under_5_acs_13_17,126) as pop_under_5_acs_13_17
@@ -288,7 +288,7 @@ as
   ,coalesce(bg.college_acs_13_17,480) as college_acs_13_17
   ,coalesce(bg.tot_prns_in_hhd_acs_13_17,1990) as tot_prns_in_hhd_acs_13_17
   
-  -- Percents demographics of age, race, education (block group) from Census 
+  -- Demographic age, race, education percentages (block group) from Census 
   ,coalesce(bg.pct_hispanic_acs_13_17,14.2960721578394) as pct_hispanic_acs_13_17
   ,coalesce(bg.pct_nh_white_alone_acs_13_17,65.5333628958917) as pct_nh_white_alone_acs_13_17
   ,coalesce(bg.pct_nh_blk_alone_acs_13_17,12.0509472949503) as pct_nh_blk_alone_acs_13_17
@@ -333,13 +333,13 @@ as
   ,coalesce(trc.pct_pop_nocompdevic_acs_13_17_tract,8.56910770409689) as pct_pop_nocompdevic_acs_13_17_tract
   ,coalesce(trc.pct_pop_w_broadcomp_acs_13_17_tract,82.53493757977) as pct_pop_w_broadcomp_acs_13_17_tract
 
-  --Language spoken (block group) from Census 
+  --Language spoken at home (block group) from Census 
   ,coalesce(bg.pct_eng_vw_span_acs_13_17,2.25840224846234) as pct_eng_vw_span_acs_13_17
   ,coalesce(bg.pct_eng_vw_indoeuro_acs_13_17,0.610076091630018) as pct_eng_vw_indoeuro_acs_13_17
   ,coalesce(bg.pct_eng_vw_api_acs_13_17,0.817020607263466) as pct_eng_vw_api_acs_13_17
   ,coalesce(bg.pct_eng_vw_acs_13_17,3.84689136566416) as pct_eng_vw_acs_13_17
 
-  -- Married, related, with children (block group) from Census 
+  -- Household relations, marriage, children (block group) from Census 
   ,coalesce(bg.pct_rel_family_hhd_acs_13_17,67.4416347001227) as pct_rel_family_hhd_acs_13_17
   ,coalesce(bg.pct_mrdcple_hhd_acs_13_17,50.4965271841652) as pct_mrdcple_hhd_acs_13_17
   ,coalesce(bg.avg_tot_prns_in_hhd_acs_13_17,2.66520630002142) as avg_tot_prns_in_hhd_acs_13_17
@@ -369,7 +369,7 @@ as
   ,coalesce(bg.pct_crowd_occp_u_acs_13_17,2.9544471103295) as pct_crowd_occp_u_acs_13_17
   ,coalesce(bg.pct_mobile_homes_acs_13_17,5.66837761256287) as pct_mobile_homes_acs_13_17 
  
-  -- Demographics on population, age, race, education, children (tract) from Census 
+  -- Population age, race, education, children (tract) from Census 
   ,coalesce(trc.tot_population_acs_13_17_tract,5465) as tot_population_acs_13_17_tract
   ,coalesce(trc.median_age_acs_13_17_tract,39.7290404593366) as median_age_acs_13_17_tract
   ,coalesce(trc.civ_noninst_pop_acs_13_17_tract,5400) as civ_noninst_pop_acs_13_17_tract
@@ -450,7 +450,7 @@ as
   ,coalesce(bg.pct_eng_vw_other_acs_13_17,0.161400892051139) as pct_eng_vw_other_acs_13_17
   */
   
-  -- Neighborhooed effects and determinants of socioeconomic mobility (tract)
+  -- Neighborhood effects and determinants of socioeconomic mobility (tract)
   -- Source: http://www.equality-of-opportunity.org/data/
   ,coalesce(hhinc_mean2000,84608.8675030326) as hhinc_mean2000
   ,coalesce(mean_commutetime2000,27.1511583146669) as mean_commutetime2000
@@ -539,7 +539,7 @@ as
   ,coalesce(cty.fraction_of_parents_in_10th_national_income_decile,0.117994046920011) as fraction_of_parents_in_10th_national_income_decile
   */
   
-  -- Macro properties of place (county)
+  -- Urban area statistics (county)
   ,coalesce(cty.log_population_density,6.12619867247722) as log_population_density
   ,coalesce(cty.fraction_with_commute_less15_mins,0.294810198323762) as fraction_with_commute_less15_mins
   --,coalesce(cty.fraction_with_commute__15_mins,-0.0099986728359157) as fraction_with_commute__15_mins
@@ -581,7 +581,7 @@ as
   ,coalesce(cty.violent_crime_rate,0.00179317116792631) as violent_crime_rate
   ,coalesce(cty.total_crime_rate,0.00705892372461041) as total_crime_rate
   
-  -- An indicator for whether the child reports positive W-2 earnings with income quintile and gender (county)
+  -- Whether the child reports positive W-2 earnings with income quintile and gender (county)
   ,coalesce(cty.w2_pos_30_q1_f,0.728292494647528) as w2_pos_30_q1_f
   ,coalesce(cty.w2_pos_30_q1_m,0.696787968406929) as w2_pos_30_q1_m
   ,coalesce(cty.w2_pos_30_q2_f,0.774017520106013) as w2_pos_30_q2_f
@@ -595,7 +595,7 @@ as
   ,coalesce(cty.primary16_clinton,0.5480444769384) as primary16_clinton
   ,coalesce(cty.primary16_sanders,0.434347726321799) as primary16_sanders
   
-  -- TargetSmart Turnout 
+  -- TargetSmart turnout 
   ,coalesce(tc.ts_tsmart_partisan_score,53.615874715767) as ts_tsmart_partisan_score
   ,coalesce(tc.ts_tsmart_presidential_general_turnout_score,72.1139112743012) as ts_tsmart_presidential_general_turnout_score
   ,coalesce(tc.ts_tsmart_midterm_general_turnout_score,49.2156783912222) as ts_tsmart_midterm_general_turnout_score
@@ -627,7 +627,7 @@ as
   ,coalesce(tc.ts_tsmart_activist_score,42.7382851129463) as ts_tsmart_activist_score
   ,coalesce(tc.ts_tsmart_working_class_score,58.6177878423767) as ts_tsmart_working_class_score
   
-  -- PredictWise
+  -- PredictWise scores
   ,coalesce(tc.predictwise_authoritarianism_score,71) as predictwise_authoritarianism_score
   ,coalesce(tc.predictwise_compassion_score,55) as predictwise_compassion_score
   ,coalesce(tc.predictwise_economic_populism_score,43) as predictwise_economic_populism_score
@@ -690,7 +690,7 @@ as
   ,coalesce(tc.gsyn_synth_zip5_total_fec_contributions,141) as gsyn_synth_zip5_total_fec_contributions
   */
   
--- Urbanicity 
+-- Residential area
   ,case 
   when tc.ts_tsmart_urbanicity in ('U5', 'U6') then 1
   when p.voting_address_urbanicity in ('U5','U6') then 1
@@ -707,13 +707,13 @@ as
   when p.census_density_rural then 1
   else 0 end geo_rural
 
--- Homeownership
+-- Homeownership binaries
   ,case when tc.tb_homeowner_flg = 'N' then 1 
   else 0 end as tb_homeowner_flg_no
   ,case when tc.tb_homeowner_flg = 'Y' then 1 
   else 0 end as tb_homeowner_flg_yes
  
--- Gender
+-- Gender binaries
   ,case 
   when p.gender_combined = 'F' then 1
   when l2.voters_gender = 'F' then 1
@@ -728,7 +728,7 @@ as
   else 0 end as male
   
  
--- Marital Status
+-- Marital status binaries
   ,case when (as20.civis_2020_marriage > 0.5 and tc.ts_tsmart_marriage_score > 50 and right(tc.xpg_ind_lvl_marital_status,1) = 'M')
   and (coalesce(p.gender_combined, l2.voters_gender, tc.tb_gender, tc.xpg_ind_lvl_gender) = 'F') then 1 
   else 0 end as married_female
@@ -738,7 +738,7 @@ as
   ,case when (as20.civis_2020_marriage > 0.5 and tc.ts_tsmart_marriage_score > 50 and right(tc.xpg_ind_lvl_marital_status,1) = 'M') then 1 
   else 0 end as married 
 
--- Ethnicity
+-- Race and ethnicity binaries
   ,case 
   when as20.civis_2020_likely_race = 'W' then 1
   when p.ethnicity_combined = 'W' then 1
@@ -765,7 +765,7 @@ as
   when tc.ts_tsmart_p_natam >= .66 then 1 
   else 0 end as eth_native
 
--- Income 
+-- Income binaries
   ,case
   when tc.xpg_estimated_household_income in ('A','B') then 1
   when as18.dnc_2018_income_dollars < 25000 then 1
@@ -792,7 +792,7 @@ as
   when bg.med_hhd_inc_bg_acs_13_17 >= 150000 then 1
   else 0 end as income_150k_plus
 
--- Age     
+-- Age and buckets
   ,coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) as age_continuous
   
   ,case 
@@ -812,7 +812,7 @@ as
   ,case  
   when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) >= 80 then 1 else 0 end as age_80plus
     
--- Education 
+-- Education binaries
   ,case
   when tc.tb_education_cd in (3,4) then 1
   when as18.dnc_2018_college_graduate > .5 and tc.ts_tsmart_college_graduate_score > 50 then 1
@@ -828,7 +828,7 @@ as
   when right(tc.xpg_ind_lvl_education_model,1) in ('1','2') and left(tc.xpg_ind_lvl_education_model,1) in ('1','2') then 1
   else 0 end as less_than_bach
     
--- Party ID and Reg
+-- Party ID binaries
   ,case when coalesce(p.party_name_dnc,l2.parties_description) = 'Democratic' or party_id = 1 then 1 
   else 0 end as party_dem
   ,case when coalesce(p.party_name_dnc,l2.parties_description) = 'Republican' or party_id = 2 then 1 
@@ -848,7 +848,9 @@ as
   ,case when pv.state_code in ('AL','GA','HI','IL','IN','MI','MN','MO','MS','MT','OH','SC','TN','TX','VA','VT','WA','WI') then 1 
   else 0 end as non_party_reg_state           
   
--- Voter registration history
+-- Voter registration history binaries
+  ,case  
+  when registration_date::date > '2018-11-08' then 1 else 0 end as vote_new_reg
   ,case when p.reg_voter_flag then 1
   else 0 end as reg_voter_flag
   ,case when p.is_permanent_absentee then 1
@@ -866,28 +868,25 @@ as
   ,case when p.years_registered >=25 then 1
   else 0 end as years_registered_25plusyears
   
-  -- General Elections
+  -- General election participation binaries
   ,pv.vote_g_2018
   ,pv.vote_g_2016
   ,pv.vote_g_2014
   ,pv.vote_g_2012
   
-  -- Dem Presidential Primaries
+  -- Dem presidential primary participation binaries
   ,pv.vote_pp_2000_party_d
   ,pv.vote_pp_2004_party_d
   ,pv.vote_pp_2008_party_d
   ,pv.vote_pp_2016_party_d
-
   ,case 
   when (pv.vote_pp_2012 = 1 or pv.vote_pp_2016 = 1) then 1 
   else 0 end as pre_primary_voter_post12
-
   ,case 
   when (pv.vote_p_2016_party_d = 1 or
   pv.vote_p_2017_party_d = 1 or
   pv.vote_p_2018_party_d = 1) then 1 
   else 0 end as primary_dem_voter_post16
-
   ,case 
   when (pv.vote_p_2008_party_d = 1 or
   pv.vote_p_2009_party_d = 1 or
@@ -901,13 +900,13 @@ as
   pv.vote_p_2017_party_d = 1 or
   pv.vote_p_2018_party_d = 1) then 1 
   else 0 end as primary_dem_voter_post08
-
+ 
+  -- Early voter / absentee voter binaries
   ,case 
   when (pv.vote_pp_2016_method_early = 1 or
   pv.vote_p_2017_method_early = 1 or
   pv.vote_p_2018_method_early = 1) then 1 
   else 0 end as primary_early_voter_post16
-
   ,case 
   when (pv.vote_p_2014_method_absentee = 1 or
   pv.vote_p_2015_method_absentee = 1 or
@@ -915,7 +914,6 @@ as
   pv.vote_p_2017_method_absentee = 1 or
   pv.vote_p_2018_method_absentee = 1) then 1 
   else 0 end as primary_absentee_voter_post14
-
   ,case 
   when (pv.vote_g_2014_method_absentee = 1 or
   pv.vote_g_2015_method_absentee = 1 or
@@ -923,31 +921,30 @@ as
   pv.vote_g_2017_method_absentee = 1 or
   pv.vote_g_2018_method_absentee = 1) then 1 
   else 0 end as general_absentee_voter_post14
-
   ,case 
   when (pv.vote_pp_2004_method_absentee = 1 or
   pv.vote_pp_2008_method_absentee = 1 or
   pv.vote_pp_2012_method_absentee = 1 or
   pv.vote_pp_2016_method_absentee = 1) then 1 
   else 0 end as pres_primary_absentee_voter_post04
-
+ 
+  -- Lapsed voter binaries
   ,case 
   when (pv.vote_pp_2008_novote_eligible = 1 and
   pv.vote_pp_2016_novote_eligible = 1) then 1 
   else 0 end as pres_primary_novote_eligible_post08
-
   ,case 
   when (pv.vote_p_2016_novote_eligible = 1 and
   pv.vote_p_2018_novote_eligible = 1) then 1 
   else 0 end as primary_novote_eligible_post16
-
   ,case 
   when (pv.vote_g_2008_novote_eligible = 1 and 
   pv.vote_g_2012_novote_eligible = 1 and
   pv.vote_g_2016_novote_eligible = 1 and
   pv.vote_g_2018_novote_eligible = 1) then 1 
   else 0 end as general_novote_eligible_post08
-
+ 
+  -- Voting frequency binaries
   ,case 
   when (pv.vote_g_2008 +
   pv.vote_g_2012 +
@@ -958,7 +955,6 @@ as
   pv.vote_g_2017 +
   pv.vote_g_2018) >= 2 then 1 
   else 0 end as general_at_least_twice_post08
-
   ,case 
   when (pv.vote_p_2008 +
   pv.vote_p_2012 +
@@ -969,25 +965,19 @@ as
   pv.vote_p_2017 +
   pv.vote_p_2018) >= 2 then 1 
   else 0 end as primary_at_least_twice_post08
-  
   ,case 
   when pv.vote_g_2018 = 1 and pv.vote_g_2016 != 1 and pv.vote_g_2014 != 1 or pv.vote_g_2012 != 1 then 1 
   else 0 end as vote_midterm_2018_voter
-    
   ,case 
   when pv.vote_g_2018 = 1 and pv.vote_g_2016 = 1 and pv.vote_g_2014 != 1 or pv.vote_g_2012 != 1 then 1 
   else 0 end as vote_pres_midterm_2018_2016_voter
-    
   ,case  
   when pv.vote_g_2018 != 1 and pv.vote_g_2016 = 1 and pv.vote_g_2014 != 1 or pv.vote_g_2012 != 1 then 1 
   else 0 end as vote_pres_2016_voter
-    
   ,case  
   when pv.vote_g_2018 != 1 and pv.vote_g_2016 != 1 and (pv.vote_g_2014 = 1 or pv.vote_g_2012 = 1 or pv.vote_g_2008 = 1) then 1 
   else 0 end as vote_lapsed_voter
-    
-  ,case  
-  when registration_date::date > '2018-11-08' then 1 else 0 end as vote_new_reg
+
   
 from phoenix_analytics.person p 
 left join phoenix_analytics.person_votes pv using(person_id)
