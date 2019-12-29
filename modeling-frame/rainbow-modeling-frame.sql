@@ -615,7 +615,7 @@ as
   ,coalesce(cty.gini,0.445165973890533) as gini
   ,coalesce(cty.top_1pct_income_share,0.00136530467373247) as top_1pct_income_share
   ,coalesce(cty.fraction_middle_class_between_p25_and_p75,0.498556746393662) as fraction_middle_class_between_p25_and_p75
-  ,coalesce(cty.segregation_of_affluence_p75,-0.00107713826175978) as segregation_of_affluence_p75
+  --,coalesce(cty.segregation_of_affluence_p75,-0.00107713826175978) as segregation_of_affluence_p75
   ,coalesce(cty.unemployment_rate,0.0467524233687776) as unemployment_rate
   ,coalesce(cty.fraction_black,-0.0583997544016713) as fraction_black
   ,coalesce(cty.poverty_rate,-0.0614342101400683) as poverty_rate
