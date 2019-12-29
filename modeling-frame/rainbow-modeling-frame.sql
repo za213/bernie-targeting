@@ -173,8 +173,8 @@ as
   ,case when tc.xp_occupation = 'K04' or tc.xpg_ind_lvl_occupation_group in ('I4','K4') then 1 else 0 end as xp_occupation_k04_sales
   ,case when tc.xp_occupation = 'K05' or tc.xpg_ind_lvl_occupation_group in ('I5','K5') then 1 else 0 end as xp_occupation_k05_office
   ,case when tc.xp_occupation = 'K06' or tc.xpg_ind_lvl_occupation_group in ('I6','K6') then 1 else 0 end as xp_occupation_k06_bluecollar
-  ,case when tc.xpg_ind_lvl_occupation_code in ('I7','K7') or tc.xpg_ind_lvl_occupation_code = '15' then 1 else 0 end as xpg_occupation_farmer
-  ,case when tc.xpg_ind_lvl_occupation_code in ('I9','K9') or tc.xpg_ind_lvl_occupation_code = '08' then 1 else 0 end as xpg_occupation_retiree
+  ,case when tc.xpg_ind_lvl_occupation_group in ('I7','K7') or tc.xpg_ind_lvl_occupation_code = '15' then 1 else 0 end as xpg_occupation_farmer
+  ,case when tc.xpg_ind_lvl_occupation_group in ('I9','K9') or tc.xpg_ind_lvl_occupation_code = '08' then 1 else 0 end as xpg_occupation_retiree
   -- Professional / Managerial Service occupations
   ,case when tc.xpg_ind_lvl_occupation_code in ('02','32') then 1 else 0 end as xpg_occupation_professional
   ,case when tc.xpg_ind_lvl_occupation_code in ('03','10') then 1 else 0 end as xpg_occupation_manager
