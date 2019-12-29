@@ -7,7 +7,7 @@
 
 ## Modeling Frame:
 * Platform table: `bernie_data_commons.rainbow_modeling_frame`
-* [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) to create modeling frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) of features
+* [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) to create modeling frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) of features and descriptions
 * Table with three default feature lists for modeling `bernie_nmarchio2.feature_list` and [import script](https://platform.civisanalytics.com/spa/#/imports/53801807)
 * Geographic features: county `bernie_nmarchio2.geo_county_covariates`, tract `bernie_nmarchio2.geo_tract_covariates`, and block group `bernie_nmarchio2.geo_block_covariates` 
 * Raw data [archived on S3](https://github.com/Bernie-2020/bernie-targeting/blob/master/s3-files/modeling-frame-source-data.R) and [dev scripts for cleaning and imputing missing data](https://github.com/Bernie-2020/bernie-targeting/tree/master/modeling-frame/dev)
@@ -18,7 +18,7 @@
 
 ## Analytics Frame:
 * Platform table: `bernie_data_commons.rainbow_analytics_frame`
-* [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-analytics-frame.sql) to create analytics frame and [data dictionary]
+* [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-analytics-frame.sql) to create analytics frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) for list of features
 
 ## Modeling Pipelines:
 
