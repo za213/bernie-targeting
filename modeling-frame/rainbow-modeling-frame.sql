@@ -727,7 +727,6 @@ as
   when tc.xpg_ind_lvl_gender = 'M' then 1
   else 0 end as male
   
- 
 -- Marital status binaries
   ,case when (as20.civis_2020_marriage > 0.5 and tc.ts_tsmart_marriage_score > 50 and right(tc.xpg_ind_lvl_marital_status,1) = 'M')
   and (coalesce(p.gender_combined, l2.voters_gender, tc.tb_gender, tc.xpg_ind_lvl_gender) = 'F') then 1 
@@ -765,7 +764,7 @@ as
   when tc.ts_tsmart_p_natam >= .66 then 1 
   else 0 end as eth_native
 
--- Income binaries
+  -- Income binaries
   ,case
   when tc.xpg_estimated_household_income in ('A','B') then 1
   when as18.dnc_2018_income_dollars < 25000 then 1
@@ -789,12 +788,11 @@ as
   ,case
   when tc.xpg_estimated_household_income in ('I','J','K','L') then 1
   when as18.dnc_2018_income_dollars >= 150000 then 1
-  when bg.med_hhd_inc_bg_acs_13_17 >= 150000 then 1
+  when bg.med_hhd_inc_bg_acs_13_17 >= 200000 then 1
   else 0 end as income_150k_plus
 
--- Age and buckets
+  -- Age continuous and binaries
   ,coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) as age_continuous
-  
   ,case 
   when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) between 18 and 22 then 1 else 0 end as age_18_22
   ,case  
@@ -812,7 +810,7 @@ as
   ,case  
   when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) >= 80 then 1 else 0 end as age_80plus
     
--- Education binaries
+  -- Education binaries
   ,case
   when tc.tb_education_cd in (3,4) then 1
   when as18.dnc_2018_college_graduate > .5 and tc.ts_tsmart_college_graduate_score > 50 then 1
@@ -828,7 +826,7 @@ as
   when right(tc.xpg_ind_lvl_education_model,1) in ('1','2') and left(tc.xpg_ind_lvl_education_model,1) in ('1','2') then 1
   else 0 end as less_than_bach
     
--- Party ID binaries
+  -- Party ID binaries
   ,case when coalesce(p.party_name_dnc,l2.parties_description) = 'Democratic' or party_id = 1 then 1 
   else 0 end as party_dem
   ,case when coalesce(p.party_name_dnc,l2.parties_description) = 'Republican' or party_id = 2 then 1 
@@ -848,7 +846,7 @@ as
   ,case when pv.state_code in ('AL','GA','HI','IL','IN','MI','MN','MO','MS','MT','OH','SC','TN','TX','VA','VT','WA','WI') then 1 
   else 0 end as non_party_reg_state           
   
--- Voter registration history binaries
+  -- Voter registration history binaries
   ,case  
   when registration_date::date > '2018-11-08' then 1 else 0 end as vote_new_reg
   ,case when p.reg_voter_flag then 1
