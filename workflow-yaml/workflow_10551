@@ -1,0 +1,33 @@
+version: '2.0'
+workflow:
+  tasks:
+    feature_defaults:
+      action: civis.run_job
+      input: 
+        job_id: 53801807
+      on-success:
+        - model_frame
+        - analytics_frame
+    model_frame:
+      action: civis.run_job
+      input: 
+        job_id: 54403702
+      on-success:
+        - compression_script
+    analytics_frame:
+      action: civis.run_job
+      input:
+        job_id: 54403717
+      on-success:
+        - compression_script
+    compression_script:
+      action: civis.run_job
+      input:
+        job_id: 54403061
+      join: all
+      
+#https://platform.civisanalytics.com/spa/#/workflows/10551  
+#https://platform.civisanalytics.com/spa/#/imports/53801807
+#https://platform.civisanalytics.com/spa/#/scripts/custom/54403702
+#https://platform.civisanalytics.com/spa/#/scripts/custom/54403717
+#https://platform.civisanalytics.com/spa/#/scripts/custom/54403061
