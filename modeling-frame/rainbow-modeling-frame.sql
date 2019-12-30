@@ -794,7 +794,9 @@ as
   else 0 end as income_150k_plus
 
   -- Age continuous and binaries
-  ,coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) as age_continuous
+  ,case when nvl(p.age_combined::int,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) between 17 and 120 
+  then nvl(p.age_combined::int,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int)
+  else 0 end as age_continuous
   ,case 
   when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) between 18 and 22 then 1 else 0 end as age_18_22
   ,case  
