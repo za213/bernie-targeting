@@ -18,11 +18,23 @@ p.person_id
 ,p.census_block_group_2010
 ,p.voting_city
     
-,case
-when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) between 18 and 34 then '1 - 18-34'
-when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) between 36 and 49 then '2 - 35-49'
-when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) between 50 and 64 then '3 - 50-64'
-when coalesce(p.age_combined,l2.voters_age::int,tc.tb_age::int,tc.xpg_ind_lvl_exact_age::int,tc.xpg_ind_lvl_estimated_age::int) >= 65 then '4 - 65+'
+,case 
+when p.age_combined::int is not null and p.age_combined::int between 18 and 34 then '1 - 18-34'
+when p.age_combined::int is not null and p.age_combined::int between 36 and 49 then '2 - 35-49'
+when p.age_combined::int is not null and p.age_combined::int between 50 and 64 then '3 - 50-64'
+when p.age_combined::int is not null and p.age_combined::int >= 65 then '4 - 65+'
+when l2.voters_age::int is not null and l2.voters_age::int between 18 and 34 then '1 - 18-34'
+when l2.voters_age::int is not null and l2.voters_age::int between 36 and 49 then '2 - 35-49'
+when l2.voters_age::int is not null and l2.voters_age::int between 50 and 64 then '3 - 50-64'
+when l2.voters_age::int is not null and l2.voters_age::int >= 65 then '4 - 65+'
+when tc.xpg_ind_lvl_exact_age::int is not null and tc.xpg_ind_lvl_exact_age::int between 18 and 34 then '1 - 18-34'
+when tc.xpg_ind_lvl_exact_age::int is not null and tc.xpg_ind_lvl_exact_age::int between 36 and 49 then '2 - 35-49'
+when tc.xpg_ind_lvl_exact_age::int is not null and tc.xpg_ind_lvl_exact_age::int between 50 and 64 then '3 - 50-64'
+when tc.xpg_ind_lvl_exact_age::int is not null and tc.xpg_ind_lvl_exact_age::int >= 65 then '4 - 65+'
+when tc.xpg_ind_lvl_estimated_age::int is not null and tc.xpg_ind_lvl_estimated_age::int between 18 and 34 then '1 - 18-34'
+when tc.xpg_ind_lvl_estimated_age::int is not null and tc.xpg_ind_lvl_estimated_age::int between 36 and 49 then '2 - 35-49'
+when tc.xpg_ind_lvl_estimated_age::int is not null and tc.xpg_ind_lvl_estimated_age::int between 50 and 64 then '3 - 50-64'
+when tc.xpg_ind_lvl_estimated_age::int is not null and tc.xpg_ind_lvl_estimated_age::int >= 65 then '4 - 65+'
 else '5 - Unknown'
 end as age_5way
 
