@@ -868,17 +868,17 @@ as
   ,case when p.years_registered >=25 then 1
   else 0 end as years_registered_25plusyears
   
-  -- General election participation binaries
-  ,pv.vote_g_2018
-  ,pv.vote_g_2016
-  ,pv.vote_g_2014
-  ,pv.vote_g_2012
+ -- General election participation binaries
+  ,coalesce(pv.vote_g_2018,0) as vote_g_2018
+  ,coalesce(pv.vote_g_2016,0) as vote_g_2016
+  ,coalesce(pv.vote_g_2014,0) as vote_g_2014
+  ,coalesce(pv.vote_g_2012,0) as vote_g_2012
   
   -- Dem presidential primary participation binaries
-  ,pv.vote_pp_2000_party_d
-  ,pv.vote_pp_2004_party_d
-  ,pv.vote_pp_2008_party_d
-  ,pv.vote_pp_2016_party_d
+  ,coalesce(pv.vote_pp_2000_party_d,0) as vote_pp_2000_party_d
+  ,coalesce(pv.vote_pp_2004_party_d,0) as vote_pp_2004_party_d
+  ,coalesce(pv.vote_pp_2008_party_d,0) as vote_pp_2008_party_d
+  ,coalesce(pv.vote_pp_2016_party_d,0) as vote_pp_2016_party_d
   ,case 
   when (pv.vote_pp_2012 = 1 or pv.vote_pp_2016 = 1) then 1 
   else 0 end as pre_primary_voter_post12
