@@ -1,39 +1,58 @@
+
+
 DROP TABLE IF EXISTS bernie_nmarchio2.events_ak_mobilize;
 
 CREATE TABLE bernie_nmarchio2.events_ak_mobilize DISTKEY (person_id) AS
   (SELECT *
    FROM (
-           (SELECT person_id ,
+           (SELECT xwalk.person_id ,
                    'mobilize_id'||'_'|| user_id AS id_source_user_id ,
-                   email ,
+                   partic.email ,
                    'mobilize_id' AS id_source ,
-                   mobilize_id AS id ,
-                   user_id ,
-                   user_firstname ,
-                   user_lastname ,
-                   user_address_line_1 ,
-                   user_address_line_2 ,
-                   user_city ,
-                   coalesce(user_state,user_state_code) AS user_state ,
-                   coalesce(user_zip, voting_zip) AS user_zip ,
-                   user_phone ,
-                   user_address_latitude ,
-                   user_address_longitude ,
+                   event.mobilize_id AS id ,
+                   partic.user_id ,
+                   partic.user_firstname ,
+                   partic.user_lastname ,
+                   p.user_address_line_1 ,
+                   p.user_address_line_2 ,
+                   p.user_city ,
+                   coalesce(p.user_state,partic.user_state_code) AS user_state ,
+                   coalesce(partic.user_zip, p.voting_zip) AS user_zip ,
+                   partic.user_phone ,
+                   p.user_address_latitude ,
+                   p.user_address_longitude ,
                    'attendee' AS user_role ,
-                   user_attended ,
-                   user_modified_date ,
-                   event_address_line_1 ,
-                   event_address_line_2 ,
-                   event_city ,
-                   event_state ,
-                   event_postal_code ,
-                   event_lat ,
-                   event_lon ,
-                   lower(event_type) as event_type ,
-                   lower(event_title) AS event_title ,
-                   to_date(TO_Timestamp(event_start,'YYYY-MM-DD HH24:MI:SS'),'YYYY-MM-DD') AS event_date ,
-                   cast(event_start AS TIMESTAMP) AS event_timestamp ,
-                   event_status
+                   partic.user_attended ,
+                   partic.user_modified_date ,
+                   event.event_address_line_1 ,
+                   event.event_address_line_2 ,
+                   event.event_city ,
+                   coalesce(event.event_state_code,evxwalk.event_state) as event_state ,
+                   event.event_postal_code ,
+                   event.event_lat ,
+                   event.event_lon ,
+                   lower(event.event_type_source) as event_type_source ,
+                   lower(event.event_title) AS event_title ,
+                   to_date(TO_Timestamp(partic.event_start,'YYYY-MM-DD HH24:MI:SS'),'YYYY-MM-DD') AS event_date ,
+                   cast(partic.event_start AS TIMESTAMP) AS event_timestamp ,
+                   partic.event_status , 
+                   evxwalk.ak_event_id , 
+                   evxwalk.mobilize_id ,
+                   evxwalk.event_type ,
+                   evxwalk.mobilize_timeslot_id ,
+                   evxwalk.van_event_van_id ,
+                   evxwalk.van_timeslot_id ,
+                   evxwalk.mob_shift_count ,
+                   evxwalk.mob_shift_order ,
+                   evxwalk.ak_title ,
+                   evxwalk.ak_address1 ,
+                   evxwalk.ak_venue ,
+                   evxwalk.mobilize_address1 ,
+                   evxwalk.mobilize_venue ,
+                   evxwalk.ak_start_utc ,
+                   evxwalk.mobilize_start_utc ,
+                   evxwalk.van_location_id ,
+                   evxwalk.van_location_name 
 FROM
               (SELECT id,
                       user_id,
@@ -51,25 +70,44 @@ FROM
                       organization__name AS event_organization_name,
                       status AS event_status,
                       attended AS user_attended
-               FROM mobilize.participations_comprehensive)
+               FROM mobilize.participations_comprehensive) partic
             LEFT JOIN
               (SELECT id AS mobilize_id,
                       location__address_line_1 AS event_address_line_1,
                       location__address_line_2 AS event_address_line_2,
                       location__locality AS event_city,
-                      location__region AS event_state,
+                      location__region AS event_state_code,
                       location__country AS event_country,
                       location__postal_code AS event_postal_code,
                       location__lat AS event_lat,
                       location__lon AS event_lon,
-                      event_type , 
+                      event_type AS event_type_source, 
                       title AS event_title ,
                       event_campaign__slug AS event_campaign 
-               FROM mobilize.events_comprehensive) using(mobilize_id)
+               FROM mobilize.events_comprehensive) event using(mobilize_id)
+            LEFT JOIN
+              (SELECT ak_event_id
+                      ,mobilize_id
+                      ,event_state
+                      ,event_type
+                      ,mobilize_timeslot_id
+                      ,van_event_van_id
+                      ,van_timeslot_id
+                      ,mob_shift_count
+                      ,mob_shift_order
+                      ,ak_title
+                      ,ak_address1
+                      ,ak_venue
+                      ,mobilize_address1
+                      ,mobilize_venue
+                      ,ak_start_utc
+                      ,mobilize_start_utc
+                      ,van_location_id
+                      ,van_location_name FROM core_table_builds.events_xwalk) evxwalk on partic.mobilize_id::int = evxwalk.mobilize_id::int
             LEFT JOIN
               (SELECT person_id,
                       email
-               FROM bernie_data_commons.master_xwalk) using(email)
+               FROM bernie_data_commons.master_xwalk) xwalk using(email)
             LEFT JOIN
               (SELECT person_id,
                       state_code AS user_state,
@@ -80,39 +118,57 @@ FROM
                       voting_zip4,
                       voting_address_latitude AS user_address_latitude,
                       voting_address_longitude AS user_address_longitude
-               FROM phoenix_analytics.person) using(person_id))
+               FROM phoenix_analytics.person) p using(person_id) 
+           )
          UNION ALL
-           ( SELECT person_id ,
+           ( SELECT coalesce(xwalk_ak.person_id_1, xwalk.person_id_2) as person_id ,
                     'ak_event_id' ||'_'|| user_id AS id_source_user_id ,
-                    email ,
+                    akuser.email ,
                     'ak_event_id' AS id_source ,
-                    ak_event_id AS id ,
-                    user_id ,
-                    user_firstname ,
-                    user_lastname ,
-                    coalesce(user_address_line_1, voting_street_address) AS user_address_line_1 ,
-                    coalesce(user_address_line_2, voting_street_address_2) AS user_address_line_2 ,
-                    coalesce(user_city, voting_city) AS user_city ,
-                    coalesce(user_state, user_region, state_code) AS user_state ,
-                    coalesce(user_zip, voting_zip, user_postal_code) AS user_zip ,
+                    event.ak_event_id AS id ,
+                    akuser.user_id ,
+                    akuser.user_firstname ,
+                    akuser.user_lastname ,
+                    coalesce(akuser.user_address_line_1, p.voting_street_address) AS user_address_line_1 ,
+                    coalesce(akuser.user_address_line_2, p.voting_street_address_2) AS user_address_line_2 ,
+                    coalesce(akuser.user_city, p.voting_city) AS user_city ,
+                    coalesce(akuser.user_state, akuser.user_region, p.state_code) AS user_state ,
+                    coalesce(akuser.user_zip, p.voting_zip, akuser.user_postal_code) AS user_zip ,
                     NULL AS user_phone ,
-                    user_address_latitude ,
-                    user_address_longitude ,
-                    user_role ,
-                    user_attended ,
-                    user_modified_date ,
-                    event_address_line_1 ,
-                    event_address_line_2 ,
-                    event_city ,
-                    event_state ,
-                    coalesce(event_postal_code,event_zip) AS event_postal_code ,
-                    event_lat ,
-                    event_lon ,
-                    lower(event_name) AS event_type ,
-                    lower(event_title) AS event_title ,
-                    to_date(TO_Timestamp(event_start,'YYYY-MM-DD HH24:MI:SS'),'YYYY-MM-DD') AS event_date ,
-                    cast(event_start AS TIMESTAMP) AS event_timestamp ,
-                    event_status 
+                    p.user_address_latitude ,
+                    p.user_address_longitude ,
+                    signup.user_role ,
+                    signup.user_attended ,
+                    akuser.user_modified_date ,
+                    event.event_address_line_1 ,
+                    event.event_address_line_2 ,
+                    event.event_city ,
+                    coalesce(event.event_state_code,evxwalk.event_state) as event_state ,
+                    coalesce(event.event_postal_code,event.event_zip) AS event_postal_code ,
+                    event.event_lat ,
+                    event.event_lon ,
+                    lower(campaign.event_name) AS event_type_source ,
+                    lower(event.event_title) AS event_title ,
+                    to_date(TO_Timestamp(event.event_start,'YYYY-MM-DD HH24:MI:SS'),'YYYY-MM-DD') AS event_date ,
+                    cast(event.event_start AS TIMESTAMP) AS event_timestamp ,
+                    event.event_status ,
+                    evxwalk.ak_event_id , 
+                    evxwalk.mobilize_id ,
+                    evxwalk.event_type ,
+                    evxwalk.mobilize_timeslot_id ,
+                    evxwalk.van_event_van_id ,
+                    evxwalk.van_timeslot_id ,
+                    evxwalk.mob_shift_count ,
+                    evxwalk.mob_shift_order ,
+                    evxwalk.ak_title ,
+                    evxwalk.ak_address1 ,
+                    evxwalk.ak_venue ,
+                    evxwalk.mobilize_address1 ,
+                    evxwalk.mobilize_venue ,
+                    evxwalk.ak_start_utc ,
+                    evxwalk.mobilize_start_utc ,
+                    evxwalk.van_location_id ,
+                    evxwalk.van_location_name 
                     --,event_name
                     --,actionkit_id
                     --,signup_id
@@ -123,9 +179,7 @@ FROM
                     --,value_signupfield
                     --,event_attendee_count
 FROM
-              (SELECT coalesce(person_id_1, person_id_2) AS person_id,
-                      *
-               FROM
+              -- (SELECT coalesce(xwalk_ak.person_id_1, xwalk.person_id_2) AS person_id, * FROM
                  (SELECT id AS user_id,
                          email,
                          first_name AS user_firstname,
@@ -140,7 +194,7 @@ FROM
                          country AS user_country,
                          TO_Timestamp(updated_at,'YYYY-MM-DD HH24:MI:SS') AS user_modified_date,
                          subscription_status
-                  FROM ak_bernie.core_user) cu
+                  FROM ak_bernie.core_user) akuser
                INNER JOIN
                  (SELECT id AS signup_id,
                          user_id,
@@ -148,19 +202,19 @@ FROM
                          ROLE AS user_role,
                          status AS user_status,
                          attended AS user_attended
-                  FROM ak_bernie.events_eventsignup) eesu using(user_id)
+                  FROM ak_bernie.events_eventsignup) signup using(user_id)
                INNER JOIN
                  (SELECT id AS id_signupfield,
                          parent_id AS signup_id,
                          name AS name_signupfield,
                          value AS value_signupfield
-                  FROM ak_bernie.events_eventsignupfield) eesuf using(signup_id)
+                  FROM ak_bernie.events_eventsignupfield) signupf using(signup_id)
                LEFT JOIN
                  (SELECT id AS ak_event_id,
                          address1 AS event_address_line_1,
                          address2 AS event_address_line_2,
                          city AS event_city,
-                         coalesce(STATE,region) AS event_state,
+                         coalesce(STATE,region) AS event_state_code,
                          postal AS event_postal_code,
                          zip AS event_zip,
                          country AS event_country,
@@ -172,22 +226,41 @@ FROM
                          venue AS event_venue,
                          title AS event_title,
                          campaign_id
-                  FROM ak_bernie.events_event) ee using(ak_event_id)
-               LEFT JOIN
+                  FROM ak_bernie.events_event) event using(ak_event_id)
+                LEFT JOIN
+                 (SELECT ak_event_id
+                         ,mobilize_id
+                         ,event_state
+                         ,event_type
+                         ,mobilize_timeslot_id
+                         ,van_event_van_id
+                         ,van_timeslot_id
+                         ,mob_shift_count
+                         ,mob_shift_order
+                         ,ak_title
+                         ,ak_address1
+                         ,ak_venue
+                         ,mobilize_address1
+                         ,mobilize_venue
+                         ,ak_start_utc
+                         ,mobilize_start_utc
+                         ,van_location_id
+                         ,van_location_name 
+                  FROM core_table_builds.events_xwalk) evxwalk on event.ak_event_id::int = evxwalk.ak_event_id::int
+                LEFT JOIN
                  (SELECT id AS campaign_id,
                          --title AS event_title,
                          name AS event_name
-                  FROM ak_bernie.events_campaign) using(campaign_id)
+                  FROM ak_bernie.events_campaign) campaign using(campaign_id)
                LEFT JOIN
                  (SELECT actionkit_id,
                          person_id AS person_id_1,
-                         ROW_NUMBER() OVER(PARTITION BY actionkit_id ORDER BY row_id DESC) rn
-                  FROM bernie_data_commons.master_xwalk_ak) xwalk ON xwalk.actionkit_id = cu.user_id
-               AND xwalk.rn = 1
+                         ROW_NUMBER() OVER(PARTITION BY actionkit_id ORDER BY row_id DESC) as rownum 
+                  FROM bernie_data_commons.master_xwalk_ak) xwalk_ak ON xwalk_ak.actionkit_id = akuser.user_id AND xwalk_ak.rownum = 1
                LEFT JOIN
                  (SELECT person_id AS person_id_2,
-                         email
-                  FROM bernie_data_commons.master_xwalk) using(email))
+                         email 
+                  FROM bernie_data_commons.master_xwalk) xwalk using(email)
             LEFT JOIN
               (SELECT person_id,
                       state_code,
@@ -198,8 +271,9 @@ FROM
                       voting_zip4,
                       voting_address_latitude AS user_address_latitude,
                       voting_address_longitude AS user_address_longitude
-               FROM phoenix_analytics.person) using(person_id))));
-
+               FROM phoenix_analytics.person) p ON p.person_id = coalesce(xwalk_ak.person_id_1, xwalk.person_id_2)
+              )
+));
 
 
 create temp table dedupe_ak_mobilize as
