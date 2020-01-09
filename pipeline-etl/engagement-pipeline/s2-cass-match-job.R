@@ -106,7 +106,7 @@ match_job <- enhancements_post_civis_data_match(name = 'Engagement Users Match J
                                                 output_table = list(databaseName = 'Bernie 2020',
                                                                     schema = 'bernie_nmarchio2',
                                                                     table = 'events_users_match_output'),
-                                                max_matches = 0,
+                                                max_matches = 1,
                                                 threshold = 0)
 
 match_job_run <- enhancements_post_civis_data_match_runs(id = match_job$id)
