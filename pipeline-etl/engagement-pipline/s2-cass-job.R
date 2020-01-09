@@ -20,6 +20,8 @@ clean_job_1 <- civis::enhancements_post_cass_ncoa(name ='Engagement Events CASS 
                                                   output_level = "cass",
                                                   limiting_sql = "")
 
+clean_job_1_run <- enhancements_post_cass_ncoa_runs(clean_job_1$id)
+
 clean_job_2 <- civis::enhancements_post_cass_ncoa(name ='Engagement Users CASS Job', 
                                                   source = list(databaseTable = list(schema = 'bernie_nmarchio2',
                                                                                      table = 'events_users',
@@ -39,7 +41,7 @@ clean_job_2 <- civis::enhancements_post_cass_ncoa(name ='Engagement Users CASS J
                                                   output_level = "cass",
                                                   limiting_sql = "person_id is null")
 
-print(clean_job)
+clean_job_2_run <- enhancements_post_cass_ncoa_runs(clean_job_2$id)
 
 # geocode_job <- enhancements_post_geocode(name = 'Geocode Job',
 #                                          remote_host_id= get_database_id('Bernie 2020'),
