@@ -135,7 +135,8 @@ UNION ALL
 --EVENTS TABLE
 DROP TABLE IF EXISTS bernie_nmarchio2.events_details;
 CREATE TABLE bernie_nmarchio2.events_details AS
-  (SELECT ak_event_id::varchar(256) ,
+  (SELECT ak_event_id||'_'||mobilize_id||'_'||mobilize_timeslot_id||'_'||van_event_van_id||'_'||van_timeslot_id as unique_id ,
+  	      ak_event_id::varchar(256) ,
           mobilize_id::varchar(256) ,
           mobilize_timeslot_id::varchar(256) ,
           van_event_van_id::varchar(256) ,
