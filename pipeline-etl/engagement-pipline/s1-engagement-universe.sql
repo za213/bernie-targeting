@@ -64,7 +64,7 @@ DROP TABLE IF EXISTS bernie_nmarchio2.events_users;
 CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
   (SELECT *
    FROM
-     (SELECT user_universe_2.source_data||'_'||user_universe_2.person_id||'_'||user_universe_2.user_email || '_' || user_universe_2.user_id as unique_id,
+     (SELECT coalesce(user_universe_2.source_data,'0')||'_'||coalesce(user_universe_2.user_email,'0')|| '_' ||coalesce(user_universe_2.user_id,'0') as unique_id,
      	     user_universe_2.person_id, --first_value(user_universe_2.person_id) over(partition by user_universe_2.user_email order by user_universe_2.user_email NULLS LAST rows between unbounded preceding and unbounded following) as person_id,
              user_universe_2.source_data,
              user_universe_2.user_id,
@@ -135,7 +135,7 @@ UNION ALL
 --EVENTS TABLE
 DROP TABLE IF EXISTS bernie_nmarchio2.events_details;
 CREATE TABLE bernie_nmarchio2.events_details AS
-  (SELECT ak_event_id||'_'||mobilize_id||'_'||mobilize_timeslot_id||'_'||van_event_van_id||'_'||van_timeslot_id as unique_id ,
+  (SELECT coalesce(ak_event_id,'0')||'_'||coalesce(mobilize_id,'0')||'_'||coalesce(mobilize_timeslot_id,'0')||'_'||coalesce(van_event_van_id,'0')||'_'||coalesce(van_timeslot_id,'0') as unique_id ,
   	      ak_event_id::varchar(256) ,
           mobilize_id::varchar(256) ,
           mobilize_timeslot_id::varchar(256) ,
@@ -228,3 +228,4 @@ CREATE TABLE bernie_nmarchio2.events_details AS
    (SELECT * FROM ak_bernie.events_event) event
  LEFT JOIN
    (SELECT id AS campaign_id, name FROM ak_bernie.events_campaign) campaign using(campaign_id)) using(ak_event_id)));
+
