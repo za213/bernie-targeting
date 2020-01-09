@@ -88,6 +88,8 @@ match_input_status <- civis::query_civis(x=sql(match_input_sql), database = 'Ber
 match_input_status
 
 # Submit the Person Match Job
+
+match_object <- match_targets_list()[[1]]$id
 match_job <- enhancements_post_civis_data_match(name = 'Engagement Users Match Job',
                                                 input_field_mapping = list(primary_key = 'unique_id',
                                                                            first_name = 'user_firstname',
@@ -99,7 +101,7 @@ match_job <- enhancements_post_civis_data_match(name = 'Engagement Users Match J
                                                                            city = 'user_city',
                                                                            state_code = 'user_state',
                                                                            zip = 'user_zip'),
-                                                match_target_id = 55862728,
+                                                match_target_id = match_object,
                                                 parent_id = NULL,
                                                 input_table = list(databaseName = 'Bernie 2020',
                                                                    schema = 'bernie_nmarchio2',
