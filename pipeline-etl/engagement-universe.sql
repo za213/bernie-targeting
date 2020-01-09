@@ -1,3 +1,4 @@
+
 --USER TABLE
 CREATE TEMP TABLE user_universe AS
      (SELECT * FROM (
@@ -63,7 +64,8 @@ DROP TABLE IF EXISTS bernie_nmarchio2.events_users;
 CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
   (SELECT *
    FROM
-     (SELECT user_universe_2.person_id,
+     (SELECT user_universe_2.source_data||'_'||user_universe_2.person_id||'_'||user_universe_2.user_email || '_' || user_universe_2.user_id as unique_id,
+     	     user_universe_2.person_id,
              user_universe_2.source_data,
              user_universe_2.user_id,
              user_universe_2.user_email,
@@ -225,5 +227,3 @@ CREATE TABLE bernie_nmarchio2.events_details AS
    (SELECT * FROM ak_bernie.events_event) event
  LEFT JOIN
    (SELECT id AS campaign_id, * FROM ak_bernie.events_campaign) campaign using(campaign_id)) using(ak_event_id)));
-
-
