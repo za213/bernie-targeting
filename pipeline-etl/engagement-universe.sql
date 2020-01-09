@@ -1,4 +1,3 @@
-
 --USER TABLE
 CREATE TEMP TABLE user_universe AS
      (SELECT * FROM (
@@ -92,7 +91,6 @@ CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
          FROM phoenix_analytics.person) p using(person_id) ));
 
 --SIGNUPS TABLE
-
 DROP TABLE IF EXISTS bernie_nmarchio2.events_signups;
 CREATE TABLE bernie_nmarchio2.events_signups AS
 (SELECT * FROM 
@@ -132,7 +130,6 @@ UNION ALL
              row_number() over (partition BY ak_event_id ORDER BY mobilize_id NULLS LAST, mobilize_timeslot_id NULLS LAST) AS dedupe
       FROM core_table_builds.events_xwalk) xw ON xw.ak_event_id = ak.event_id AND xw.dedupe = 1));
 
-
 --EVENTS TABLE
 DROP TABLE IF EXISTS bernie_nmarchio2.events_details;
 CREATE TABLE bernie_nmarchio2.events_details AS
@@ -156,22 +153,22 @@ CREATE TABLE bernie_nmarchio2.events_details AS
           coalesce(event_lat_ak,event_lat_mob)::varchar(256) AS event_lat ,
           coalesce(event_type,event_type_mob)::varchar(256) AS event_type_v1 ,
           CASE
-          WHEN event_type_source ILIKE '%barnstorm%' THEN 'barnstorm'
-          WHEN event_type_source SIMILAR TO ('%canvass%|%bernie-on-the-ballot%|%bernie-journey%|%signature_gathering%') THEN 'canvass'
-          WHEN event_type_source SIMILAR TO ('%solidarityevent%|%solidarity-event%|%solidarity_event%') THEN 'solidarity-action'
-          WHEN event_type_source SIMILAR TO ('%event-bernie-sanders%|%bernie-2020-event%') THEN 'rally-town-hall'
-          WHEN event_type_source SIMILAR TO ('%postcards_for_bernie%|%plan-win-party%|%debate-watch-party%|%debate_watch_party%|%office_opening%|%house-party%|%house_party%') THEN 'small-event'
-          WHEN event_type_source SIMILAR TO ('%call-bernie_virtual%|%phone_bank%|%phonebank%|%phone-bank%') THEN 'phonebank'
-          WHEN event_type_source SIMILAR TO ('%friend-to-friend%|%friend_to_friend%') THEN 'friend-to-friend'
-          WHEN event_type_source SIMILAR TO ('%volunteer_training%|%training%') THEN 'training'
-          WHEN event_title SIMILAR TO ('%rally%|%town hall%|%panel%|%first friday%|%community meeting%|%community conversation%|%brunch%|%alexandria%|%phillip agnew%|%aoc%|%bernie on the ballot%|%bernie breakfast%|%bernie 2020 discussion%|%nina turner%|%bernie 2020 meets%|%townhall%|%roundtable%') THEN 'rally-town-hall'
-          WHEN event_title SIMILAR TO ('%petition%|%canvass%|%petitions%|%volunteering%|%help get bernie%|%bernie journey%') THEN 'canvass'
-          WHEN event_title SIMILAR TO ('%phonebank%|%recruitment%|%make calls%') THEN 'phonebank'
-          WHEN event_title SIMILAR TO ('%barnstorm%') THEN 'barnstorm'
-          WHEN event_title SIMILAR TO ('%training%') THEN 'training'
-          WHEN event_title SIMILAR TO ('%parade%|%march%|%teachers for bernie%') THEN 'solidarity-action'
-          WHEN event_title SIMILAR TO ('%organizing meeting%') THEN 'solidarity-action'
-          WHEN event_title SIMILAR TO ('%delegates%|%meeting%|%talk bernie%|%community discussion%|%meet up%|%team meeting%|%student%|%high school%|% for bernie%|%kickoff meeting%|%leadership meeting%|%kick-off meeting%|%headquarters%|%bernie virtual meeting%|%bash%|%parranda%|%office opening%|%party%|%art hop%|%plan to win%|%debate watch party%|%dinner%|%postcards%|%potluck%|%volunteer appreciation%|%social hour%|%club meeting%|%unidos con bernie%|%debate%|%food drive%|%fiesta%|%happy hour%|%tabling%|%bonfire%') THEN 'small-event'
+          WHEN coalesce(event_type,event_type_mob) ILIKE '%barnstorm%' THEN 'barnstorm'
+          WHEN coalesce(event_type,event_type_mob) SIMILAR TO ('%canvass%|%bernie-on-the-ballot%|%bernie-journey%|%signature_gathering%') THEN 'canvass'
+          WHEN coalesce(event_type,event_type_mob) SIMILAR TO ('%solidarityevent%|%solidarity-event%|%solidarity_event%') THEN 'solidarity-action'
+          WHEN coalesce(event_type,event_type_mob) SIMILAR TO ('%event-bernie-sanders%|%bernie-2020-event%') THEN 'rally-town-hall'
+          WHEN coalesce(event_type,event_type_mob) SIMILAR TO ('%postcards_for_bernie%|%plan-win-party%|%debate-watch-party%|%debate_watch_party%|%office_opening%|%house-party%|%house_party%') THEN 'small-event'
+          WHEN coalesce(event_type,event_type_mob) SIMILAR TO ('%call-bernie_virtual%|%phone_bank%|%phonebank%|%phone-bank%') THEN 'phonebank'
+          WHEN coalesce(event_type,event_type_mob) SIMILAR TO ('%friend-to-friend%|%friend_to_friend%') THEN 'friend-to-friend'
+          WHEN coalesce(event_type,event_type_mob) SIMILAR TO ('%volunteer_training%|%training%') THEN 'training'
+          WHEN coalesce(ak_title,event_title_ak,event_title_mob) SIMILAR TO ('%rally%|%town hall%|%panel%|%first friday%|%community meeting%|%community conversation%|%brunch%|%alexandria%|%phillip agnew%|%aoc%|%bernie on the ballot%|%bernie breakfast%|%bernie 2020 discussion%|%nina turner%|%bernie 2020 meets%|%townhall%|%roundtable%') THEN 'rally-town-hall'
+          WHEN coalesce(ak_title,event_title_ak,event_title_mob) SIMILAR TO ('%petition%|%canvass%|%petitions%|%volunteering%|%help get bernie%|%bernie journey%') THEN 'canvass'
+          WHEN coalesce(ak_title,event_title_ak,event_title_mob) SIMILAR TO ('%phonebank%|%recruitment%|%make calls%') THEN 'phonebank'
+          WHEN coalesce(ak_title,event_title_ak,event_title_mob) SIMILAR TO ('%barnstorm%') THEN 'barnstorm'
+          WHEN coalesce(ak_title,event_title_ak,event_title_mob) SIMILAR TO ('%training%') THEN 'training'
+          WHEN coalesce(ak_title,event_title_ak,event_title_mob) SIMILAR TO ('%parade%|%march%|%teachers for bernie%') THEN 'solidarity-action'
+          WHEN coalesce(ak_title,event_title_ak,event_title_mob) SIMILAR TO ('%organizing meeting%') THEN 'solidarity-action'
+          WHEN coalesce(ak_title,event_title_ak,event_title_mob)SIMILAR TO ('%delegates%|%meeting%|%talk bernie%|%community discussion%|%meet up%|%team meeting%|%student%|%high school%|% for bernie%|%kickoff meeting%|%leadership meeting%|%kick-off meeting%|%headquarters%|%bernie virtual meeting%|%bash%|%parranda%|%office opening%|%party%|%art hop%|%plan to win%|%debate watch party%|%dinner%|%postcards%|%potluck%|%volunteer appreciation%|%social hour%|%club meeting%|%unidos con bernie%|%debate%|%food drive%|%fiesta%|%happy hour%|%tabling%|%bonfire%') THEN 'small-event'
           ELSE 'other' END AS event_type_v2,
           event_name::varchar(256) ,
           event_campaign_mob::varchar(256) ,
@@ -228,4 +225,5 @@ CREATE TABLE bernie_nmarchio2.events_details AS
    (SELECT * FROM ak_bernie.events_event) event
  LEFT JOIN
    (SELECT id AS campaign_id, * FROM ak_bernie.events_campaign) campaign using(campaign_id)) using(ak_event_id)));
+
 
