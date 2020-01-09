@@ -1,0 +1,29 @@
+version: '2.0'
+workflow:
+  tasks:
+    build-engagement-tables:
+      action: civis.run_job
+      input:
+        job_id: 56212503
+      on-success:
+        - cass-match
+    cass-match:
+      action: civis.run_job
+      input:
+        job_id: 56212903
+      on-success:
+        - user-dedupe
+    user-dedupe:
+      action: civis.run_job
+      input:
+        job_id: 0
+      on-success:
+        - unified-table
+    unified-table:
+      action: civis.run_job
+      input:
+        job_id: 0
+
+#https://platform.civisanalytics.com/spa/#/scripts/custom/56212503
+#https://platform.civisanalytics.com/spa/#/scripts/containers/56212903
+        
