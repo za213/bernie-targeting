@@ -51,13 +51,11 @@ clean_job_2 <- civis::enhancements_post_cass_ncoa(name ='Engagement Users CASS J
 
 clean_job_2_run <- enhancements_post_cass_ncoa_runs(clean_job_2$id)
 
-# Block until the users CASS job finishes
+# Block until the users and events CASS job finishes
 r <- await(f=enhancements_get_cass_ncoa_runs, 
            id=clean_job_2_run$cassNcoaId, 
            run_id=clean_job_2_run$id)
 get_status(r)
-
-# Block until the events CASS job finishes
 r <- await(f=enhancements_get_cass_ncoa_runs, 
            id=clean_job_1_run$cassNcoaId, 
            run_id=clean_job_1_run$id)
@@ -88,7 +86,6 @@ match_input_status <- civis::query_civis(x=sql(match_input_sql), database = 'Ber
 match_input_status
 
 # Submit the Person Match Job
-
 match_object <- match_targets_list()[[1]]$id
 match_job <- enhancements_post_civis_data_match(name = 'Engagement Users Match Job',
                                                 input_field_mapping = list(primary_key = 'unique_id',
