@@ -35,7 +35,7 @@ CREATE TEMP TABLE user_universe AS
 
 CREATE TEMP TABLE user_universe_2 AS
   (SELECT * FROM
-     (SELECT coalesce(xwalk_master.person_id_master,xwalk_ak.person_id_ak) AS person_id,
+     (SELECT coalesce(xwalk_master.person_id_master,xwalk_ak.person_id_ak,akmatch.person_id_actionkit,mobmatch.person_id_mobilize) AS person_id,
              user_universe.source_data,
              user_universe.user_id,
              coalesce(user_universe.email,xwalk_master.email_master) AS user_email,
@@ -48,17 +48,25 @@ CREATE TEMP TABLE user_universe_2 AS
              user_universe.user_zip,
              user_universe.user_phone,
              user_universe.user_modified_date
-              FROM user_universe
-         LEFT JOIN
-           (SELECT person_id AS person_id_master,
-                   email AS email_master,
-                   ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY email NULLS LAST) AS rownum
-            FROM bernie_data_commons.master_xwalk) xwalk_master ON (xwalk_master.email_master = user_universe.email AND xwalk_master.rownum = 1)
-         LEFT JOIN
-           (SELECT actionkit_id,
-                   person_id AS person_id_ak,
-                   ROW_NUMBER() OVER(PARTITION BY actionkit_id ORDER BY row_id DESC) AS rownum
-            FROM bernie_data_commons.master_xwalk_ak) xwalk_ak ON (xwalk_ak.actionkit_id = user_universe.user_id AND xwalk_ak.rownum = 1)));
+      FROM user_universe
+      LEFT JOIN
+        (SELECT person_id AS person_id_master,
+                email AS email_master,
+                ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY email NULLS LAST) AS rownum
+         FROM bernie_data_commons.master_xwalk) xwalk_master ON (xwalk_master.email_master = user_universe.email AND xwalk_master.rownum = 1)
+      LEFT JOIN
+        (SELECT actionkit_id,
+                person_id AS person_id_ak,
+                ROW_NUMBER() OVER(PARTITION BY actionkit_id ORDER BY row_id DESC) AS rownum
+         FROM bernie_data_commons.master_xwalk_ak) xwalk_ak ON (xwalk_ak.actionkit_id = user_universe.user_id AND xwalk_ak.rownum = 1)
+      LEFT JOIN
+        (SELECT person_id AS person_id_mobilize,
+                user_id_mobilize
+         FROM bernie_nmarchio2.events_users_xwalk WHERE user_id_mobilize IS NOT NULL AND person_id IS NOT NULL) mobmatch ON mobmatch.user_id_mobilize = user_universe.user_id AND user_universe.source_data = 'mobilize'
+      LEFT JOIN
+        (SELECT person_id AS person_id_actionkit,
+                user_id_actionkit
+         FROM bernie_nmarchio2.events_users_xwalk WHERE user_id_actionkit IS NOT NULL AND person_id IS NOT NULL) akmatch ON akmatch.user_id_actionkit = user_universe.user_id AND user_universe.source_data = 'actionkit' ));
 
 DROP TABLE IF EXISTS bernie_nmarchio2.events_users;
 CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
