@@ -85,25 +85,24 @@ CREATE TABLE bernie_nmarchio2.events_users_xwalk AS
                      ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY user_email NULLS LAST) AS rownum
      FROM bernie_nmarchio2.events_users_enhanced) side ON main.person_id = side.person_id AND side.rownum = 1);
 
-
---SIGNUPS TABLE
+-- Coalesced signups table
 DROP TABLE IF EXISTS bernie_nmarchio2.events_signups;
 CREATE TABLE bernie_nmarchio2.events_signups AS
 (SELECT 
-          coalesce(m.source_data, a.source_data) as source_data ,
+          coalesce(a.source_data,m.source_data) as source_data ,
           m.signup_id_mobilize ,
           a.signup_id_ak ,
-          coalesce(m.user_modified_date_mobilize, a.user_modified_date_ak) as user_modified_date,
-          coalesce(m.user_id, a.user_id) AS user_id ,
-          coalesce(m.ak_event_id,a.ak_event_id) as ak_event_id ,
-          coalesce(m.mobilize_id, a.mobilize_id) AS mobilize_id ,
-          coalesce(m.mobilize_timeslot_id, a.mobilize_timeslot_id) AS mobilize_timeslot_id,
-          coalesce(m.user_attended, a.user_attended) AS user_attended ,
-          coalesce(m.status, a.status) AS status , 
-          coalesce(m.person_id, a.person_id) AS person_id,
-          coalesce(m.user_email, a.user_email) as user_email,
-          coalesce(m.user_id_mobilize, a.user_id_mobilize) as user_id_mobilize,
-          coalesce(m.user_id_actionkit, a.user_id_actionkit) as user_id_actionkit
+          coalesce(a.user_modified_date_ak,m.user_modified_date_mobilize) as user_modified_date,
+          coalesce(a.user_id,m.user_id) AS user_id ,
+          coalesce(a.ak_event_id,m.ak_event_id) as ak_event_id ,
+          coalesce(a.mobilize_id,m.mobilize_id) AS mobilize_id ,
+          coalesce(a.mobilize_timeslot_id,m.mobilize_timeslot_id) AS mobilize_timeslot_id,
+          coalesce(a.user_attended,m.user_attended) AS user_attended ,
+          coalesce(a.status,m.status) AS status , 
+          coalesce(a.person_id,m.person_id) AS person_id,
+          coalesce(a.user_email,m.user_email) as user_email,
+          coalesce(a.user_id_mobilize,m.user_id_mobilize) as user_id_mobilize,
+          coalesce(a.user_id_actionkit,m.user_id_actionkit) as user_id_actionkit
  FROM
   (SELECT 'mobilize' AS source_data ,
           mob.id::varchar(256) AS signup_id_mobilize ,
@@ -125,7 +124,7 @@ CREATE TABLE bernie_nmarchio2.events_signups AS
              mobilize_id,
              mobilize_timeslot_id,
              row_number() over (partition BY mobilize_id || '_' || mobilize_timeslot_id ORDER BY ak_event_id NULLS LAST) AS dedupe
-      FROM core_table_builds.events_xwalk) xw ON mob.event_id = xw.mobilize_id AND mob.timeslot_id = xw.mobilize_timeslot_id AND xw.dedupe = 1
+      FROM bernie_nmarchio2.events_details WHERE mobilize_id IS NOT NULL) xw ON mob.event_id = xw.mobilize_id AND mob.timeslot_id = xw.mobilize_timeslot_id AND xw.dedupe = 1
    LEFT JOIN 
      (SELECT DISTINCT person_id,
                       user_email,
@@ -154,7 +153,7 @@ FULL JOIN
              mobilize_id,
              mobilize_timeslot_id,
              row_number() over (partition BY ak_event_id ORDER BY mobilize_id NULLS LAST, mobilize_timeslot_id NULLS LAST) AS dedupe
-      FROM core_table_builds.events_xwalk) xw ON xw.ak_event_id = ak.event_id AND xw.dedupe = 1
+      FROM bernie_nmarchio2.events_details WHERE ak_event_id IS NOT NULL) xw ON xw.ak_event_id = ak.event_id AND xw.dedupe = 1
    LEFT JOIN 
      (SELECT DISTINCT person_id,
                       user_email,
@@ -162,6 +161,4 @@ FULL JOIN
                       user_id_actionkit
       FROM bernie_nmarchio2.events_users_xwalk
       WHERE user_id_actionkit IS NOT NULL) xw_user ON ak.user_id = xw_user.user_id_actionkit) a
-  ON (m.ak_event_id = a.ak_event_id AND m.user_id_actionkit = a.user_id_actionkit)  
-     AND (m.mobilize_id = a.mobilize_id AND m.mobilize_timeslot_id = a.mobilize_timeslot_id AND m.user_id_mobilize = a.user_id_mobilize));
-
+  ON (m.ak_event_id = a.ak_event_id AND m.user_id_actionkit = a.user_id_actionkit) );
