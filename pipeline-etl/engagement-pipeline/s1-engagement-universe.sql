@@ -100,46 +100,6 @@ CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
                 voting_address_longitude AS user_address_longitude
          FROM phoenix_analytics.person) p using(person_id) ));
 
---SIGNUPS TABLE
-DROP TABLE IF EXISTS bernie_nmarchio2.events_signups;
-CREATE TABLE bernie_nmarchio2.events_signups AS
-(SELECT * FROM 
-  (SELECT 'mobilize' AS source_data ,
-          mob.id::varchar(256) AS signup_id ,
-          TO_Timestamp(mob.user__modified_date,'YYYY-MM-DD HH24:MI:SS') AS user_modified_date ,
-          mob.user_id::varchar(256) AS user_id ,
-          xw.ak_event_id::varchar(256) ,
-          mob.event_id::varchar(256) AS mobilize_id ,
-          mob.timeslot_id::varchar(256) AS mobilize_timeslot_id ,
-          mob.attended::boolean AS user_attended ,
-          mob.status::varchar(256) AS status
-   FROM
-     (SELECT * FROM mobilize.participations_comprehensive) mob
-   LEFT JOIN
-     (SELECT DISTINCT ak_event_id,
-             mobilize_id,
-             mobilize_timeslot_id,
-             row_number() over (partition BY mobilize_id || '_' || mobilize_timeslot_id ORDER BY ak_event_id NULLS LAST) AS dedupe
-      FROM core_table_builds.events_xwalk) xw ON mob.event_id = xw.mobilize_id AND mob.timeslot_id = xw.mobilize_timeslot_id AND xw.dedupe = 1)
-UNION ALL
-  (SELECT 'actionkit' AS source_data ,
-          ak.id::varchar(256) AS signup_id ,
-          TO_Timestamp(ak.updated_at,'YYYY-MM-DD HH24:MI:SS') AS user_modified_date ,
-          ak.user_id::varchar(256) AS user_id ,
-          ak.event_id::varchar(256) AS ak_event_id ,
-          xw.mobilize_id::varchar(256) ,
-          xw.mobilize_timeslot_id::varchar(256) ,
-          ak.attended::boolean AS user_attended ,
-          ak.status::varchar(256) AS status
-   FROM
-     (SELECT * FROM ak_bernie.events_eventsignup) ak
-   LEFT JOIN
-     (SELECT DISTINCT ak_event_id,
-             mobilize_id,
-             mobilize_timeslot_id,
-             row_number() over (partition BY ak_event_id ORDER BY mobilize_id NULLS LAST, mobilize_timeslot_id NULLS LAST) AS dedupe
-      FROM core_table_builds.events_xwalk) xw ON xw.ak_event_id = ak.event_id AND xw.dedupe = 1));
-
 --EVENTS TABLE
 DROP TABLE IF EXISTS bernie_nmarchio2.events_details;
 CREATE TABLE bernie_nmarchio2.events_details AS
