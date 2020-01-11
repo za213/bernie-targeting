@@ -1,5 +1,5 @@
 
---USER TABLE
+-- Unioned table of all ActionKit and Mobilize users
 CREATE TEMP TABLE user_universe AS
      (SELECT * FROM (
               (SELECT DISTINCT id::varchar(256) AS user_id,
@@ -100,54 +100,48 @@ CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
                 voting_address_longitude AS user_address_longitude
          FROM phoenix_analytics.person) p using(person_id) ));
 
---EVENTS TABLE
+-- Coalesced table of all event details
 DROP TABLE IF EXISTS bernie_nmarchio2.events_details;
 CREATE TABLE bernie_nmarchio2.events_details AS
-  (SELECT coalesce(ak_event_id,'0')||'_'||coalesce(mobilize_id,'0')||'_'||coalesce(mobilize_timeslot_id,'0')||'_'||coalesce(van_event_van_id,'0')||'_'||coalesce(van_timeslot_id,'0')||'_'||coalesce(event_campaign,'0')||'_'||coalesce(van_location_id,'0')||'_'||coalesce(mob_shift_count,'0')||'_'||coalesce(mob_shift_order,'0') as unique_id ,
-  	      ak_event_id::varchar(256) ,
-          mobilize_id::varchar(256) ,
-          mobilize_timeslot_id::varchar(256) ,
-          van_event_van_id::varchar(256) ,
-          van_timeslot_id::varchar(256) ,
-          coalesce(ak_title,event_title_ak,event_title_mob)::varchar(256) AS event_title ,
-          coalesce(van_location_name,mobilize_venue,ak_venue) AS event_venue ,
-          coalesce(mobilize_start_utc::timestamptz,ak_start_utc::timestamptz) AS event_start_utc ,
-          coalesce(ak_address1,mobilize_address1,event_address_line_1_ak,event_address_line_1_mob) AS event_address1 ,
-          coalesce(event_address_line_2_mob,event_address_line_2_ak)::varchar(256) AS event_address2 ,
-          coalesce(event_city_mob,event_city_ak)::varchar(256) AS event_city ,
-          case WHEN event_state IN ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY') THEN event_state
-          WHEN event_state_ak IN ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY') THEN event_state_ak
-          WHEN event_state_mob IN ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY') THEN event_state_mob
+  (SELECT coalesce(ak.ak_event_id,'0')||'_'||coalesce(mob.mobilize_id,'0')||'_'||coalesce(ak.event_campaign,'0') as unique_id ,
+  	      ak.ak_event_id::varchar(256) ,
+          mob.mobilize_id::varchar(256) ,
+          coalesce(xwalk.ak_title,ak.event_title_ak,mob.event_title_mob)::varchar(256) AS event_title ,
+          coalesce(xwalk.mobilize_venue,xwalk.ak_venue,xwalk.van_location_name) AS event_venue ,
+          coalesce(xwalk.mobilize_start_utc::timestamptz,xwalk.ak_start_utc::timestamptz) AS event_start_utc ,
+          coalesce(xwalk.ak_address1,xwalk.mobilize_address1,ak.event_address_line_1_ak,mob.event_address_line_1_mob) AS event_address1 ,
+          coalesce(mob.event_address_line_2_mob,ak.event_address_line_2_ak)::varchar(256) AS event_address2 ,
+          coalesce(mob.event_city_mob,ak.event_city_ak)::varchar(256) AS event_city ,
+          case WHEN xwalk.event_state IN ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY') THEN xwalk.event_state
+          WHEN ak.event_state_ak IN ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY') THEN ak.event_state_ak
+          WHEN mob.event_state_mob IN ('AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY') THEN mob.event_state_mob
           ELSE NULL END AS event_state ,
-          coalesce(event_zip_mob,event_zip_ak)::varchar(256) AS event_zip ,
-          coalesce(event_lon_ak,event_lon_mob)::varchar(256) AS event_lon ,
-          coalesce(event_lat_ak,event_lat_mob)::varchar(256) AS event_lat ,
-          coalesce(event_type,event_type_mob)::varchar(256) AS event_type_v1 ,
+          coalesce(mob.event_zip_mob,ak.event_zip_ak)::varchar(256) AS event_zip ,
+          coalesce(ak.event_lon_ak,mob.event_lon_mob)::varchar(256) AS event_lon ,
+          coalesce(ak.event_lat_ak,mob.event_lat_mob)::varchar(256) AS event_lat ,
+          coalesce(xwalk.event_type,mob.event_type_mob)::varchar(256) AS event_type_v1 ,
           CASE
-          WHEN lower(coalesce(event_name,event_type_mob)) ILIKE '%barnstorm%' THEN 'barnstorm'
-          WHEN lower(coalesce(event_name,event_type_mob)) SIMILAR TO ('%canvass%|%bernie-on-the-ballot%|%bernie-journey%|%signature_gathering%') THEN 'canvass'
-          WHEN lower(coalesce(event_name,event_type_mob)) SIMILAR TO ('%solidarityevent%|%solidarity-event%|%solidarity_event%') THEN 'solidarity-action'
-          WHEN lower(coalesce(event_name,event_type_mob)) SIMILAR TO ('%event-bernie-sanders%|%bernie-2020-event%') THEN 'rally-town-hall'
-          WHEN lower(coalesce(event_name,event_type_mob)) SIMILAR TO ('%postcards_for_bernie%|%plan-win-party%|%debate-watch-party%|%debate_watch_party%|%office_opening%|%house-party%|%house_party%') THEN 'small-event'
-          WHEN lower(coalesce(event_name,event_type_mob)) SIMILAR TO ('%call-bernie_virtual%|%phone_bank%|%phonebank%|%phone-bank%') THEN 'phonebank'
-          WHEN lower(coalesce(event_name,event_type_mob)) SIMILAR TO ('%friend-to-friend%|%friend_to_friend%') THEN 'friend-to-friend'
-          WHEN lower(coalesce(event_name,event_type_mob)) SIMILAR TO ('%volunteer_training%|%training%') THEN 'training'
-          WHEN lower(coalesce(ak_title,event_title_ak,event_title_mob)) SIMILAR TO ('%rally%|%town hall%|%panel%|%first friday%|%community meeting%|%community conversation%|%brunch%|%alexandria%|%phillip agnew%|%aoc%|%bernie on the ballot%|%bernie breakfast%|%bernie 2020 discussion%|%nina turner%|%bernie 2020 meets%|%townhall%|%roundtable%') THEN 'rally-town-hall'
-          WHEN lower(coalesce(ak_title,event_title_ak,event_title_mob)) SIMILAR TO ('%petition%|%canvass%|%petitions%|%volunteering%|%help get bernie%|%bernie journey%') THEN 'canvass'
-          WHEN lower(coalesce(ak_title,event_title_ak,event_title_mob)) SIMILAR TO ('%phonebank%|%recruitment%|%make calls%') THEN 'phonebank'
-          WHEN lower(coalesce(ak_title,event_title_ak,event_title_mob)) SIMILAR TO ('%barnstorm%') THEN 'barnstorm'
-          WHEN lower(coalesce(ak_title,event_title_ak,event_title_mob)) SIMILAR TO ('%training%') THEN 'training'
-          WHEN lower(coalesce(ak_title,event_title_ak,event_title_mob)) SIMILAR TO ('%parade%|%march%|%teachers for bernie%') THEN 'solidarity-action'
-          WHEN lower(coalesce(ak_title,event_title_ak,event_title_mob)) SIMILAR TO ('%organizing meeting%') THEN 'solidarity-action'
-          WHEN lower(coalesce(event_title_ak,event_title_mob,ak_title)) SIMILAR TO ('%delegates%|%meeting%|%talk bernie%|%community discussion%|%meet up%|%team meeting%|%student%|%high school%|% for bernie%|%kickoff meeting%|%leadership meeting%|%kick-off meeting%|%headquarters%|%bernie virtual meeting%|%bash%|%parranda%|%office opening%|%party%|%art hop%|%plan to win%|%debate watch party%|%dinner%|%postcards%|%potluck%|%volunteer appreciation%|%social hour%|%club meeting%|%unidos con bernie%|%debate%|%food drive%|%fiesta%|%happy hour%|%tabling%|%bonfire%') THEN 'small-event'
+          WHEN lower(coalesce(ak.event_name,mob.event_type_mob)) ILIKE '%barnstorm%' THEN 'barnstorm'
+          WHEN lower(coalesce(ak.event_name,mob.event_type_mob)) SIMILAR TO ('%canvass%|%bernie-on-the-ballot%|%bernie-journey%|%signature_gathering%') THEN 'canvass'
+          WHEN lower(coalesce(ak.event_name,mob.event_type_mob)) SIMILAR TO ('%solidarityevent%|%solidarity-event%|%solidarity_event%') THEN 'solidarity-action'
+          WHEN lower(coalesce(ak.event_name,mob.event_type_mob)) SIMILAR TO ('%event-bernie-sanders%|%bernie-2020-event%') THEN 'rally-town-hall'
+          WHEN lower(coalesce(ak.event_name,mob.event_type_mob)) SIMILAR TO ('%postcards_for_bernie%|%plan-win-party%|%debate-watch-party%|%debate_watch_party%|%office_opening%|%house-party%|%house_party%') THEN 'small-event'
+          WHEN lower(coalesce(ak.event_name,mob.event_type_mob)) SIMILAR TO ('%call-bernie_virtual%|%phone_bank%|%phonebank%|%phone-bank%') THEN 'phonebank'
+          WHEN lower(coalesce(ak.event_name,mob.event_type_mob)) SIMILAR TO ('%friend-to-friend%|%friend_to_friend%') THEN 'friend-to-friend'
+          WHEN lower(coalesce(ak.event_name,mob.event_type_mob)) SIMILAR TO ('%volunteer_training%|%training%') THEN 'training'
+          WHEN lower(coalesce(xwalk.ak_title,ak.event_title_ak,mob.event_title_mob)) SIMILAR TO ('%rally%|%town hall%|%panel%|%first friday%|%community meeting%|%community conversation%|%brunch%|%alexandria%|%phillip agnew%|%aoc%|%bernie on the ballot%|%bernie breakfast%|%bernie 2020 discussion%|%nina turner%|%bernie 2020 meets%|%townhall%|%roundtable%') THEN 'rally-town-hall'
+          WHEN lower(coalesce(xwalk.ak_title,ak.event_title_ak,mob.event_title_mob)) SIMILAR TO ('%petition%|%canvass%|%petitions%|%volunteering%|%help get bernie%|%bernie journey%') THEN 'canvass'
+          WHEN lower(coalesce(xwalk.ak_title,ak.event_title_ak,mob.event_title_mob)) SIMILAR TO ('%phonebank%|%recruitment%|%make calls%') THEN 'phonebank'
+          WHEN lower(coalesce(xwalk.ak_title,ak.event_title_ak,mob.event_title_mob)) SIMILAR TO ('%barnstorm%') THEN 'barnstorm'
+          WHEN lower(coalesce(xwalk.ak_title,ak.event_title_ak,mob.event_title_mob)) SIMILAR TO ('%training%') THEN 'training'
+          WHEN lower(coalesce(xwalk.ak_title,ak.event_title_ak,mob.event_title_mob)) SIMILAR TO ('%parade%|%march%|%teachers for bernie%') THEN 'solidarity-action'
+          WHEN lower(coalesce(xwalk.ak_title,ak.event_title_ak,mob.event_title_mob)) SIMILAR TO ('%organizing meeting%') THEN 'solidarity-action'
+          WHEN lower(coalesce(ak.event_title_ak,mob.event_title_mob,xwalk.ak_title)) SIMILAR TO ('%delegates%|%meeting%|%talk bernie%|%community discussion%|%meet up%|%team meeting%|%student%|%high school%|% for bernie%|%kickoff meeting%|%leadership meeting%|%kick-off meeting%|%headquarters%|%bernie virtual meeting%|%bash%|%parranda%|%office opening%|%party%|%art hop%|%plan to win%|%debate watch party%|%dinner%|%postcards%|%potluck%|%volunteer appreciation%|%social hour%|%club meeting%|%unidos con bernie%|%debate%|%food drive%|%fiesta%|%happy hour%|%tabling%|%bonfire%') THEN 'small-event'
           ELSE 'other' END AS event_type_v2,
-          event_name::varchar(256) ,
-          event_campaign_mob::varchar(256) ,
-          event_campaign::varchar(256) ,
-          van_location_id::varchar(256) ,
-          mob_shift_count::varchar(256) ,
-          mob_shift_order::varchar(256)
-   FROM (
+          ak.event_name::varchar(256) ,
+          mob.event_campaign_mob::varchar(256) ,
+          ak.event_campaign::varchar(256) 
+   FROM 
           (SELECT event.id::int AS ak_event_id,
                   event.address1::varchar(256) AS event_address_line_1_ak,
                   event.address2::varchar(256) AS event_address_line_2_ak,
@@ -162,16 +156,11 @@ CREATE TABLE bernie_nmarchio2.events_details AS
            FROM
              (SELECT * FROM ak_bernie.events_event) event
            LEFT JOIN
-             (SELECT id AS campaign_id, name FROM ak_bernie.events_campaign) campaign using(campaign_id)) 
-   LEFT JOIN
+             (SELECT id AS campaign_id, name FROM ak_bernie.events_campaign) campaign USING(campaign_id)) ak 
+   FULL JOIN
            (SELECT ak_event_id ,
                    mobilize_id ,
                    event_type ,
-                   mobilize_timeslot_id ,
-                   van_event_van_id ,
-                   van_timeslot_id ,
-                   mob_shift_count ,
-                   mob_shift_order ,
                    ak_title ,
                    CASE WHEN ak_address1 SIMILAR TO '%Exact location TBD%|%Address provided upon RSVP%' THEN NULL ELSE ak_address1 END AS ak_address1 ,
                    CASE WHEN ak_venue SIMILAR TO '%Unnamed venue%|%Private venue%' THEN NULL ELSE ak_venue END AS ak_venue ,
@@ -181,9 +170,9 @@ CREATE TABLE bernie_nmarchio2.events_details AS
                    mobilize_start_utc ,
                    van_location_id ,
                    CASE WHEN van_location_name SIMILAR TO '%Unnamed venue%|%Private venue%' THEN NULL ELSE van_location_name END AS van_location_name ,
-                   event_state
-            FROM core_table_builds.events_xwalk)
-           using(ak_event_id)
+                   event_state , 
+                   ROW_NUMBER() OVER(PARTITION BY ak_event_id ||'_'||mobilize_id ORDER BY ak_event_id NULLS LAST, mobilize_id NULLS LAST) AS rownum
+            FROM core_table_builds.events_xwalk) xwalk ON xwalk.ak_event_id = ak.ak_event_id AND xwalk.rownum = 1
    FULL JOIN
            (SELECT id::varchar(256) AS mobilize_id,
                    location__address_line_1::varchar(256) AS event_address_line_1_mob,
@@ -196,6 +185,5 @@ CREATE TABLE bernie_nmarchio2.events_details AS
                    lower(event_type::varchar(256)) AS event_type_mob,
                    lower(title::varchar(256)) AS event_title_mob,
                    event_campaign__slug::varchar(256) AS event_campaign_mob
-            FROM mobilize.events_comprehensive) 
-            using(mobilize_id)
-   ));
+            FROM mobilize.events_comprehensive) mob ON mob.mobilize_id = xwalk.mobilize_id
+   );
