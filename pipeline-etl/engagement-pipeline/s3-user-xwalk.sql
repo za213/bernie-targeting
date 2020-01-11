@@ -122,9 +122,8 @@ CREATE TABLE bernie_nmarchio2.events_signups AS
    LEFT JOIN
      (SELECT DISTINCT ak_event_id,
              mobilize_id,
-             mobilize_timeslot_id,
-             row_number() over (partition BY mobilize_id || '_' || mobilize_timeslot_id ORDER BY ak_event_id NULLS LAST) AS dedupe
-      FROM bernie_nmarchio2.events_details WHERE mobilize_id IS NOT NULL) xw ON mob.event_id = xw.mobilize_id AND mob.timeslot_id = xw.mobilize_timeslot_id AND xw.dedupe = 1
+             row_number() over (partition BY mobilize_id ORDER BY ak_event_id NULLS LAST) AS dedupe
+      FROM bernie_nmarchio2.events_details WHERE mobilize_id IS NOT NULL) xw ON mob.event_id = xw.mobilize_id AND xw.dedupe = 1
    LEFT JOIN 
      (SELECT DISTINCT person_id,
                       user_email,
@@ -139,7 +138,7 @@ FULL JOIN
           ak.user_id::varchar(256) AS user_id ,
           ak.event_id::varchar(256) AS ak_event_id ,
           xw.mobilize_id::varchar(256) ,
-          xw.mobilize_timeslot_id::varchar(256) ,
+          null as mobilize_timeslot_id ,
           ak.attended::boolean AS user_attended ,
           ak.status::varchar(256) AS status ,
           xw_user.person_id,
@@ -151,8 +150,7 @@ FULL JOIN
    LEFT JOIN
      (SELECT DISTINCT ak_event_id,
              mobilize_id,
-             mobilize_timeslot_id,
-             row_number() over (partition BY ak_event_id ORDER BY mobilize_id NULLS LAST, mobilize_timeslot_id NULLS LAST) AS dedupe
+             row_number() over (partition BY ak_event_id ORDER BY mobilize_id NULLS LAST) AS dedupe
       FROM bernie_nmarchio2.events_details WHERE ak_event_id IS NOT NULL) xw ON xw.ak_event_id = ak.event_id AND xw.dedupe = 1
    LEFT JOIN 
      (SELECT DISTINCT person_id,
