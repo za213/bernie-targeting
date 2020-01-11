@@ -148,6 +148,22 @@ CREATE TABLE bernie_nmarchio2.events_details AS
           mob_shift_count::varchar(256) ,
           mob_shift_order::varchar(256)
    FROM (
+          (SELECT event.id::int AS ak_event_id,
+                  event.address1::varchar(256) AS event_address_line_1_ak,
+                  event.address2::varchar(256) AS event_address_line_2_ak,
+                  event.city::varchar(256) AS event_city_ak,
+                  coalesce(event.state,event.region)::varchar(256) AS event_state_ak,
+                  coalesce(event.zip,event.postal) AS event_zip_ak,
+                  event.longitude::real AS event_lon_ak,
+                  event.latitude::real AS event_lat_ak,
+                  event.title AS event_title_ak ,
+                  event.campaign_id AS event_campaign ,
+                  campaign.name AS event_name
+           FROM
+             (SELECT * FROM ak_bernie.events_event) event
+           LEFT JOIN
+             (SELECT id AS campaign_id, name FROM ak_bernie.events_campaign) campaign using(campaign_id)) 
+   LEFT JOIN
            (SELECT ak_event_id ,
                    mobilize_id ,
                    event_type ,
@@ -167,33 +183,19 @@ CREATE TABLE bernie_nmarchio2.events_details AS
                    CASE WHEN van_location_name SIMILAR TO '%Unnamed venue%|%Private venue%' THEN NULL ELSE van_location_name END AS van_location_name ,
                    event_state
             FROM core_table_builds.events_xwalk)
-         LEFT JOIN
-(SELECT id::varchar(256) AS mobilize_id,
-        location__address_line_1::varchar(256) AS event_address_line_1_mob,
-        location__address_line_2::varchar(256) AS event_address_line_2_mob,
-        location__locality::varchar(256) AS event_city_mob,
-        location__region::varchar(256) AS event_state_mob,
-        location__postal_code::varchar(256) AS event_zip_mob,
-        location__lat::real AS event_lat_mob,
-        location__lon::real AS event_lon_mob,
-        lower(event_type::varchar(256)) AS event_type_mob,
-        lower(title::varchar(256)) AS event_title_mob,
-        event_campaign__slug::varchar(256) AS event_campaign_mob
- FROM mobilize.events_comprehensive) using(mobilize_id)
-         LEFT JOIN
-(SELECT event.id::int AS ak_event_id,
-        event.address1::varchar(256) AS event_address_line_1_ak,
-        event.address2::varchar(256) AS event_address_line_2_ak,
-        event.city::varchar(256) AS event_city_ak,
-        coalesce(event.state,event.region)::varchar(256) AS event_state_ak,
-        coalesce(event.zip,event.postal) AS event_zip_ak,
-        event.longitude::real AS event_lon_ak,
-        event.latitude::real AS event_lat_ak,
-        event.title AS event_title_ak ,
-        event.campaign_id AS event_campaign ,
-        campaign.name AS event_name
- FROM
-   (SELECT * FROM ak_bernie.events_event) event
- LEFT JOIN
-   (SELECT id AS campaign_id, name FROM ak_bernie.events_campaign) campaign using(campaign_id)) using(ak_event_id)));
-
+           using(ak_event_id)
+   LEFT JOIN
+           (SELECT id::varchar(256) AS mobilize_id,
+                   location__address_line_1::varchar(256) AS event_address_line_1_mob,
+                   location__address_line_2::varchar(256) AS event_address_line_2_mob,
+                   location__locality::varchar(256) AS event_city_mob,
+                   location__region::varchar(256) AS event_state_mob,
+                   location__postal_code::varchar(256) AS event_zip_mob,
+                   location__lat::real AS event_lat_mob,
+                   location__lon::real AS event_lon_mob,
+                   lower(event_type::varchar(256)) AS event_type_mob,
+                   lower(title::varchar(256)) AS event_title_mob,
+                   event_campaign__slug::varchar(256) AS event_campaign_mob
+            FROM mobilize.events_comprehensive) 
+            using(mobilize_id)
+   ));
