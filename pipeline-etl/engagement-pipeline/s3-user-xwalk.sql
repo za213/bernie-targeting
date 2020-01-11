@@ -1,4 +1,4 @@
--- Coalesced address table
+-- Coalesced user address table
 DROP TABLE IF EXISTS bernie_nmarchio2.events_users_enhanced;
 CREATE TABLE bernie_nmarchio2.events_users_enhanced AS
 (SELECT base_ids.unique_id ,
@@ -47,7 +47,6 @@ FULL JOIN
                    user_id AS user_id_actionkit
    FROM bernie_nmarchio2.events_users_enhanced WHERE source_data = 'actionkit' AND person_id IS NOT NULL) ON person_id_mobilize = person_id_actionkit);
 
-
 CREATE TEMP TABLE email_xwalk AS
 (SELECT coalesce(user_email_mobilize,user_email_actionkit) AS user_email,
        user_id_mobilize,
@@ -61,7 +60,7 @@ FULL JOIN
                    user_id AS user_id_actionkit
    FROM bernie_nmarchio2.events_users_enhanced WHERE source_data = 'actionkit' AND person_id IS NULL AND user_email IS NOT NULL) ON user_email_mobilize = user_email_actionkit);
 
--- Mobilize-ActionKit User Crosswalk (some people have duplicative Mobilize and ActionKit IDs)
+-- Mobilize-ActionKit User crosswalk (some people have duplicative Mobilize and ActionKit IDs)
 DROP TABLE IF EXISTS bernie_nmarchio2.events_users_xwalk;
 CREATE TABLE bernie_nmarchio2.events_users_xwalk AS
 (SELECT main.person_id,
@@ -85,7 +84,7 @@ CREATE TABLE bernie_nmarchio2.events_users_xwalk AS
                      ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY user_email NULLS LAST) AS rownum
      FROM bernie_nmarchio2.events_users_enhanced) side ON main.person_id = side.person_id AND side.rownum = 1);
 
--- Coalesced signups table
+-- Coalesced events signups table
 DROP TABLE IF EXISTS bernie_nmarchio2.events_signups;
 CREATE TABLE bernie_nmarchio2.events_signups AS
 (SELECT 
