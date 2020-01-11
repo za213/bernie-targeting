@@ -7,30 +7,8 @@ drop table if exists bernie_nmarchio2.events_users_clean;'
 drop_status <- civis::query_civis(x=sql(drop_table_sql), database = 'Bernie 2020') 
 drop_status
 
-# Run CASS job on events table
-clean_job_1 <- civis::enhancements_post_cass_ncoa(name ='Engagement Events CASS Job', 
-                                                  source = list(databaseTable = list(schema = 'bernie_nmarchio2',
-                                                                                     table = 'events_details',
-                                                                                     remoteHostId = get_database_id('Bernie 2020'),     
-                                                                                     credentialId = default_credential(),
-                                                                                     multipartKey = list('unique_id'))),
-                                                  destination = list(databaseTable = list(schema = 'bernie_nmarchio2',
-                                                                                          table = 'events_details_clean')),
-                                                  column_mapping = list(address1 = 'event_address1',
-                                                                        address2 = 'event_address2',
-                                                                        city = 'event_city',
-                                                                        state = 'event_state',
-                                                                        zip = 'event_zip',
-                                                                        name = NULL,
-                                                                        company = NULL),
-                                                  use_default_column_mapping = "false",
-                                                  output_level = "cass",
-                                                  limiting_sql = "")
-
-clean_job_1_run <- enhancements_post_cass_ncoa_runs(clean_job_1$id)
-
 # Run CASS job on users table
-clean_job_2 <- civis::enhancements_post_cass_ncoa(name ='Engagement Users CASS Job', 
+clean_job <- civis::enhancements_post_cass_ncoa(name ='Engagement Users CASS Job', 
                                                   source = list(databaseTable = list(schema = 'bernie_nmarchio2',
                                                                                      table = 'events_users',
                                                                                      remoteHostId = get_database_id('Bernie 2020'),
@@ -49,16 +27,12 @@ clean_job_2 <- civis::enhancements_post_cass_ncoa(name ='Engagement Users CASS J
                                                   output_level = "cass",
                                                   limiting_sql = "person_id is null")
 
-clean_job_2_run <- enhancements_post_cass_ncoa_runs(clean_job_2$id)
+clean_job_run <- enhancements_post_cass_ncoa_runs(clean_job$id)
 
 # Block until the users and events CASS job finishes
 r <- await(f=enhancements_get_cass_ncoa_runs, 
-           id=clean_job_2_run$cassNcoaId, 
-           run_id=clean_job_2_run$id)
-get_status(r)
-r <- await(f=enhancements_get_cass_ncoa_runs, 
-           id=clean_job_1_run$cassNcoaId, 
-           run_id=clean_job_1_run$id)
+           id=clean_job_run$cassNcoaId, 
+           run_id=clean_job_run$id)
 get_status(r)
 
 # Submit coalesce query
@@ -116,6 +90,33 @@ m <- await(f=enhancements_get_civis_data_match_runs,
            id=match_job_run$civisDataMatchId,
            run_id=match_job_run$id)
 get_status(m)
+
+# Run CASS job on events table
+# clean_job_1 <- civis::enhancements_post_cass_ncoa(name ='Engagement Events CASS Job', 
+#                                                   source = list(databaseTable = list(schema = 'bernie_nmarchio2',
+#                                                                                      table = 'events_details',
+#                                                                                      remoteHostId = get_database_id('Bernie 2020'),     
+#                                                                                      credentialId = default_credential(),
+#                                                                                      multipartKey = list('unique_id'))),
+#                                                   destination = list(databaseTable = list(schema = 'bernie_nmarchio2',
+#                                                                                           table = 'events_details_clean')),
+#                                                   column_mapping = list(address1 = 'event_address1',
+#                                                                         address2 = 'event_address2',
+#                                                                         city = 'event_city',
+#                                                                         state = 'event_state',
+#                                                                         zip = 'event_zip',
+#                                                                         name = NULL,
+#                                                                         company = NULL),
+#                                                   use_default_column_mapping = "false",
+#                                                   output_level = "cass",
+#                                                   limiting_sql = "")
+# 
+# clean_job_1_run <- enhancements_post_cass_ncoa_runs(clean_job_1$id)
+
+# r <- await(f=enhancements_get_cass_ncoa_runs, 
+#            id=clean_job_1_run$cassNcoaId, 
+#            run_id=clean_job_1_run$id)
+# get_status(r)
 
 # geocode_job <- enhancements_post_geocode(name = 'Geocode Job',
 #                                          remote_host_id= get_database_id('Bernie 2020'),
