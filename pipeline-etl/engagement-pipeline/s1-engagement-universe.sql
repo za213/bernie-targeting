@@ -101,6 +101,8 @@ CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
          FROM phoenix_analytics.person) p using(person_id) ));
 
 --EVENTS TABLE
+
+
 DROP TABLE IF EXISTS bernie_nmarchio2.events_details;
 CREATE TABLE bernie_nmarchio2.events_details AS
   (SELECT coalesce(ak_event_id,'0')||'_'||coalesce(mobilize_id,'0')||'_'||coalesce(mobilize_timeslot_id,'0')||'_'||coalesce(van_event_van_id,'0')||'_'||coalesce(van_timeslot_id,'0')||'_'||coalesce(event_campaign,'0')||'_'||coalesce(van_location_id,'0')||'_'||coalesce(mob_shift_count,'0')||'_'||coalesce(mob_shift_order,'0') as unique_id ,
@@ -184,7 +186,7 @@ CREATE TABLE bernie_nmarchio2.events_details AS
                    event_state
             FROM core_table_builds.events_xwalk)
            using(ak_event_id)
-   LEFT JOIN
+   FULL JOIN
            (SELECT id::varchar(256) AS mobilize_id,
                    location__address_line_1::varchar(256) AS event_address_line_1_mob,
                    location__address_line_2::varchar(256) AS event_address_line_2_mob,
