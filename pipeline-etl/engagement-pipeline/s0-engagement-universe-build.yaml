@@ -12,19 +12,21 @@ workflow:
       input:
         job_id: 56212903
       on-success:
-        - user-dedupe
-    user-dedupe:
+        - user-xwalk
+    user-xwalk:
       action: civis.run_job
       input:
-        job_id: 0
+        job_id: 56738816
       on-success:
         - unified-table
     unified-table:
       action: civis.run_job
       input:
-        job_id: 0
+        job_id: 56739073
 
 #https://platform.civisanalytics.com/spa/#/workflows/10896
 #https://platform.civisanalytics.com/spa/#/scripts/custom/56212503
 #https://platform.civisanalytics.com/spa/#/scripts/containers/56212903
+#https://platform.civisanalytics.com/spa/#/scripts/custom/56738816
+#https://platform.civisanalytics.com/spa/#/scripts/custom/56739073
         
