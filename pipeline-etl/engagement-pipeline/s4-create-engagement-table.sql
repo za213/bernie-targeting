@@ -1,3 +1,55 @@
+CREATE TEMP TABLE event_analytics AS
+(SELECT source_data ,
+       user_id ,
+       person_id ,
+       user_email ,
+       user_id_mobilize ,
+       user_id_actionkit ,
+       SUM(CASE WHEN user_attended = 't' THEN 1 ELSE 0 END) AS attended ,
+       SUM(CASE WHEN user_attended = 't' OR user_attended = 'f' THEN 1 ELSE 0 END) AS signups ,
+       SUM(CASE WHEN event_type_v2 = 'canvass' AND user_attended = 't' THEN 1 ELSE 0 END) AS attended_canvass ,
+       SUM(CASE WHEN event_type_v2 = 'canvass' THEN 1 ELSE 0 END) AS signups_canvass ,
+       SUM(CASE WHEN event_type_v2 = 'phonebank' AND user_attended = 't' THEN 1 ELSE 0 END) AS attended_phonebank ,
+       SUM(CASE WHEN event_type_v2 = 'phonebank' THEN 1 ELSE 0 END) AS signups_phonebank ,
+       SUM(CASE WHEN event_type_v2 = 'small-event' AND user_attended = 't' THEN 1 ELSE 0 END) AS attended_small_event ,
+       SUM(CASE WHEN event_type_v2 = 'small-event' THEN 1 ELSE 0 END) AS signups_small_event ,
+       SUM(CASE WHEN event_type_v2 = 'other' AND user_attended = 't' THEN 1 ELSE 0 END) AS attended_other ,
+       SUM(CASE WHEN event_type_v2 = 'other' THEN 1 ELSE 0 END) AS signups_other ,
+       SUM(CASE WHEN event_type_v2 = 'friend-to-friend' AND user_attended = 't' THEN 1 ELSE 0 END) AS attended_friend_to_friend ,
+       SUM(CASE WHEN event_type_v2 = 'friend-to-friend' THEN 1 ELSE 0 END) AS signups_friend_to_friend ,
+       SUM(CASE WHEN event_type_v2 = 'training' AND user_attended = 't' THEN 1 ELSE 0 END) AS attended_training ,
+       SUM(CASE WHEN event_type_v2 = 'training' THEN 1 ELSE 0 END) AS signups_training ,
+       SUM(CASE WHEN event_type_v2 = 'barnstorm' AND user_attended = 't' THEN 1 ELSE 0 END) AS attended_barnstorm ,
+       SUM(CASE WHEN event_type_v2 = 'barnstorm' THEN 1 ELSE 0 END) AS signups_barnstorm ,
+       SUM(CASE WHEN event_type_v2 = 'rally-town-hall' AND user_attended = 't' THEN 1 ELSE 0 END) AS attended_rally_town_hall ,
+       SUM(CASE WHEN event_type_v2 = 'rally-town-hall' THEN 1 ELSE 0 END) AS signups_rally_town_hall ,
+       SUM(CASE WHEN event_type_v2 = 'solidarity-action' AND user_attended = 't' THEN 1 ELSE 0 END) AS attended_solidarity_action ,
+       SUM(CASE WHEN event_type_v2 = 'solidarity-action' THEN 1 ELSE 0 END) AS signups_solidarity_action ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) <= 10 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_10_days ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 11 AND 20 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_11_20_days ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 21 AND 30 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_21_30_days ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 31 AND 40 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_31_40_days ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 41 AND 50 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_41_50_days ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 51 AND 60 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_51_60_days ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 61 AND 70 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_61_70_days ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 71 AND 80 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_71_80_days ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 81 AND 90 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_81_90_days ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 91 AND 100 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_91_100_days ,
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) >= 101 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_over_100_days 
+       FROM
+(SELECT * FROM 
+(SELECT * FROM
+   (SELECT * FROM bernie_nmarchio2.events_signups WHERE source_data = 'actionkit') sign_ak
+ LEFT JOIN
+   (SELECT *, ROW_NUMBER() OVER(PARTITION BY ak_event_id ORDER BY mobilize_id NULLS LAST) AS rownum FROM bernie_nmarchio2.events_details) evnt_ak ON (sign_ak.ak_event_id = evnt_ak.ak_event_id AND evnt_ak.rownum = 1))
+UNION ALL 
+(SELECT * FROM
+   (SELECT * FROM bernie_nmarchio2.events_signups WHERE source_data = 'mobilize') sign_mob
+ LEFT JOIN
+   (SELECT *, ROW_NUMBER() OVER(PARTITION BY mobilize_id ORDER BY ak_event_id NULLS LAST) AS rownum FROM bernie_nmarchio2.events_details) evnt_mob ON (sign_mob.mobilize_id = evnt_mob.mobilize_id AND evnt_mob.rownum = 1)))
+GROUP BY 1,2,3,4,5,6);
+
+
 
 DROP TABLE IF EXISTS bernie_nmarchio2.engagement_analytics;
 CREATE TABLE bernie_nmarchio2.engagement_analytics DISTKEY (person_id) AS 
@@ -69,19 +121,18 @@ CREATE TABLE bernie_nmarchio2.engagement_analytics DISTKEY (person_id) AS
     spoke.support_final as spoke_support_final,
     spoke.support_change as spoke_support_change
 FROM
-(SELECT person_id::varchar(10) FROM phoenix_analytics.person where is_deceased = false and reg_record_merged = false and reg_on_current_file = true and reg_voter_flag = true) phx
+ (SELECT person_id::varchar(10) FROM phoenix_analytics.person where is_deceased = false and reg_record_merged = false and reg_on_current_file = true and reg_voter_flag = true) phx
 FULL JOIN
-  (SELECT *
-   FROM event_analytics) events USING(person_id)
+ (SELECT * FROM event_analytics) events USING(person_id)
 FULL JOIN
-(SELECT person_id::varchar(10), CASE WHEN deleted = 'f' THEN 1 ELSE 0 END AS slack_vol, profile_email AS email
-FROM
+ (SELECT person_id::varchar(10), CASE WHEN deleted = 'f' THEN 1 ELSE 0 END AS slack_vol, profile_email AS email
+ FROM
   (SELECT id AS slack_id, name, deleted, profile_email FROM slack.vol_users) slack
-LEFT JOIN
+ LEFT JOIN
   (SELECT person_id::varchar(10), email, ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY email NULLS LAST) AS rownum
-FROM bernie_data_commons.master_xwalk) xwalk_master ON (xwalk_master.email = slack.profile_email AND xwalk_master.rownum = 1)) slack USING(person_id)
+ FROM bernie_data_commons.master_xwalk) xwalk_master ON (xwalk_master.email = slack.profile_email AND xwalk_master.rownum = 1)) slack USING(person_id)
 FULL JOIN
-(SELECT person_id::varchar(10) ,
+ (SELECT person_id::varchar(10) ,
        bern_id ,
        bern_canvasser_id ,
        total_points as bern_total_points ,
@@ -90,40 +141,35 @@ FULL JOIN
        CASE WHEN attempted_voter_lookup = 't' then 1 else 0 end as bern_attempted_voter_lookup
        FROM
   (SELECT * FROM bern_app.canvass_canvasser) canv
-FULL JOIN
+ FULL JOIN
   (SELECT person_id::varchar(10),
           bern_id,
           bern_canvasser_id,
           ROW_NUMBER() OVER(PARTITION BY bern_id ORDER BY email NULLS LAST) AS rownum
-FROM bernie_data_commons.master_xwalk) xwalk ON canv.id = xwalk.bern_id
-AND xwalk.rownum = 1) bern USING(person_id)
-LEFT JOIN (
-SELECT *
-FROM (
-SELECT person_id::varchar(10) ,
-           CASE WHEN surveyresponseid IN (1) THEN 1 ELSE 0 END AS support_1_id ,
-           CASE WHEN surveyresponseid IN (1,2) THEN 1 ELSE 0 END AS support_1_2_id ,
-           CASE WHEN surveyresponseid IN (3) THEN 1 ELSE 0 END AS undecided_3_id ,
-           CASE WHEN surveyresponseid IN (96) THEN 1 WHEN surveyresponseid IN (97,98) THEN 0 ELSE NULL END AS persuaded_id ,
-           CASE WHEN surveyresponseid IN (83) THEN 1 ELSE 0 END AS bernie_id ,
-           CASE WHEN surveyresponseid IN (13,15,16) THEN 1 ELSE 0 END AS liz_joe_pete_support_id ,
-           CASE WHEN surveyresponseid IN (17,18,19,20,21,22,23,24,25,26,27,28,29,30,95) THEN 1 ELSE 0 END AS rest_of_field_support_id ,
-           CASE WHEN surveyresponseid IN (105) THEN 1 WHEN surveyresponseid IN (106,107) THEN 0 ELSE NULL END AS npp_yes_id ,
-           CASE WHEN surveyresponseid IN (40) THEN 1 WHEN surveyresponseid IN (106,107) THEN 0 ELSE NULL END AS sticker_id ,
-           CASE WHEN surveyresponseid IN (99) THEN 1 WHEN surveyresponseid IN (100,101) THEN 0 ELSE NULL END AS commit2caucus_id ,
-           CASE WHEN surveyresponseid IN (10) THEN 1 ELSE 0 END AS union_id ,
-           CASE WHEN surveyresponseid IN (9,103,104) THEN 1 ELSE 0 END AS student_id ,
-           CASE WHEN surveyresponseid IN (32) THEN 1 WHEN surveyresponseid IN (33) THEN 0 ELSE NULL END AS volunteer_yes_id ,
-           CASE WHEN surveyresponseid IN (32,34,94) THEN 1 WHEN surveyresponseid IN (33) THEN 0 ELSE NULL END AS volunteer_yes_maybe_id ,
-           CASE WHEN surveyresponseid IN (35,36) THEN 1 ELSE 0 END AS event_rsvp_yes_maybe ,
-           CASE WHEN surveyresponseid IN (37,38) THEN 1 ELSE 0 END AS has_will_donate ,
-           row_number() over (partition BY person_id ORDER BY contactdate ASC) AS dup
-FROM
-  (SELECT *
-   FROM contacts.surveyresponses) sr
-JOIN bernie_data_commons.contactcontacts_joined ccj using(contactcontact_id)
-LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid))
-WHERE dup = 1
+ FROM bernie_data_commons.master_xwalk) xwalk ON canv.id = xwalk.bern_id AND xwalk.rownum = 1) bern USING(person_id)
+LEFT JOIN (SELECT * FROM (
+ SELECT person_id::varchar(10) ,
+            CASE WHEN surveyresponseid IN (1) THEN 1 ELSE 0 END AS support_1_id ,
+            CASE WHEN surveyresponseid IN (1,2) THEN 1 ELSE 0 END AS support_1_2_id ,
+            CASE WHEN surveyresponseid IN (3) THEN 1 ELSE 0 END AS undecided_3_id ,
+            CASE WHEN surveyresponseid IN (96) THEN 1 WHEN surveyresponseid IN (97,98) THEN 0 ELSE NULL END AS persuaded_id ,
+            CASE WHEN surveyresponseid IN (83) THEN 1 ELSE 0 END AS bernie_id ,
+            CASE WHEN surveyresponseid IN (13,15,16) THEN 1 ELSE 0 END AS liz_joe_pete_support_id ,
+            CASE WHEN surveyresponseid IN (17,18,19,20,21,22,23,24,25,26,27,28,29,30,95) THEN 1 ELSE 0 END AS rest_of_field_support_id ,
+            CASE WHEN surveyresponseid IN (105) THEN 1 WHEN surveyresponseid IN (106,107) THEN 0 ELSE NULL END AS npp_yes_id ,
+            CASE WHEN surveyresponseid IN (40) THEN 1 WHEN surveyresponseid IN (106,107) THEN 0 ELSE NULL END AS sticker_id ,
+            CASE WHEN surveyresponseid IN (99) THEN 1 WHEN surveyresponseid IN (100,101) THEN 0 ELSE NULL END AS commit2caucus_id ,
+            CASE WHEN surveyresponseid IN (10) THEN 1 ELSE 0 END AS union_id ,
+            CASE WHEN surveyresponseid IN (9,103,104) THEN 1 ELSE 0 END AS student_id ,
+            CASE WHEN surveyresponseid IN (32) THEN 1 WHEN surveyresponseid IN (33) THEN 0 ELSE NULL END AS volunteer_yes_id ,
+            CASE WHEN surveyresponseid IN (32,34,94) THEN 1 WHEN surveyresponseid IN (33) THEN 0 ELSE NULL END AS volunteer_yes_maybe_id ,
+            CASE WHEN surveyresponseid IN (35,36) THEN 1 ELSE 0 END AS event_rsvp_yes_maybe ,
+            CASE WHEN surveyresponseid IN (37,38) THEN 1 ELSE 0 END AS has_will_donate ,
+            row_number() over (partition BY person_id ORDER BY contactdate ASC) AS dup
+ FROM
+  (SELECT * FROM contacts.surveyresponses) sr
+ INNER JOIN bernie_data_commons.contactcontacts_joined ccj using(contactcontact_id)
+ LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid)) WHERE dup = 1
   AND person_id IS NOT NULL) surveyresp USING(person_id)
   LEFT JOIN (
   SELECT person_id::varchar(10),
