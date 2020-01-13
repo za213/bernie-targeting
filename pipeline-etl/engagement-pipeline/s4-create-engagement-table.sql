@@ -1,3 +1,4 @@
+-- Build event analytics table
 CREATE TEMP TABLE event_analytics AS
 (SELECT source_data ,
        user_id ,
@@ -48,8 +49,6 @@ UNION ALL
  LEFT JOIN
    (SELECT *, ROW_NUMBER() OVER(PARTITION BY mobilize_id ORDER BY ak_event_id NULLS LAST) AS rownum FROM bernie_nmarchio2.events_details) evnt_mob ON (sign_mob.mobilize_id = evnt_mob.mobilize_id AND evnt_mob.rownum = 1)))
 GROUP BY 1,2,3,4,5,6);
-
-
 
 DROP TABLE IF EXISTS bernie_nmarchio2.engagement_analytics;
 CREATE TABLE bernie_nmarchio2.engagement_analytics DISTKEY (person_id) AS 
