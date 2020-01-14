@@ -1,5 +1,7 @@
--- Build event analytics table
-CREATE TEMP TABLE event_analytics AS
+
+-- ActionKit-Mobilize
+DROP TABLE IF EXISTS bernie_nmarchio2.universe_actionkit_mobilize;
+CREATE TABLE bernie_nmarchio2.universe_actionkit_mobilize AS
 (SELECT source_data ,
        user_id ,
        person_id ,
@@ -50,87 +52,40 @@ UNION ALL
    (SELECT *, ROW_NUMBER() OVER(PARTITION BY mobilize_id ORDER BY ak_event_id NULLS LAST) AS rownum FROM bernie_nmarchio2.events_details) evnt_mob ON (sign_mob.mobilize_id = evnt_mob.mobilize_id AND evnt_mob.rownum = 1)))
 GROUP BY 1,2,3,4,5,6);
 
-DROP TABLE IF EXISTS bernie_nmarchio2.engagement_analytics;
-CREATE TABLE bernie_nmarchio2.engagement_analytics DISTKEY (person_id) AS 
-(SELECT phx.person_id ,
-    events.source_data ,
-    events.user_id ,
-    coalesce(events.user_email,slack.email) as user_email ,
-    events.user_id_mobilize ,
-    events.user_id_actionkit ,
-    bern.bern_id ,
-    bern.bern_canvasser_id ,
-    slack.slack_vol ,
-    events.attended ,
-    events.signups ,
-    events.attended_canvass ,
-    events.signups_canvass ,
-    events.attended_phonebank ,
-    events.signups_phonebank ,
-    events.attended_small_event ,
-    events.signups_small_event ,
-    events.attended_other ,
-    events.signups_other ,
-    events.attended_friend_to_friend ,
-    events.signups_friend_to_friend ,
-    events.attended_training ,
-    events.signups_training ,
-    events.attended_barnstorm ,
-    events.signups_barnstorm ,
-    events.attended_rally_town_hall ,
-    events.signups_rally_town_hall ,
-    events.attended_solidarity_action ,
-    events.signups_solidarity_action ,
-    events.active_10_days ,
-    events.active_11_20_days ,
-    events.active_21_30_days ,
-    events.active_31_40_days ,
-    events.active_41_50_days ,
-    events.active_51_60_days ,
-    events.active_61_70_days ,
-    events.active_71_80_days ,
-    events.active_81_90_days ,
-    events.active_91_100_days ,
-    events.active_over_100_days ,
-    bern.bern_total_points,
-    bern.bern_is_student,
-    bern.bern_is_union,
-    bern.bern_attempted_voter_lookup, 
-    surveyresp.support_1_id ,
-    surveyresp.support_1_2_id ,
-    surveyresp.undecided_3_id ,
-    surveyresp.persuaded_id ,
-    surveyresp.bernie_id ,
-    surveyresp.liz_joe_pete_support_id ,
-    surveyresp.rest_of_field_support_id ,
-    surveyresp.npp_yes_id ,
-    surveyresp.sticker_id ,
-    surveyresp.commit2caucus_id ,
-    surveyresp.union_id ,
-    surveyresp.student_id ,
-    surveyresp.volunteer_yes_id ,
-    surveyresp.volunteer_yes_maybe_id ,
-    surveyresp.event_rsvp_yes_maybe ,
-    surveyresp.has_will_donate ,
-    spoke.spoke_support_1box ,
-    spoke.spoke_persuasion_1plus ,
-    spoke.spoke_persuasion_1minus ,
-    spoke.spoke_persuasion_nochange ,
-    spoke.support_init as spoke_support_init,
-    spoke.support_final as spoke_support_final,
-    spoke.support_change as spoke_support_change
-FROM
- (SELECT person_id::varchar(10) FROM phoenix_analytics.person where is_deceased = false and reg_record_merged = false and reg_on_current_file = true and reg_voter_flag = true) phx
-FULL JOIN
- (SELECT * FROM event_analytics) events USING(person_id)
-FULL JOIN
- (SELECT person_id::varchar(10), CASE WHEN deleted = 'f' THEN 1 ELSE 0 END AS slack_vol, profile_email AS email
- FROM
-  (SELECT id AS slack_id, name, deleted, profile_email FROM slack.vol_users) slack
- LEFT JOIN
-  (SELECT person_id::varchar(10), email, ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY email NULLS LAST) AS rownum
- FROM bernie_data_commons.master_xwalk) xwalk_master ON (xwalk_master.email = slack.profile_email AND xwalk_master.rownum = 1)) slack USING(person_id)
-FULL JOIN
+-- MyCampaign Activist Codes
+DROP TABLE IF EXISTS bernie_nmarchio2.universe_myc;
+CREATE TABLE bernie_nmarchio2.universe_myc AS
+ (SELECT mx.person_id::varchar(10) ,
+         mx.actionkit_id ,
+         mx.email ,
+         mx.st_myc_van_id ,
+         SUM(CASE WHEN ac_lookup.activist_code_type = 'MVP' then 1 else 0 end) as mvp_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_type = 'Activist' then 1 else 0 end) as activist_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_type = 'Canvassed' then 1 else 0 end) as canvass_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_type = 'Volunteer' then 1 else 0 end) as volunteer_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_type = 'Email' or ac_lookup.activist_code_name SIMILAR TO '%AK Email Signup%' then 1 else 0 end) as email_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_type IN ('Donors','Donor') or ac_lookup.activist_code_name SIMILAR TO '%2020 Donor%|%2020 Rec Donor%|%Low Dollar Donor%' then 1 else 0 end) as donors_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_type = 'Events' then 1 else 0 end) as events_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_type = 'Legacy' or ac_lookup.activist_code_name SIMILAR TO ('%2016%|%16%') then 1 else 0 end) as legacy_2016_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_type IN ('Political','Constituency','Constituency/Issue','Issue') or ac_lookup.activist_code_name SIMILAR TO ('%Latinx4Bern%|%LGBTQ 4 Bernie%|%Muslims4Bern%|%AfAm4Bernie%|%4 Bernie%|%BlackWomen4Bern%|%Share the Bern%|%Faith 4 Bernie%|%Women 4 Bernie%|%Veterans 4 Bernie%') then 1 else 0 end) as constituencies_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_type IN ('Staff','Elected Officials','Party Officials','Candidate') or ac_lookup.activist_code_name SIMILAR TO ('%Endorser%|%Endorsee%') then 1 else 0 end ) as officials_staff_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_type IN ('Contacts','Out of State','Other') then 1 else 0 end) as other_activist_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_name SIMILAR TO ('%Volunteer Level%|%Volunteer Team Lead%|%Volunteer Leader%|%Caucus Volunteer%|%Vol Yes%|%SuperVol%|%LatinX Vols%|%SuperVols%|%Canvass%|%Shift Compl%|%Knock Doors%|%Give ride to caucus%|%Phone Bank%|%HQ_Phonebank%') then 1 else 0 end) as volunteer_shifts_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_name SIMILAR TO ('%Prospect%|%Volunteer Signup%|%Vol Sign Up%|%Prop_Vol%|%Door Knock Sign Up%|%VolProp%|%Vol Prop%|%Web Commit Signup%|%AK Volunteer Signup%|%AK LTE Signup%|%AK Text Signup%|%AK Spanish Signup%|%AK Tabling Signup%|%AK Phonebank Signup%') then 1 else 0 end) as volunteer_signup_myc ,
+         SUM(CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%RallyRSVP%|%Rally RSVP%|% RSVP%|%Ral RSVP%|%Rally Signup%|%Barnstorm Signup%' THEN 1 ELSE 0 END) AS rally_rsvp_myc ,
+         sum(CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Student%' THEN 1 ELSE 0 END) AS student_myc ,
+         sum(CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Teacher%' THEN 1 ELSE 0 END) AS teacher_myc ,
+         sum(CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Labor%' THEN 1 ELSE 0 END) AS labor_myc ,
+         sum(CASE WHEN ac_lookup.activist_code_name IS NOT NULL THEN 1 ELSE 0 END) AS present_in_myc
+ FROM phoenix_demssanders20_vansync_derived.activist_myc ac
+ LEFT JOIN phoenix_demssanders20_vansync.activist_codes ac_lookup ON ac_lookup.activist_code_id = ac.activist_code_id
+ LEFT JOIN bernie_data_commons.master_xwalk_st_myc mx ON mx.myc_van_id = ac.myc_van_id AND mx.state_code = ac.state_code
+ WHERE ac.committee_id = 73296
+ GROUP BY 1, 2, 3, 4);
+
+-- Bern App
+DROP TABLE IF EXISTS bernie_nmarchio2.universe_bern;
+CREATE TABLE bernie_nmarchio2.universe_bern AS
  (SELECT person_id::varchar(10) ,
        bern_id ,
        bern_canvasser_id ,
@@ -140,46 +95,52 @@ FULL JOIN
        CASE WHEN attempted_voter_lookup = 't' then 1 else 0 end as bern_attempted_voter_lookup
        FROM
   (SELECT * FROM bern_app.canvass_canvasser) canv
- FULL JOIN
+ LEFT JOIN
   (SELECT person_id::varchar(10),
           bern_id,
           bern_canvasser_id,
           ROW_NUMBER() OVER(PARTITION BY bern_id ORDER BY email NULLS LAST) AS rownum
- FROM bernie_data_commons.master_xwalk) xwalk ON canv.id = xwalk.bern_id AND xwalk.rownum = 1) bern USING(person_id)
-LEFT JOIN (SELECT * FROM (
+ FROM bernie_data_commons.master_xwalk) xwalk ON canv.id = xwalk.bern_id AND xwalk.rownum = 1);
+
+-- Survey Responses
+DROP TABLE IF EXISTS bernie_nmarchio2.universe_surveyresponse;
+CREATE TABLE bernie_nmarchio2.universe_surveyresponse AS
+(SELECT * FROM (
  SELECT person_id::varchar(10) ,
-            CASE WHEN surveyresponseid IN (1) THEN 1 ELSE 0 END AS support_1_id ,
-            CASE WHEN surveyresponseid IN (1,2) THEN 1 ELSE 0 END AS support_1_2_id ,
-            CASE WHEN surveyresponseid IN (3) THEN 1 ELSE 0 END AS undecided_3_id ,
-            CASE WHEN surveyresponseid IN (96) THEN 1 WHEN surveyresponseid IN (97,98) THEN 0 ELSE NULL END AS persuaded_id ,
-            CASE WHEN surveyresponseid IN (83) THEN 1 ELSE 0 END AS bernie_id ,
-            CASE WHEN surveyresponseid IN (13,15,16) THEN 1 ELSE 0 END AS liz_joe_pete_support_id ,
-            CASE WHEN surveyresponseid IN (17,18,19,20,21,22,23,24,25,26,27,28,29,30,95) THEN 1 ELSE 0 END AS rest_of_field_support_id ,
-            CASE WHEN surveyresponseid IN (105) THEN 1 WHEN surveyresponseid IN (106,107) THEN 0 ELSE NULL END AS npp_yes_id ,
-            CASE WHEN surveyresponseid IN (40) THEN 1 WHEN surveyresponseid IN (106,107) THEN 0 ELSE NULL END AS sticker_id ,
-            CASE WHEN surveyresponseid IN (99) THEN 1 WHEN surveyresponseid IN (100,101) THEN 0 ELSE NULL END AS commit2caucus_id ,
-            CASE WHEN surveyresponseid IN (10) THEN 1 ELSE 0 END AS union_id ,
-            CASE WHEN surveyresponseid IN (9,103,104) THEN 1 ELSE 0 END AS student_id ,
-            CASE WHEN surveyresponseid IN (32) THEN 1 WHEN surveyresponseid IN (33) THEN 0 ELSE NULL END AS volunteer_yes_id ,
-            CASE WHEN surveyresponseid IN (32,34,94) THEN 1 WHEN surveyresponseid IN (33) THEN 0 ELSE NULL END AS volunteer_yes_maybe_id ,
-            CASE WHEN surveyresponseid IN (35,36) THEN 1 ELSE 0 END AS event_rsvp_yes_maybe ,
-            CASE WHEN surveyresponseid IN (37,38) THEN 1 ELSE 0 END AS has_will_donate ,
-            row_number() over (partition BY person_id ORDER BY contactdate ASC) AS dup
+        actionkit_id ,
+        st_myc_van_id ,
+        CASE WHEN surveyresponseid IN (1) THEN 1 ELSE 0 END AS support_1_id ,
+        CASE WHEN surveyresponseid IN (1,2) THEN 1 ELSE 0 END AS support_1_2_id ,
+        CASE WHEN surveyresponseid IN (3) THEN 1 ELSE 0 END AS undecided_3_id ,
+        CASE WHEN surveyresponseid IN (96) THEN 1 WHEN surveyresponseid IN (97,98) THEN 0 ELSE NULL END AS persuaded_id ,
+        CASE WHEN surveyresponseid IN (83) THEN 1 ELSE 0 END AS bernie_id ,
+        CASE WHEN surveyresponseid IN (13,15,16) THEN 1 ELSE 0 END AS liz_joe_pete_support_id ,
+        CASE WHEN surveyresponseid IN (17,18,19,20,21,22,23,24,25,26,27,28,29,30,95) THEN 1 ELSE 0 END AS rest_of_field_support_id ,
+        CASE WHEN surveyresponseid IN (105) THEN 1 WHEN surveyresponseid IN (106,107) THEN 0 ELSE NULL END AS npp_yes_id ,
+        CASE WHEN surveyresponseid IN (40) THEN 1 WHEN surveyresponseid IN (106,107) THEN 0 ELSE NULL END AS sticker_id ,
+        CASE WHEN surveyresponseid IN (99) THEN 1 WHEN surveyresponseid IN (100,101) THEN 0 ELSE NULL END AS commit2caucus_id ,
+        CASE WHEN surveyresponseid IN (10) THEN 1 ELSE 0 END AS union_id ,
+        CASE WHEN surveyresponseid IN (9,103,104) THEN 1 ELSE 0 END AS student_id ,
+        CASE WHEN surveyresponseid IN (32) THEN 1 WHEN surveyresponseid IN (33) THEN 0 ELSE NULL END AS volunteer_yes_id ,
+        CASE WHEN surveyresponseid IN (32,34,94) THEN 1 WHEN surveyresponseid IN (33) THEN 0 ELSE NULL END AS volunteer_yes_maybe_id ,
+        CASE WHEN surveyresponseid IN (35,36) THEN 1 ELSE 0 END AS event_rsvp_yes_maybe_id ,
+        CASE WHEN surveyresponseid IN (37,38) THEN 1 ELSE 0 END AS has_will_donate_id ,
+        row_number() over (partition BY person_id ORDER BY contactdate ASC) AS dup
  FROM
-  (SELECT * FROM contacts.surveyresponses) sr
- INNER JOIN bernie_data_commons.contactcontacts_joined ccj using(contactcontact_id)
- LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid)) WHERE dup = 1
-  AND person_id IS NOT NULL) surveyresp USING(person_id)
-  LEFT JOIN (
-  SELECT person_id::varchar(10),
+  (SELECT * FROM contacts.surveyresponses) sr INNER JOIN bernie_data_commons.contactcontacts_joined ccj using(contactcontact_id) LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid)) WHERE dup = 1);
+
+-- Spoke
+DROP TABLE IF EXISTS bernie_nmarchio2.universe_spoke;
+CREATE TABLE bernie_nmarchio2.universe_spoke AS
+(SELECT person_id::varchar(10),
         CASE WHEN support_init = 1 THEN 1 ELSE 0 END AS spoke_support_1box,
         CASE WHEN support_change >= 1 THEN 1 WHEN support_init = 1 THEN NULL ELSE 0 END AS spoke_persuasion_1plus,
         CASE WHEN support_change <= -1 THEN 1 WHEN support_init = 5 THEN NULL ELSE 0 END AS spoke_persuasion_1minus,
         CASE WHEN support_change = 0 THEN 1 ELSE 0 END AS spoke_persuasion_nochange,
         support_init,
         support_final,
-        support_change
- FROM
+        support_change 
+        FROM
    (SELECT person_id,
            sr.*,
            srt.*,
@@ -188,25 +149,156 @@ LEFT JOIN (SELECT * FROM (
            json_extract_path_text(lower(surveyresponseopen), 'support_init') AS support_init,
            json_extract_path_text(lower(surveyresponseopen), 'support_final') AS support_final,
            json_extract_path_text(lower(surveyresponseopen), 'support_change') AS support_change
-FROM
-  (SELECT *
-   FROM contacts.surveyresponses
-   WHERE surveyquestionid = 28) sr
-JOIN bernie_data_commons.contactcontacts_joined ccj using(contactcontact_id)
-LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid)
-WHERE ccj.lalvoterid IS NOT NULL) WHERE dup = 1
-  AND person_id IS NOT NULL) spoke USING(person_id)
-  LEFT JOIN
- (SELECT person_id::varchar(10) ,
-       sum(CASE WHEN activist_code_name SIMILAR TO '%2016 Donor%|%2020 Donor%|%2020 Rec Donor%|%Low Dollar Donor%' THEN 1 ELSE 0 END) AS donor_myc ,
-       sum(CASE WHEN activist_code_name SIMILAR TO '%Volunteer Prospect%|%AK Volunteer Signup%|%VolProp%|%Vol Prop%|%VolProp%|%VolProp%|%Vol Prop%|%Border-Vol-Prospect%|%Caucus_Vol_Prospect%|%Online Vol Sign Up%|%16 Bern Vol Prospect%|%BSD Vol Signup%|%High_Prop_Vol_1014%|%AK LTE Signup%|%AK Text Signup%|%16 GOTV Signup%|%AK Rally Signup%|%AK Rally Signup%|%AK Email Signup%|%Web Signup%|%AK Student Signup%|%AK Tabling Signup%|%AK Spanish Signup%|%Web Commit Signup%|%AK Phonebank Signup%|%AK Barnstorm Signup%|%2016July 29th Signup%|%AK Pol. Event Signup%|%AK Sol. Event Signup%|%2020 Delegate Propec%|%OOS_Canvas_Interest%|%Ind4Bern%|%APIA4Bern%|%Latinx4Bern%|%LGBTQ 4 Bernie%|%Muslims4Bern%|%2016 AfAm4Bernie%|%2016 SMB 4 Bernie%|%BlackWomen4Bern%|%16 Latinx 4 Bernie%|%2016 Labor 4 Bernie%|%2016 - Labor4Bernie%|%16 Share the Bern%|%2016 Faith 4 Bernie%|%Students 4 Bernie%|%2016 Teachers4Bernie%|%Women 4 Bernie%|%16 Veterans 4 Bernie%|%Personal_Endorser%|%99 County Endorsees%|%Confirmed Endorser%|%Pol-Rural Endorsers%|%Endorser%|%2016 Supporter%' THEN 1 ELSE 0 END) AS volunteer_prospect_myc ,
-       sum(CASE WHEN activist_code_name SIMILAR TO '%Labor%|%Labor Members%|%Labor CG Mem%|%Pol-Labor Endorsers%|%Pol-Labor%' THEN 1 ELSE 0 END) AS union_activist ,
-       sum(CASE WHEN activist_code_name SIMILAR TO '%16 GV RallyRSVP%|%16 CHS Rally RSVP%|%16 Col Rally RSVP%|%2016 Winthrop RSVP%|%2016 Benedict RSVP%|%2016 Florence RSVP%|%2016 Sumter Ral RSVP%' THEN 1 ELSE 0 END) AS rsvp_myc ,
-       sum(CASE WHEN activist_code_name SIMILAR TO '%Volunteer Level 1%|%Volunteer Level 2%|%Volunteer Level 3%|%Volunteer Team Lead%|%Volunteer Leader%|%Volunteer%|%OOS Volunteer%|%Caucus Volunteer%|%Vol. Team Member%|%2016 Vol Evnt Atnde%|%Past Vol Yes%|%2020 SuperVol%|%2020 LatinX Vols%|%2016 OOS NH Vol%|%2016 GV Rally Vol%|%2016 CHS Rally Vol%|%2016 SumterRallyVol%|%2016 ColumbiaRalVol%|%Team Maine SuperVols%|%2020 Superdelegates%|%2016 State Delegate%|%Delegate%|%2016 County Delegate%|%2016 Canvass%|%2016 Canvass Captain%|%Crowd_Canvas_BERN%|%AK Com. Canvass Host%|%IA_Shift_6-16--July%|%2016 DVC Shift Compl%|%2016 Knock Doors%|%16Door Knock Sign Up%|%Give ride to caucus%|%Phone Bank%|%HQ_Phonebank_yes%|%2016 Phone Bank SU%|%VT_HQ_Phonebank%' THEN 1 ELSE 0 END) AS shiftvolunteer_myc ,
-       sum(CASE WHEN activist_code_name SIMILAR TO '%Student%|%Student UNR%|%Student UNLV%|%Student CSN%|%Student TMCC%|%Student High School%|%Student Bulk%|%Student NSC%|%Student_Leadership%|%Student WNC%|%Student SNC%|%16 Student - Comm%|%16 Student - HS%|%Grad Student%|%Prospective Student%|%High School Student%' THEN 1 ELSE 0 END) AS student_myc ,
-       sum(CASE WHEN activist_code_name SIMILAR TO '%Teacher%' THEN 1 ELSE 0 END) AS teacher_myc
-FROM phoenix_demssanders20_vansync_derived.activist_myc ac
-INNER JOIN phoenix_demssanders20_vansync.activist_codes ac_lookup ON ac_lookup.activist_code_id = ac.activist_code_id
-LEFT JOIN bernie_data_commons.master_xwalk mx ON mx.myc_van_id = ac.myc_van_id
-AND mx.state_code = ac.state_code
-GROUP BY 1) USING(person_id));
+           FROM
+   (SELECT *
+    FROM contacts.surveyresponses
+    WHERE surveyquestionid = 28) sr
+ INNER JOIN bernie_data_commons.contactcontacts_joined ccj using(contactcontact_id)
+ LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid)
+ WHERE ccj.lalvoterid IS NOT NULL) WHERE dup = 1 AND person_id IS NOT NULL); 
+
+-- Slack
+DROP TABLE IF EXISTS bernie_nmarchio2.universe_slack;
+CREATE TABLE bernie_nmarchio2.universe_slack AS
+ (SELECT person_id::varchar(10), st_myc_van_id, CASE WHEN deleted = 'f' THEN 1 ELSE 0 END AS slack_vol, profile_email AS email
+ FROM
+  (SELECT id AS slack_id, name, deleted, profile_email FROM slack.vol_users) slack
+ LEFT JOIN
+  (SELECT person_id::varchar(10), st_myc_van_id, email, ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY email NULLS LAST) AS rownum
+ FROM bernie_data_commons.master_xwalk) xwalk_master ON (xwalk_master.email = slack.profile_email AND xwalk_master.rownum = 1));
+
+-- Engagement Universe
+DROP TABLE IF EXISTS bernie_nmarchio2.universe_engagement;
+CREATE TABLE bernie_nmarchio2.universe_engagement AS 
+(SELECT 
+ coalesce(xwalk.person_id, akm_1.person_id, akm_2.person_id) AS person_id
+,xwalk.bern_id 
+,coalesce(slack_1.email,slack_2.email,akm_1.user_email,akm_2.user_email,akm_3.user_email,xwalk.email) AS email 
+,xwalk.st_myc_van_id
+,coalesce(akm_1.user_id_mobilize, akm_2.user_id_mobilize, akm_3.user_id_mobilize) AS mobilize_id
+,xwalk.actionkit_id
+,coalesce(akm_1.attended,akm_2.attended,akm_3.attended) AS attended
+,coalesce(akm_1.signups,akm_2.signups,akm_3.signups) AS signups
+,coalesce(akm_1.attended_canvass,akm_2.attended_canvass,akm_3.attended_canvass) AS attended_canvass
+,coalesce(akm_1.signups_canvass,akm_2.signups_canvass,akm_3.signups_canvass) AS signups_canvass
+,coalesce(akm_1.attended_phonebank,akm_2.attended_phonebank,akm_3.attended_phonebank) AS attended_phonebank
+,coalesce(akm_1.signups_phonebank,akm_2.signups_phonebank,akm_3.signups_phonebank) AS signups_phonebank
+,coalesce(akm_1.attended_small_event,akm_2.attended_small_event,akm_3.attended_small_event) AS attended_small_event
+,coalesce(akm_1.signups_small_event,akm_2.signups_small_event,akm_3.signups_small_event) AS signups_small_event
+,coalesce(akm_1.attended_other,akm_2.attended_other,akm_3.attended_other) AS attended_other
+,coalesce(akm_1.signups_other,akm_2.signups_other,akm_3.signups_other) AS signups_other
+,coalesce(akm_1.attended_friend_to_friend,akm_2.attended_friend_to_friend,akm_3.attended_friend_to_friend) AS attended_friend_to_friend
+,coalesce(akm_1.signups_friend_to_friend,akm_2.signups_friend_to_friend,akm_3.signups_friend_to_friend) AS signups_friend_to_friend
+,coalesce(akm_1.attended_training,akm_2.attended_training,akm_3.attended_training) AS attended_training
+,coalesce(akm_1.signups_training,akm_2.signups_training,akm_3.signups_training) AS signups_training
+,coalesce(akm_1.attended_barnstorm,akm_2.attended_barnstorm,akm_3.attended_barnstorm) AS attended_barnstorm
+,coalesce(akm_1.signups_barnstorm,akm_2.signups_barnstorm,akm_3.signups_barnstorm) AS signups_barnstorm
+,coalesce(akm_1.attended_rally_town_hall,akm_2.attended_rally_town_hall,akm_3.attended_rally_town_hall) AS attended_rally_town_hall
+,coalesce(akm_1.signups_rally_town_hall,akm_2.signups_rally_town_hall,akm_3.signups_rally_town_hall) AS signups_rally_town_hall
+,coalesce(akm_1.attended_solidarity_action,akm_2.attended_solidarity_action,akm_3.attended_solidarity_action) AS attended_solidarity_action
+,coalesce(akm_1.signups_solidarity_action,akm_2.signups_solidarity_action,akm_3.signups_solidarity_action) AS signups_solidarity_action
+,coalesce(akm_1.active_10_days,akm_2.active_10_days,akm_3.active_10_days) AS active_10_days
+,coalesce(akm_1.active_11_20_days,akm_2.active_11_20_days,akm_3.active_11_20_days) AS active_11_20_days
+,coalesce(akm_1.active_21_30_days,akm_2.active_21_30_days,akm_3.active_21_30_days) AS active_21_30_days
+,coalesce(akm_1.active_31_40_days,akm_2.active_31_40_days,akm_3.active_31_40_days) AS active_31_40_days
+,coalesce(akm_1.active_41_50_days,akm_2.active_41_50_days,akm_3.active_41_50_days) AS active_41_50_days
+,coalesce(akm_1.active_51_60_days,akm_2.active_51_60_days,akm_3.active_51_60_days) AS active_51_60_days
+,coalesce(akm_1.active_61_70_days,akm_2.active_61_70_days,akm_3.active_61_70_days) AS active_61_70_days
+,coalesce(akm_1.active_71_80_days,akm_2.active_71_80_days,akm_3.active_71_80_days) AS active_71_80_days
+,coalesce(akm_1.active_81_90_days,akm_2.active_81_90_days,akm_3.active_81_90_days) AS active_81_90_days
+,coalesce(akm_1.active_91_100_days,akm_2.active_91_100_days,akm_3.active_91_100_days) AS active_91_100_days
+,coalesce(akm_1.active_over_100_days,akm_2.active_over_100_days,akm_3.active_over_100_days) AS active_over_100_days
+
+,myc.mvp_myc
+,myc.activist_myc
+,myc.canvass_myc
+,myc.volunteer_myc
+,myc.email_myc
+,myc.donors_myc
+,myc.events_myc
+,myc.legacy_2016_myc
+,myc.constituencies_myc
+,myc.officials_staff_myc
+,myc.other_activist_myc
+,myc.volunteer_shifts_myc
+,myc.volunteer_signup_myc
+,myc.rally_rsvp_myc
+,myc.student_myc
+,myc.teacher_myc
+,myc.labor_myc
+,myc.present_in_myc
+
+,bern.bern_total_points
+,bern.bern_is_student
+,bern.bern_is_union
+,bern.bern_attempted_voter_lookup
+
+,coalesce(slack_1.slack_vol,slack_2.slack_vol) AS slack_vol
+
+,surveys.support_1_id
+,surveys.support_1_2_id
+,surveys.undecided_3_id
+,surveys.persuaded_id
+,surveys.bernie_id
+,surveys.liz_joe_pete_support_id
+,surveys.rest_of_field_support_id
+,surveys.npp_yes_id
+,surveys.sticker_id
+,surveys.commit2caucus_id
+,surveys.union_id
+,surveys.student_id
+,surveys.volunteer_yes_id
+,surveys.volunteer_yes_maybe_id
+,surveys.event_rsvp_yes_maybe_id
+,surveys.has_will_donate_id
+
+,spoke.spoke_support_1box
+,spoke.spoke_persuasion_1plus
+,spoke.spoke_persuasion_1minus
+,spoke.spoke_persuasion_nochange
+,spoke.support_init
+,spoke.support_final
+,spoke.support_change
+
+ FROM (
+
+-- Crosswalk
+(SELECT * FROM bernie_data_commons.master_xwalk) xwalk
+-- Survey responses
+LEFT JOIN
+(SELECT * FROM bernie_nmarchio2.universe_surveyresponse WHERE person_id IS NOT NULL) surveys
+ON surveys.person_id = xwalk.person_id
+-- Spoke
+LEFT JOIN
+(SELECT * FROM bernie_nmarchio2.universe_spoke WHERE person_id IS NOT NULL) spoke
+ON spoke.person_id = xwalk.person_id
+-- MyCampaign Activists
+LEFT JOIN
+(SELECT * FROM bernie_nmarchio2.universe_myc WHERE st_myc_van_id IS NOT NULL) myc
+ON myc.st_myc_van_id = xwalk.st_myc_van_id
+-- Bern App
+LEFT JOIN
+(SELECT * FROM bernie_nmarchio2.universe_bern WHERE bern_id IS NOT NULL) bern
+ON bern.bern_id = xwalk.bern_id
+-- Slack
+LEFT JOIN
+(SELECT * FROM bernie_nmarchio2.universe_slack) slack_1
+ON (slack_1.st_myc_van_id = xwalk.st_myc_van_id AND slack_1.st_myc_van_id IS NOT NULL) 
+FULL JOIN
+(SELECT * FROM bernie_nmarchio2.universe_slack) slack_2
+ON (slack_2.email = xwalk.email AND slack_2.st_myc_van_id IS NULL AND slack_2.email IS NOT NULL)
+-- ActionKit
+LEFT JOIN 
+(SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize) akm_1
+ON (akm_1.user_id_actionkit = xwalk.actionkit_id AND akm_1.user_id_actionkit IS NOT NULL) 
+LEFT JOIN
+(SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize) akm_2
+ON (akm_2.person_id = xwalk.person_id AND akm_2.user_id_actionkit IS NULL AND akm_2.person_id IS NOT NULL) 
+FULL JOIN
+(SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize) akm_3
+ON (akm_3.user_email = xwalk.email AND akm_3.user_id_actionkit IS NULL AND akm_3.person_id IS NULL AND akm_3.user_email IS NOT NULL) 
+)
+WHERE COALESCE(surveys.person_id::VARCHAR,spoke.person_id::VARCHAR,myc.st_myc_van_id::VARCHAR,bern.bern_id::VARCHAR,slack_1.st_myc_van_id::VARCHAR,slack_2.email::VARCHAR,akm_1.user_id_actionkit::VARCHAR,akm_2.person_id::VARCHAR,akm_3.user_email::VARCHAR) IS NOT NULL
+);
+
+
