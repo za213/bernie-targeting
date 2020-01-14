@@ -1,4 +1,3 @@
-
 -- ActionKit-Mobilize
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_actionkit_mobilize;
 CREATE TABLE bernie_nmarchio2.universe_actionkit_mobilize AS
@@ -8,6 +7,7 @@ CREATE TABLE bernie_nmarchio2.universe_actionkit_mobilize AS
        user_email ,
        user_id_mobilize ,
        user_id_actionkit ,
+       1 AS actionkit_mobilize_universe , 
        SUM(CASE WHEN user_attended = 't' THEN 1 ELSE 0 END) AS attended ,
        SUM(CASE WHEN user_attended = 't' OR user_attended = 'f' THEN 1 ELSE 0 END) AS signups ,
        SUM(CASE WHEN event_type_v2 = 'canvass' AND user_attended = 't' THEN 1 ELSE 0 END) AS attended_canvass ,
@@ -59,6 +59,7 @@ CREATE TABLE bernie_nmarchio2.universe_myc AS
          mx.actionkit_id ,
          mx.email ,
          mx.st_myc_van_id ,
+         1 AS mycampaign_universe , 
          SUM(CASE WHEN ac_lookup.activist_code_type = 'MVP' then 1 else 0 end) as mvp_myc ,
          SUM(CASE WHEN ac_lookup.activist_code_type = 'Activist' then 1 else 0 end) as activist_myc ,
          SUM(CASE WHEN ac_lookup.activist_code_type = 'Canvassed' then 1 else 0 end) as canvass_myc ,
@@ -89,6 +90,7 @@ CREATE TABLE bernie_nmarchio2.universe_bern AS
  (SELECT person_id::varchar(10) ,
        bern_id ,
        bern_canvasser_id ,
+       1 AS bern_universe ,
        total_points as bern_total_points ,
        CASE WHEN is_student = 't' then 1 else 0 end as bern_is_student ,
        CASE WHEN is_union = 't' then 1 else 0 end as bern_is_union ,
@@ -109,6 +111,7 @@ CREATE TABLE bernie_nmarchio2.universe_surveyresponse AS
  SELECT person_id::varchar(10) ,
         actionkit_id ,
         st_myc_van_id ,
+        1 AS survey_universe ,
         CASE WHEN surveyresponseid IN (1) THEN 1 ELSE 0 END AS support_1_id ,
         CASE WHEN surveyresponseid IN (1,2) THEN 1 ELSE 0 END AS support_1_2_id ,
         CASE WHEN surveyresponseid IN (3) THEN 1 ELSE 0 END AS undecided_3_id ,
@@ -133,6 +136,7 @@ CREATE TABLE bernie_nmarchio2.universe_surveyresponse AS
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_spoke;
 CREATE TABLE bernie_nmarchio2.universe_spoke AS
 (SELECT person_id::varchar(10),
+		1 AS spoke_universe ,
         CASE WHEN support_init = 1 THEN 1 ELSE 0 END AS spoke_support_1box,
         CASE WHEN support_change >= 1 THEN 1 WHEN support_init = 1 THEN NULL ELSE 0 END AS spoke_persuasion_1plus,
         CASE WHEN support_change <= -1 THEN 1 WHEN support_init = 5 THEN NULL ELSE 0 END AS spoke_persuasion_1minus,
@@ -160,7 +164,11 @@ CREATE TABLE bernie_nmarchio2.universe_spoke AS
 -- Slack
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_slack;
 CREATE TABLE bernie_nmarchio2.universe_slack AS
- (SELECT person_id::varchar(10), st_myc_van_id, CASE WHEN deleted = 'f' THEN 1 ELSE 0 END AS slack_vol, profile_email AS email
+ (SELECT person_id::varchar(10), 
+         st_myc_van_id, 
+         1 AS slack_universe,
+         CASE WHEN deleted = 'f' THEN 1 ELSE 0 END AS slack_vol, 
+         profile_email AS email
  FROM
   (SELECT id AS slack_id, name, deleted, profile_email FROM slack.vol_users) slack
  LEFT JOIN
@@ -171,94 +179,97 @@ CREATE TABLE bernie_nmarchio2.universe_slack AS
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_engagement;
 CREATE TABLE bernie_nmarchio2.universe_engagement AS 
 (SELECT 
- coalesce(xwalk.person_id, akm_1.person_id, akm_2.person_id) AS person_id
+ COALESCE(xwalk.person_id, akm_1.person_id, akm_2.person_id) AS person_id
 ,xwalk.bern_id 
-,coalesce(slack_1.email,slack_2.email,akm_1.user_email,akm_2.user_email,akm_3.user_email,xwalk.email) AS email 
+,COALESCE(slack_1.email,slack_2.email,akm_1.user_email,akm_2.user_email,akm_3.user_email,xwalk.email) AS email 
 ,xwalk.st_myc_van_id
-,coalesce(akm_1.user_id_mobilize, akm_2.user_id_mobilize, akm_3.user_id_mobilize) AS mobilize_id
+,COALESCE(akm_1.user_id_mobilize, akm_2.user_id_mobilize, akm_3.user_id_mobilize) AS mobilize_id
 ,xwalk.actionkit_id
-,coalesce(akm_1.attended,akm_2.attended,akm_3.attended) AS attended
-,coalesce(akm_1.signups,akm_2.signups,akm_3.signups) AS signups
-,coalesce(akm_1.attended_canvass,akm_2.attended_canvass,akm_3.attended_canvass) AS attended_canvass
-,coalesce(akm_1.signups_canvass,akm_2.signups_canvass,akm_3.signups_canvass) AS signups_canvass
-,coalesce(akm_1.attended_phonebank,akm_2.attended_phonebank,akm_3.attended_phonebank) AS attended_phonebank
-,coalesce(akm_1.signups_phonebank,akm_2.signups_phonebank,akm_3.signups_phonebank) AS signups_phonebank
-,coalesce(akm_1.attended_small_event,akm_2.attended_small_event,akm_3.attended_small_event) AS attended_small_event
-,coalesce(akm_1.signups_small_event,akm_2.signups_small_event,akm_3.signups_small_event) AS signups_small_event
-,coalesce(akm_1.attended_other,akm_2.attended_other,akm_3.attended_other) AS attended_other
-,coalesce(akm_1.signups_other,akm_2.signups_other,akm_3.signups_other) AS signups_other
-,coalesce(akm_1.attended_friend_to_friend,akm_2.attended_friend_to_friend,akm_3.attended_friend_to_friend) AS attended_friend_to_friend
-,coalesce(akm_1.signups_friend_to_friend,akm_2.signups_friend_to_friend,akm_3.signups_friend_to_friend) AS signups_friend_to_friend
-,coalesce(akm_1.attended_training,akm_2.attended_training,akm_3.attended_training) AS attended_training
-,coalesce(akm_1.signups_training,akm_2.signups_training,akm_3.signups_training) AS signups_training
-,coalesce(akm_1.attended_barnstorm,akm_2.attended_barnstorm,akm_3.attended_barnstorm) AS attended_barnstorm
-,coalesce(akm_1.signups_barnstorm,akm_2.signups_barnstorm,akm_3.signups_barnstorm) AS signups_barnstorm
-,coalesce(akm_1.attended_rally_town_hall,akm_2.attended_rally_town_hall,akm_3.attended_rally_town_hall) AS attended_rally_town_hall
-,coalesce(akm_1.signups_rally_town_hall,akm_2.signups_rally_town_hall,akm_3.signups_rally_town_hall) AS signups_rally_town_hall
-,coalesce(akm_1.attended_solidarity_action,akm_2.attended_solidarity_action,akm_3.attended_solidarity_action) AS attended_solidarity_action
-,coalesce(akm_1.signups_solidarity_action,akm_2.signups_solidarity_action,akm_3.signups_solidarity_action) AS signups_solidarity_action
-,coalesce(akm_1.active_10_days,akm_2.active_10_days,akm_3.active_10_days) AS active_10_days
-,coalesce(akm_1.active_11_20_days,akm_2.active_11_20_days,akm_3.active_11_20_days) AS active_11_20_days
-,coalesce(akm_1.active_21_30_days,akm_2.active_21_30_days,akm_3.active_21_30_days) AS active_21_30_days
-,coalesce(akm_1.active_31_40_days,akm_2.active_31_40_days,akm_3.active_31_40_days) AS active_31_40_days
-,coalesce(akm_1.active_41_50_days,akm_2.active_41_50_days,akm_3.active_41_50_days) AS active_41_50_days
-,coalesce(akm_1.active_51_60_days,akm_2.active_51_60_days,akm_3.active_51_60_days) AS active_51_60_days
-,coalesce(akm_1.active_61_70_days,akm_2.active_61_70_days,akm_3.active_61_70_days) AS active_61_70_days
-,coalesce(akm_1.active_71_80_days,akm_2.active_71_80_days,akm_3.active_71_80_days) AS active_71_80_days
-,coalesce(akm_1.active_81_90_days,akm_2.active_81_90_days,akm_3.active_81_90_days) AS active_81_90_days
-,coalesce(akm_1.active_91_100_days,akm_2.active_91_100_days,akm_3.active_91_100_days) AS active_91_100_days
-,coalesce(akm_1.active_over_100_days,akm_2.active_over_100_days,akm_3.active_over_100_days) AS active_over_100_days
 
-,myc.mvp_myc
-,myc.activist_myc
-,myc.canvass_myc
-,myc.volunteer_myc
-,myc.email_myc
-,myc.donors_myc
-,myc.events_myc
-,myc.legacy_2016_myc
-,myc.constituencies_myc
-,myc.officials_staff_myc
-,myc.other_activist_myc
-,myc.volunteer_shifts_myc
-,myc.volunteer_signup_myc
-,myc.rally_rsvp_myc
-,myc.student_myc
-,myc.teacher_myc
-,myc.labor_myc
-,myc.present_in_myc
+,COALESCE(akm_1.actionkit_mobilize_universe,akm_2.actionkit_mobilize_universe,akm_3.actionkit_mobilize_universe) AS actionkit_mobilize_universe
+,COALESCE(akm_1.attended,akm_2.attended,akm_3.attended,0) AS attended
+,COALESCE(akm_1.signups,akm_2.signups,akm_3.signups,0) AS signups
+,COALESCE(akm_1.attended_canvass,akm_2.attended_canvass,akm_3.attended_canvass,0) AS attended_canvass
+,COALESCE(akm_1.signups_canvass,akm_2.signups_canvass,akm_3.signups_canvass,0) AS signups_canvass
+,COALESCE(akm_1.attended_phonebank,akm_2.attended_phonebank,akm_3.attended_phonebank,0) AS attended_phonebank
+,COALESCE(akm_1.signups_phonebank,akm_2.signups_phonebank,akm_3.signups_phonebank,0) AS signups_phonebank
+,COALESCE(akm_1.attended_small_event,akm_2.attended_small_event,akm_3.attended_small_event,0) AS attended_small_event
+,COALESCE(akm_1.signups_small_event,akm_2.signups_small_event,akm_3.signups_small_event,0) AS signups_small_event
+,COALESCE(akm_1.attended_other,akm_2.attended_other,akm_3.attended_other,0) AS attended_other
+,COALESCE(akm_1.signups_other,akm_2.signups_other,akm_3.signups_other,0) AS signups_other
+,COALESCE(akm_1.attended_friend_to_friend,akm_2.attended_friend_to_friend,akm_3.attended_friend_to_friend,0) AS attended_friend_to_friend
+,COALESCE(akm_1.signups_friend_to_friend,akm_2.signups_friend_to_friend,akm_3.signups_friend_to_friend,0) AS signups_friend_to_friend
+,COALESCE(akm_1.attended_training,akm_2.attended_training,akm_3.attended_training,0) AS attended_training
+,COALESCE(akm_1.signups_training,akm_2.signups_training,akm_3.signups_training,0) AS signups_training
+,COALESCE(akm_1.attended_barnstorm,akm_2.attended_barnstorm,akm_3.attended_barnstorm,0) AS attended_barnstorm
+,COALESCE(akm_1.signups_barnstorm,akm_2.signups_barnstorm,akm_3.signups_barnstorm,0) AS signups_barnstorm
+,COALESCE(akm_1.attended_rally_town_hall,akm_2.attended_rally_town_hall,akm_3.attended_rally_town_hall,0) AS attended_rally_town_hall
+,COALESCE(akm_1.signups_rally_town_hall,akm_2.signups_rally_town_hall,akm_3.signups_rally_town_hall,0) AS signups_rally_town_hall
+,COALESCE(akm_1.attended_solidarity_action,akm_2.attended_solidarity_action,akm_3.attended_solidarity_action,0) AS attended_solidarity_action
+,COALESCE(akm_1.signups_solidarity_action,akm_2.signups_solidarity_action,akm_3.signups_solidarity_action,0) AS signups_solidarity_action
+,COALESCE(akm_1.active_10_days,akm_2.active_10_days,akm_3.active_10_days,0) AS active_10_days
+,COALESCE(akm_1.active_11_20_days,akm_2.active_11_20_days,akm_3.active_11_20_days,0) AS active_11_20_days
+,COALESCE(akm_1.active_21_30_days,akm_2.active_21_30_days,akm_3.active_21_30_days,0) AS active_21_30_days
+,COALESCE(akm_1.active_31_40_days,akm_2.active_31_40_days,akm_3.active_31_40_days,0) AS active_31_40_days
+,COALESCE(akm_1.active_41_50_days,akm_2.active_41_50_days,akm_3.active_41_50_days,0) AS active_41_50_days
+,COALESCE(akm_1.active_51_60_days,akm_2.active_51_60_days,akm_3.active_51_60_days,0) AS active_51_60_days
+,COALESCE(akm_1.active_61_70_days,akm_2.active_61_70_days,akm_3.active_61_70_days,0) AS active_61_70_days
+,COALESCE(akm_1.active_71_80_days,akm_2.active_71_80_days,akm_3.active_71_80_days,0) AS active_71_80_days
+,COALESCE(akm_1.active_81_90_days,akm_2.active_81_90_days,akm_3.active_81_90_days,0) AS active_81_90_days
+,COALESCE(akm_1.active_91_100_days,akm_2.active_91_100_days,akm_3.active_91_100_days,0) AS active_91_100_days
+,COALESCE(akm_1.active_over_100_days,akm_2.active_over_100_days,akm_3.active_over_100_days,0) AS active_over_100_days
 
-,bern.bern_total_points
-,bern.bern_is_student
-,bern.bern_is_union
-,bern.bern_attempted_voter_lookup
+,myc.mycampaign_universe
+,COALESCE(myc.mvp_myc,0) AS mvp_myc
+,COALESCE(myc.activist_myc,0) AS activist_myc
+,COALESCE(myc.canvass_myc,0) AS canvass_myc
+,COALESCE(myc.volunteer_myc,0) AS volunteer_myc
+,COALESCE(myc.email_myc,0) AS email_myc
+,COALESCE(myc.donors_myc,0) AS donors_myc
+,COALESCE(myc.events_myc,0) AS events_myc
+,COALESCE(myc.legacy_2016_myc,0) AS legacy_2016_myc
+,COALESCE(myc.constituencies_myc,0) AS constituencies_myc
+,COALESCE(myc.officials_staff_myc,0) AS officials_staff_myc
+,COALESCE(myc.other_activist_myc,0) AS other_activist_myc
+,COALESCE(myc.volunteer_shifts_myc,0) AS volunteer_shifts_myc
+,COALESCE(myc.volunteer_signup_myc,0) AS volunteer_signup_myc
+,COALESCE(myc.rally_rsvp_myc,0) AS rally_rsvp_myc
+,COALESCE(myc.student_myc,0) AS student_myc
+,COALESCE(myc.teacher_myc,0) AS teacher_myc
+,COALESCE(myc.labor_myc,0) AS labor_myc
+,COALESCE(myc.present_in_myc,0) AS present_in_myc
 
-,coalesce(slack_1.slack_vol,slack_2.slack_vol) AS slack_vol
+,bern.bern_universe
+,COALESCE(bern.bern_total_points,0) AS bern_total_points
+,COALESCE(bern.bern_is_student,0) AS bern_is_student
+,COALESCE(bern.bern_is_union,0) AS bern_is_union
+,COALESCE(bern.bern_attempted_voter_lookup,0) AS bern_attempted_voter_lookup
 
-,surveys.support_1_id
-,surveys.support_1_2_id
-,surveys.undecided_3_id
-,surveys.persuaded_id
-,surveys.bernie_id
-,surveys.liz_joe_pete_support_id
-,surveys.rest_of_field_support_id
-,surveys.npp_yes_id
-,surveys.sticker_id
-,surveys.commit2caucus_id
-,surveys.union_id
-,surveys.student_id
-,surveys.volunteer_yes_id
-,surveys.volunteer_yes_maybe_id
-,surveys.event_rsvp_yes_maybe_id
-,surveys.has_will_donate_id
+,COALESCE(slack_1.slack_universe,slack_1.slack_universe) AS slack_universe
+,COALESCE(slack_1.slack_vol,slack_2.slack_vol,0) AS slack_vol
 
-,spoke.spoke_support_1box
-,spoke.spoke_persuasion_1plus
-,spoke.spoke_persuasion_1minus
-,spoke.spoke_persuasion_nochange
-,spoke.support_init
-,spoke.support_final
-,spoke.support_change
+,surveys.survey_universe
+,COALESCE(surveys.support_1_id,0) AS support_1_id
+,COALESCE(surveys.support_1_2_id,0) AS support_1_2_id
+,COALESCE(surveys.undecided_3_id,0) AS undecided_3_id
+,COALESCE(surveys.persuaded_id,0) AS persuaded_id
+,COALESCE(surveys.bernie_id,0) AS bernie_id
+,COALESCE(surveys.liz_joe_pete_support_id,0) AS liz_joe_pete_support_id
+,COALESCE(surveys.rest_of_field_support_id,0) AS rest_of_field_support_id
+,COALESCE(surveys.npp_yes_id,0) AS npp_yes_id
+,COALESCE(surveys.sticker_id,0) AS sticker_id
+,COALESCE(surveys.commit2caucus_id,0) AS commit2caucus_id
+,COALESCE(surveys.union_id,0) AS union_id
+,COALESCE(surveys.student_id,0) AS student_id
+,COALESCE(surveys.volunteer_yes_id,0) AS volunteer_yes_id
+,COALESCE(surveys.volunteer_yes_maybe_id,0) AS volunteer_yes_maybe_id
+,COALESCE(surveys.event_rsvp_yes_maybe_id,0) AS event_rsvp_yes_maybe_id
+,COALESCE(surveys.has_will_donate_id,0) AS has_will_donate_id
+
+,spoke.spoke_universe
+,COALESCE(spoke.support_init,0) AS support_init
+,COALESCE(spoke.support_final,0) AS support_final
+,COALESCE(spoke.support_change,0) AS support_change
 
  FROM (
 
@@ -284,7 +295,7 @@ ON bern.bern_id = xwalk.bern_id
 LEFT JOIN
 (SELECT * FROM bernie_nmarchio2.universe_slack) slack_1
 ON (slack_1.st_myc_van_id = xwalk.st_myc_van_id AND slack_1.st_myc_van_id IS NOT NULL) 
-FULL JOIN
+LEFT JOIN
 (SELECT * FROM bernie_nmarchio2.universe_slack) slack_2
 ON (slack_2.email = xwalk.email AND slack_2.st_myc_van_id IS NULL AND slack_2.email IS NOT NULL)
 -- ActionKit
@@ -294,11 +305,11 @@ ON (akm_1.user_id_actionkit = xwalk.actionkit_id AND akm_1.user_id_actionkit IS 
 LEFT JOIN
 (SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize) akm_2
 ON (akm_2.person_id = xwalk.person_id AND akm_2.user_id_actionkit IS NULL AND akm_2.person_id IS NOT NULL) 
-FULL JOIN
+LEFT JOIN
 (SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize) akm_3
 ON (akm_3.user_email = xwalk.email AND akm_3.user_id_actionkit IS NULL AND akm_3.person_id IS NULL AND akm_3.user_email IS NOT NULL) 
 )
-WHERE COALESCE(surveys.person_id::VARCHAR,spoke.person_id::VARCHAR,myc.st_myc_van_id::VARCHAR,bern.bern_id::VARCHAR,slack_1.st_myc_van_id::VARCHAR,slack_2.email::VARCHAR,akm_1.user_id_actionkit::VARCHAR,akm_2.person_id::VARCHAR,akm_3.user_email::VARCHAR) IS NOT NULL
+WHERE COALESCE(akm_1.actionkit_mobilize_universe,akm_2.actionkit_mobilize_universe,akm_3.actionkit_mobilize_universe,myc.mycampaign_universe,bern.bern_universe,surveys.survey_universe,spoke.spoke_universe,slack_1.slack_universe,slack_2.slack_universe) IS NOT NULL
 );
 
 
