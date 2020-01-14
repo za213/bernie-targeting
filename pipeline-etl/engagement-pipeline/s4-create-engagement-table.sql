@@ -142,9 +142,9 @@ CREATE TABLE bernie_nmarchio2.universe_spoke AS
         CASE WHEN support_change >= 1 THEN 1 WHEN support_init = 1 THEN NULL ELSE 0 END AS spoke_persuasion_1plus,
         CASE WHEN support_change <= -1 THEN 1 WHEN support_init = 5 THEN NULL ELSE 0 END AS spoke_persuasion_1minus,
         CASE WHEN support_change = 0 THEN 1 ELSE 0 END AS spoke_persuasion_nochange,
-        support_init,
-        support_final,
-        support_change
+        support_init::smallint,
+        support_final::smallint,
+        support_change::smallint
         FROM
    (SELECT person_id,
            sr.*,
@@ -268,9 +268,9 @@ CREATE TABLE bernie_nmarchio2.universe_engagement AS
 ,COALESCE(surveys.has_will_donate_id,0) AS has_will_donate_id
 
 ,COALESCE(spoke.spoke_universe,0) AS spoke_universe
-,spoke.support_init
-,spoke.support_final
-,spoke.support_change
+,COALESCE(spoke.support_init,0) AS support_init
+,COALESCE(spoke.support_final,0) AS support_final
+,COALESCE(spoke.support_change,0) AS support_change
 
  FROM (
 
