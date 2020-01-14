@@ -39,6 +39,7 @@
 | `donor_1plus_times` | Probability to donate at least once |
 | `donor_27plus_usd` | Probability to donate more than $27 |
 | `bernie_action` | Probability to take any of the above actions |
+* Note columns with `_100` are cut into percentiles nationally such that when `where score_100 >= 80` would give the top 20% highest scores.
 
 #### Spoke Persuasion Models:
 * [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/spoke-dv-recode.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/spoke-modeling-workflow-20191221.ipynb)
@@ -50,7 +51,8 @@
 | `spoke_support_1box` | Probability of responding with 1 support |
 | `spoke_persuasion_1plus` | Probability of moving 1 or more in favor of Bernie |
 | `spoke_persuasion_1minus` | Probability of moving 1 or more against Bernie |
- 
+* Note columns with `_100` are cut into percentiles nationally such that when `where score_100 >= 80` would give the top 20% highest scores.
+
 ## Analytics
 * Under construction
   * Crosstab generation script and visualizations
