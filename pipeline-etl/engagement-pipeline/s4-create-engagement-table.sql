@@ -312,3 +312,22 @@ ON (akm_3.user_email = xwalk.email AND akm_3.user_id_actionkit IS NULL AND akm_3
 )
 WHERE COALESCE(akm_1.actionkit_mobilize_universe::int,akm_2.actionkit_mobilize_universe::int,akm_3.actionkit_mobilize_universe::int,myc.mycampaign_universe::int,bern.bern_universe::int,surveys.survey_universe::int,spoke.spoke_universe::int,slack_1.slack_universe::int,slack_2.slack_universe::int) IS NOT NULL
 );
+							 
+drop table if exists bernie_nmarchio2.events_users_match_input;
+drop table if exists bernie_nmarchio2.events_users_match_output;
+drop table if exists bernie_nmarchio2.events_users;
+drop table if exists bernie_nmarchio2.events_users_clean;
+drop table if exists bernie_nmarchio2.universe_actionkit_mobilize;
+drop table if exists bernie_nmarchio2.universe_bern;
+drop table if exists bernie_nmarchio2.universe_myc;
+drop table if exists bernie_nmarchio2.universe_slack;
+drop table if exists bernie_nmarchio2.universe_spoke;
+drop table if exists bernie_nmarchio2.universe_surveyresponse;
+
+GRANT USAGE ON SCHEMA bernie_nmarchio2 TO GROUP bernie_data;
+GRANT SELECT ON bernie_nmarchio2.universe_engagement TO GROUP bernie_data;
+GRANT SELECT ON bernie_nmarchio2.events_details TO GROUP bernie_data;
+GRANT SELECT ON bernie_nmarchio2.events_signups TO GROUP bernie_data;
+GRANT SELECT ON bernie_nmarchio2.events_users_enhanced TO GROUP bernie_data;
+GRANT SELECT ON bernie_nmarchio2.events_users_xwalk TO GROUP bernie_data;
+							 							 
