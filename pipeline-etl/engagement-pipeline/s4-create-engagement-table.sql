@@ -141,9 +141,9 @@ CREATE TABLE bernie_nmarchio2.universe_spoke AS
         CASE WHEN support_change >= 1 THEN 1 WHEN support_init = 1 THEN NULL ELSE 0 END AS spoke_persuasion_1plus,
         CASE WHEN support_change <= -1 THEN 1 WHEN support_init = 5 THEN NULL ELSE 0 END AS spoke_persuasion_1minus,
         CASE WHEN support_change = 0 THEN 1 ELSE 0 END AS spoke_persuasion_nochange,
-        support_init,
-        support_final,
-        support_change 
+        support_init::int,
+        support_final::int,
+        support_change::int
         FROM
    (SELECT person_id,
            sr.*,
@@ -179,14 +179,14 @@ CREATE TABLE bernie_nmarchio2.universe_slack AS
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_engagement;
 CREATE TABLE bernie_nmarchio2.universe_engagement AS 
 (SELECT 
- COALESCE(xwalk.person_id, akm_1.person_id, akm_2.person_id) AS person_id
+ COALESCE(xwalk.person_id::VARCHAR, akm_1.person_id::VARCHAR, akm_2.person_id::VARCHAR) AS person_id
 ,xwalk.bern_id 
 ,COALESCE(slack_1.email,slack_2.email,akm_1.user_email,akm_2.user_email,akm_3.user_email,xwalk.email) AS email 
 ,xwalk.st_myc_van_id
-,COALESCE(akm_1.user_id_mobilize, akm_2.user_id_mobilize, akm_3.user_id_mobilize) AS mobilize_id
+,COALESCE(akm_1.user_id_mobilize::VARCHAR, akm_2.user_id_mobilize::VARCHAR, akm_3.user_id_mobilize::VARCHAR) AS mobilize_id
 ,xwalk.actionkit_id
 
-,COALESCE(akm_1.actionkit_mobilize_universe,akm_2.actionkit_mobilize_universe,akm_3.actionkit_mobilize_universe) AS actionkit_mobilize_universe
+,COALESCE(akm_1.actionkit_mobilize_universe,akm_2.actionkit_mobilize_universe,akm_3.actionkit_mobilize_universe,0) AS actionkit_mobilize_universe
 ,COALESCE(akm_1.attended,akm_2.attended,akm_3.attended,0) AS attended
 ,COALESCE(akm_1.signups,akm_2.signups,akm_3.signups,0) AS signups
 ,COALESCE(akm_1.attended_canvass,akm_2.attended_canvass,akm_3.attended_canvass,0) AS attended_canvass
@@ -219,7 +219,7 @@ CREATE TABLE bernie_nmarchio2.universe_engagement AS
 ,COALESCE(akm_1.active_91_100_days,akm_2.active_91_100_days,akm_3.active_91_100_days,0) AS active_91_100_days
 ,COALESCE(akm_1.active_over_100_days,akm_2.active_over_100_days,akm_3.active_over_100_days,0) AS active_over_100_days
 
-,myc.mycampaign_universe
+,COALESCE(myc.mycampaign_universe,0) AS mycampaign_universe
 ,COALESCE(myc.mvp_myc,0) AS mvp_myc
 ,COALESCE(myc.activist_myc,0) AS activist_myc
 ,COALESCE(myc.canvass_myc,0) AS canvass_myc
@@ -239,16 +239,16 @@ CREATE TABLE bernie_nmarchio2.universe_engagement AS
 ,COALESCE(myc.labor_myc,0) AS labor_myc
 ,COALESCE(myc.present_in_myc,0) AS present_in_myc
 
-,bern.bern_universe
+,COALESCE(bern.bern_universe,0) AS bern_universe
 ,COALESCE(bern.bern_total_points,0) AS bern_total_points
 ,COALESCE(bern.bern_is_student,0) AS bern_is_student
 ,COALESCE(bern.bern_is_union,0) AS bern_is_union
 ,COALESCE(bern.bern_attempted_voter_lookup,0) AS bern_attempted_voter_lookup
 
-,COALESCE(slack_1.slack_universe,slack_1.slack_universe) AS slack_universe
+,COALESCE(slack_1.slack_universe,slack_1.slack_universe,0) AS slack_universe
 ,COALESCE(slack_1.slack_vol,slack_2.slack_vol,0) AS slack_vol
 
-,surveys.survey_universe
+,COALESCE(surveys.survey_universe,0) AS survey_universe
 ,COALESCE(surveys.support_1_id,0) AS support_1_id
 ,COALESCE(surveys.support_1_2_id,0) AS support_1_2_id
 ,COALESCE(surveys.undecided_3_id,0) AS undecided_3_id
@@ -266,7 +266,7 @@ CREATE TABLE bernie_nmarchio2.universe_engagement AS
 ,COALESCE(surveys.event_rsvp_yes_maybe_id,0) AS event_rsvp_yes_maybe_id
 ,COALESCE(surveys.has_will_donate_id,0) AS has_will_donate_id
 
-,spoke.spoke_universe
+,COALESCE(spoke.spoke_universe,0) AS spoke_universe
 ,COALESCE(spoke.support_init,0) AS support_init
 ,COALESCE(spoke.support_final,0) AS support_final
 ,COALESCE(spoke.support_change,0) AS support_change
@@ -309,7 +309,5 @@ LEFT JOIN
 (SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize) akm_3
 ON (akm_3.user_email = xwalk.email AND akm_3.user_id_actionkit IS NULL AND akm_3.person_id IS NULL AND akm_3.user_email IS NOT NULL) 
 )
-WHERE COALESCE(akm_1.actionkit_mobilize_universe,akm_2.actionkit_mobilize_universe,akm_3.actionkit_mobilize_universe,myc.mycampaign_universe,bern.bern_universe,surveys.survey_universe,spoke.spoke_universe,slack_1.slack_universe,slack_2.slack_universe) IS NOT NULL
+WHERE COALESCE(akm_1.actionkit_mobilize_universe::int,akm_2.actionkit_mobilize_universe::int,akm_3.actionkit_mobilize_universe::int,myc.mycampaign_universe::int,bern.bern_universe::int,surveys.survey_universe::int,spoke.spoke_universe::int,slack_1.slack_universe::int,slack_2.slack_universe::int) IS NOT NULL
 );
-
-
