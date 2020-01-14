@@ -1,6 +1,10 @@
 
 DROP TABLE IF EXISTS bernie_nmarchio2.support_id_recode;
-CREATE TABLE bernie_nmarchio2.support_id_recode AS 
+CREATE TABLE bernie_nmarchio2.support_id_recode 
+  DISTSTYLE KEY
+  DISTKEY (person_id)
+  SORTKEY (person_id)
+AS 
 (select 
  person_id
 -- Candidate Support DVs
