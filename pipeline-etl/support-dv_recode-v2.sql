@@ -34,5 +34,4 @@ WHERE STATE = 'IA'
             OR f_support_bucket_floor_80 = 1
             OR f_support_bucket_floor_90 = 1)
        AND (f_donut_anti_bernie <> 1
-            AND field_support_int NOT IN (4,
-                                          5))));
+            AND field_support_int NOT IN (4,5))));
