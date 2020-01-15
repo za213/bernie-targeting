@@ -21,13 +21,13 @@ INNER JOIN
                     OR f_ctc_last_60_days = 1
                     OR f_ctc_npp = 1
                     OR f_ctc_other_party = 1
-                    -- OR f_id_1_other_party = 1
+                    OR f_id_1_other_party = 1
                     OR f_donated = 1
                     OR f_core_donut_top50 = 1
                     OR f_hosted_1_event = 1
-                    -- OR f_id_1_dem = 1
-                    -- OR f_id_1_last_60_days = 1
-                    -- OR f_id_1_npp = 1
+                    OR f_id_1_dem = 1
+                    OR f_id_1_last_60_days = 1
+                    OR f_id_1_npp = 1
                     OR f_support_bucket_floor_80 = 1
                     OR f_support_bucket_floor_90 = 1) THEN 1
               ELSE 0
