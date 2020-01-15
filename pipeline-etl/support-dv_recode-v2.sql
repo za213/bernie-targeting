@@ -5,7 +5,6 @@ CREATE TABLE bernie_nmarchio2.support_id_recode
   SORTKEY (person_id)
 AS 
 (SELECT person_id::varchar(10) ,
-       CURRENT_DATE ,
        CASE
            WHEN support_int = 1 THEN 1
            WHEN support_int IS NOT NULL
