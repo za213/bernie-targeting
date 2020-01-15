@@ -6,7 +6,7 @@ CREATE TABLE bernie_nmarchio2.support_id_recode
   SORTKEY (person_id)
 AS 
 (select 
- person_id
+ person_id::varchar(10)
 -- Candidate Support DVs
 ,case when first_choice = 'Bernie Sanders' then 1 when first_choice is not null or first_choice <> 'Donald Trump' then 0 else NULL end as first_choice_bernie
 ,case when first_choice = 'Donald Trump' then 1 when first_choice is not null then 0 else NULL end as first_choice_trump
