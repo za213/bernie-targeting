@@ -43,4 +43,4 @@ INNER JOIN
 WHERE in_core = 0
   AND in_exclusion = 0
   AND state = 'IA'
-  AND datediff(d, TO_DATE(survey_date, 'YYYY-MM-DD'), TO_DATE('2020-01-10','YYYY-MM-DD')) <= 60);
+  AND datediff(d, TO_DATE(survey_date, 'YYYY-MM-DD'), TO_DATE('2020-01-10','YYYY-MM-DD')) <= 90);
