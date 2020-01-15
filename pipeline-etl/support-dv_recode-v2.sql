@@ -17,12 +17,12 @@ FROM bernie_data_commons.third_party_ids
 INNER JOIN
   (SELECT person_id,
           CASE
-              WHEN (f_ctc_dem = 1
-                    OR f_ctc_last_60_days = 1
-                    OR f_ctc_npp = 1
-                    OR f_ctc_other_party = 1
-                    OR f_id_1_other_party = 1
-                    OR f_donated = 1
+              WHEN (--f_ctc_dem = 1
+                    --OR f_ctc_last_60_days = 1
+                    --OR f_ctc_npp = 1
+                    --OR f_ctc_other_party = 1
+                    --OR f_id_1_other_party = 1
+                    f_donated = 1
                     OR f_core_donut_top50 = 1
                     OR f_hosted_1_event = 1
                     OR f_id_1_dem = 1
