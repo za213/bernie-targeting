@@ -4,8 +4,7 @@ CREATE TABLE bernie_nmarchio2.support_id_recode
   DISTKEY (person_id)
   SORTKEY (person_id)
 AS 
-(
-SELECT person_id::varchar(10) ,
+(SELECT person_id::varchar(10) ,
        CASE
            WHEN support_int = 1 THEN 1
            WHEN support_int IS NOT NULL
