@@ -16,22 +16,21 @@ FROM bernie_data_commons.third_party_ids
 WHERE STATE = 'IA'
   AND datediff(d, TO_DATE(survey_date, 'YYYY-MM-DD'), TO_DATE('2020-01-10','YYYY-MM-DD')) <= 60
   AND person_id IN
-    (SELECT person_id
-     FROM gotv_universes.gotv_person_flags
-     WHERE state_code = 'IA'
-       AND (f_ctc_dem = 1
-            OR f_ctc_last_60_days = 1
-            OR f_ctc_npp = 1
-            OR f_ctc_other_party = 1
-            OR f_id_1_other_party = 1
-            OR f_donated = 1
-            OR f_core_donut_top50 = 1
-            OR f_hosted_1_event = 1
-            OR f_id_1_dem = 1
-            OR f_id_1_last_60_days = 1
-            OR f_id_1_npp = 1
-            OR f_support_bucket_floor_80 = 1
-            OR f_support_bucket_floor_90 = 1)
-      AND ((f_donut_anti_bernie =0 or f_donut_anti_bernie is null)
-           AND (field_support_int NOT IN (4,5) or field_support_int is null)))
-            );
+  (SELECT person_id
+   FROM gotv_universes.gotv_person_flags
+   WHERE state_code = 'IA'
+     AND (f_ctc_dem = 1
+          OR f_ctc_last_60_days = 1
+          OR f_ctc_npp = 1
+          OR f_ctc_other_party = 1
+          OR f_id_1_other_party = 1
+          OR f_donated = 1
+          OR f_core_donut_top50 = 1
+          OR f_hosted_1_event = 1
+          OR f_id_1_dem = 1
+          OR f_id_1_last_60_days = 1
+          OR f_id_1_npp = 1
+          OR f_support_bucket_floor_80 = 1
+          OR f_support_bucket_floor_90 = 1)
+     AND ((f_donut_anti_bernie = 0 OR f_donut_anti_bernie IS NULL)
+          AND (field_support_int NOT IN (4,5) OR field_support_int IS NULL))));
