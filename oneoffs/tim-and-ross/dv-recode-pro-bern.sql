@@ -1,6 +1,6 @@
 
-DROP TABLE IF EXISTS bernie_nmarchio2.nh_gotc_dvs;
-CREATE TABLE bernie_nmarchio2.nh_gotc_dvs
+DROP TABLE IF EXISTS ernie_tryan.nh_gotc_dvs; b
+CREATE TABLE ernie_tryan.nh_gotc_dvs
   DISTSTYLE KEY
   DISTKEY (person_id)
   SORTKEY (person_id)
