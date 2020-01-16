@@ -37,4 +37,4 @@ WHERE state_code = 'IA' AND person_id IS NOT NULL) using(person_id)
 WHERE in_core_excl_1s = 0
   AND in_exclusion = 0
   AND state = 'IA'
-  AND datediff(d, TO_DATE(survey_date, 'YYYY-MM-DD'), TO_DATE('2020-01-10','YYYY-MM-DD')) <= 90);
+  AND datediff(d, TO_DATE(survey_date, 'YYYY-MM-DD'), TO_DATE('2020-01-10','YYYY-MM-DD')) between 0 and 90);
