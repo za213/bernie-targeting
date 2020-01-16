@@ -25,7 +25,7 @@ fav_econ_issue_7way,
 fav_poli_issue_5way,
 fav_cultural_issue_10way
 from
-(select * from bernie_tryan.pro_bernie_1_id where support_1_id_100 >= 80) a left join 
+(select * from bernie_tryan.gotp_output_20200116 where pro_bernie_1_id_100 >= 80) a left join 
 bernie_data_commons.rainbow_analytics_frame r using(person_id)
 );
       
