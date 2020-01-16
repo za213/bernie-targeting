@@ -1,3 +1,10 @@
+  
+DROP TABLE IF EXISTS bernie_nmarchio2.support_id_recode;
+CREATE TABLE bernie_nmarchio2.support_id_recode 
+  DISTSTYLE KEY
+  DISTKEY (person_id)
+  SORTKEY (person_id)
+AS 
 (select
 person_id::varchar(10) 
 ,       CASE
@@ -32,4 +39,4 @@ gotv_universes.gotv_person_flags
 where third_party_survey_date between '2019-12-20' and '2020-01-10' 
 and state_code = 'IA'
 and person_id is not null
-) where and in_core_excl_1s = 0 and in_exclusion = 0 
+) where and in_core_excl_1s = 0 and in_exclusion = 0 );
