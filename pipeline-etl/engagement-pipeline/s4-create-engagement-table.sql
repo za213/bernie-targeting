@@ -178,16 +178,18 @@ CREATE TABLE bernie_nmarchio2.universe_slack AS
  FROM bernie_data_commons.master_xwalk) xwalk_master ON (xwalk_master.email = slack.profile_email AND xwalk_master.rownum = 1));
 
 -- Engagement Universe
+
+-- Engagement Universe
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_engagement;
 CREATE TABLE bernie_nmarchio2.universe_engagement AS 
 (SELECT 
- COALESCE(xwalk.person_id::VARCHAR, akm_1.person_id::VARCHAR, akm_2.person_id::VARCHAR, akm_3.person_id::VARCHAR,spoke.person_id::VARCHAR,surveys.person_id::VARCHAR) AS person_id
-,COALESCE(xwalk.bern_id, bern.bern_id) AS bern_id
+ COALESCE(xwalk.person_id::VARCHAR, akm_1.person_id::VARCHAR, akm_2.person_id::VARCHAR) AS person_id
+,xwalk.bern_id 
 ,COALESCE(slack_1.email,slack_2.email,akm_1.user_email,akm_2.user_email,akm_3.user_email,xwalk.email) AS email 
-,COALESCE(xwalk.st_myc_van_id,myc.st_myc_van_id,slack_1.st_myc_van_id,slack_2.st_myc_van_id) AS st_myc_van_id
+,xwalk.st_myc_van_id
 ,COALESCE(akm_1.user_id_mobilize::VARCHAR, akm_2.user_id_mobilize::VARCHAR, akm_3.user_id_mobilize::VARCHAR) AS mobilize_id
-,COALESCE(xwalk.actionkit_id,akm_1.user_id_actionkit,akm_2.user_id_actionkit,akm_3.user_id_actionkit) AS actionkit_id
---ActionKit Mobilize
+,xwalk.actionkit_id
+
 ,COALESCE(akm_1.actionkit_mobilize_universe,akm_2.actionkit_mobilize_universe,akm_3.actionkit_mobilize_universe,0) AS actionkit_mobilize_universe
 ,COALESCE(akm_1.attended,akm_2.attended,akm_3.attended,0) AS attended
 ,COALESCE(akm_1.signups,akm_2.signups,akm_3.signups,0) AS signups
@@ -220,7 +222,7 @@ CREATE TABLE bernie_nmarchio2.universe_engagement AS
 ,COALESCE(akm_1.active_81_90_days,akm_2.active_81_90_days,akm_3.active_81_90_days,0) AS active_81_90_days
 ,COALESCE(akm_1.active_91_100_days,akm_2.active_91_100_days,akm_3.active_91_100_days,0) AS active_91_100_days
 ,COALESCE(akm_1.active_over_100_days,akm_2.active_over_100_days,akm_3.active_over_100_days,0) AS active_over_100_days
--- MyCampaign
+
 ,COALESCE(myc.mycampaign_universe,0) AS mycampaign_universe
 ,COALESCE(myc.mvp_myc,0) AS mvp_myc
 ,COALESCE(myc.activist_myc,0) AS activist_myc
@@ -274,6 +276,7 @@ CREATE TABLE bernie_nmarchio2.universe_engagement AS
 ,COALESCE(spoke.support_change,0) AS support_change
 
  FROM (
+
 -- Crosswalk
 (SELECT * FROM bernie_data_commons.master_xwalk) xwalk
 -- Survey responses
@@ -312,6 +315,8 @@ ON (akm_3.user_email = xwalk.email AND akm_3.user_id_actionkit IS NULL AND akm_3
 )
 WHERE COALESCE(akm_1.actionkit_mobilize_universe::int,akm_2.actionkit_mobilize_universe::int,akm_3.actionkit_mobilize_universe::int,myc.mycampaign_universe::int,bern.bern_universe::int,surveys.survey_universe::int,spoke.spoke_universe::int,slack_1.slack_universe::int,slack_2.slack_universe::int) IS NOT NULL
 );
+							 
+							 
 							 
 drop table if exists bernie_nmarchio2.events_users_match_input;
 drop table if exists bernie_nmarchio2.events_users_match_output;
