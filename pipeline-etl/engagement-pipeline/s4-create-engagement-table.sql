@@ -182,11 +182,11 @@ DROP TABLE IF EXISTS bernie_nmarchio2.universe_engagement;
 CREATE TABLE bernie_nmarchio2.universe_engagement AS 
 (SELECT 
  COALESCE(xwalk.person_id::VARCHAR, akm_1.person_id::VARCHAR, akm_2.person_id::VARCHAR, akm_3.person_id::VARCHAR,spoke.person_id::VARCHAR,surveys.person_id::VARCHAR) AS person_id
-,COALESCE(xwalk.bern_id, bern.bern_id) AS bern_id
+,COALESCE(xwalk.bern_id::VARCHAR, bern.bern_id::VARCHAR) AS bern_id
 ,COALESCE(slack_1.email,slack_2.email,akm_1.user_email,akm_2.user_email,akm_3.user_email,xwalk.email) AS email 
-,COALESCE(xwalk.st_myc_van_id,myc.st_myc_van_id,slack_1.st_myc_van_id,slack_2.st_myc_van_id) AS st_myc_van_id
+,COALESCE(xwalk.st_myc_van_id::VARCHAR,myc.st_myc_van_id::VARCHAR,slack_1.st_myc_van_id::VARCHAR,slack_2.st_myc_van_id::VARCHAR) AS st_myc_van_id
 ,COALESCE(akm_1.user_id_mobilize::VARCHAR, akm_2.user_id_mobilize::VARCHAR, akm_3.user_id_mobilize::VARCHAR) AS mobilize_id
-,COALESCE(xwalk.actionkit_id,akm_1.user_id_actionkit,akm_2.user_id_actionkit,akm_3.user_id_actionkit) AS actionkit_id
+,COALESCE(xwalk.actionkit_id::VARCHAR,akm_1.user_id_actionkit::VARCHAR,akm_2.user_id_actionkit::VARCHAR,akm_3.user_id_actionkit::VARCHAR) AS actionkit_id
 --ActionKit Mobilize
 ,COALESCE(akm_1.actionkit_mobilize_universe,akm_2.actionkit_mobilize_universe,akm_3.actionkit_mobilize_universe,0) AS actionkit_mobilize_universe
 ,COALESCE(akm_1.attended,akm_2.attended,akm_3.attended,0) AS attended
