@@ -17,10 +17,10 @@ INNER JOIN
 (SELECT 
 person_id , 
 CASE
-           WHEN (-- f_id_1_other_party = 1
-                 -- OR f_id_1_dem = 1
-                 -- OR f_id_1_last_60_days = 1
-                 -- OR f_id_1_npp = 1
+           WHEN (--     f_id_1_other_party = 1
+--     OR f_id_1_dem = 1
+--     OR f_id_1_last_60_days = 1
+--     OR f_id_1_npp = 1
                  f_ctc_dem = 1
                  OR f_ctc_last_60_days = 1
                  OR f_ctc_npp = 1
@@ -33,9 +33,8 @@ CASE
            ELSE 0
        END AS in_core_excl_1s ,
        CASE
-           WHEN f_donut_anti_bernie = 1 
-           -- OR field_support_int IN (4,5)
-           THEN 1
+           WHEN f_donut_anti_bernie =1 --     OR field_support_int IN (4,5)
+ THEN 1
            ELSE 0
        END AS in_exclusion
 FROM gotv_universes.gotv_person_flags
