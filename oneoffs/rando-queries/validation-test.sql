@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS bernie_nmarchio2.civis_random_sample;
-CREATE TABLE bernie_nmarchio2.civis_random_sample AS
+DROP TABLE IF EXISTS bernie_nmarchio2.test;
+CREATE TABLE bernie_nmarchio2.test AS
 (select 
 coalesce(a.person_id,b.person_id,c.person_id) as person_id
 ,coalesce(voter_state_field,state) as state_coalesced
