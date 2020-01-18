@@ -5,6 +5,7 @@ as (
     select p.person_id
     ,coalesce(household_id_1,0) as household_id_1
     ,coalesce(household_id_5,0) as household_id_5
+    ,coalesce(household_ctc,0) as household_ctc
     ,coalesce(household_donor,0) as household_donor
     ,coalesce(household_event_rsvp,0) as household_event_rsvp
     ,coalesce(household_event_attendee,0) as household_event_attendee
@@ -13,6 +14,7 @@ as (
         select voting_address_id
         ,max(case when ccj.person_id is not null and ccj.support_int = 1 then 1 else 0 end) as household_id_1
         ,max(case when ccj.person_id is not null and ccj.support_int = 5 then 1 else 0 end) as household_id_5
+        ,max(case when ctc.person_id is not null then 1 else 0 end) as household_ctc
         ,max(case when donors.user_id is not null then 1 else 0 end) as household_donor
         ,max(case when events.person_id is not null and events.events_rsvpd >= 1 then 1 else 0 end) as household_event_rsvp
         ,max(case when events.person_id is not null and events.events_attended >= 1 then 1 else 0 end) as household_event_attendee
@@ -48,6 +50,16 @@ as (
             and xw.state_code in ('IA')
             group by 1,2,3,4,5
         ) events on events.person_id = xw.person_id
+        left join (
+            select ccj.person_id
+            from contacts.surveyresponses sr
+            join contacts.surveyresponsetext srt on srt.surveyresponseid = sr.surveyresponseid
+            join bernie_data_commons.contactcontacts_joined ccj on ccj.contactcontact_id = sr.contactcontact_id
+            where surveyquestionid in (32,30,9,29,31,35)
+            and srt.surveyresponsetext = 'Commit to caucus/vote'
+            and person_id is not null
+            group by 1
+        ) ctc on ctc.person_id = p.person_id
         group by 1
     ) p_household on p_household.voting_address_id = p.voting_address_id
     where p.reg_voter_flag = true
