@@ -39,6 +39,7 @@ SELECT person_id::varchar,
 FROM bernie_data_commons.contactcontacts_joined
 WHERE support_id IS NOT NULL
   AND person_id IS NOT NULL
+  AND support_int IN (1,2,3,4,5)
   AND voter_state IN ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA'))
 WHERE state_stratification <= 3000) b 
 using(person_id)
@@ -58,3 +59,5 @@ DROP TABLE IF EXISTS bernie_nmarchio2.delivery;
 CREATE TABLE bernie_nmarchio2.delivery AS
 (select person_id, voterbase_id, coalesce(TO_DATE(contactdate_field, 'YYYY-MM-DD'), TO_DATE(survey_date, 'YYYY-MM-DD')) as date 
 	from bernie_nmarchio2.test)
+
+
