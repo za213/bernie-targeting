@@ -41,7 +41,7 @@ WHERE support_id IS NOT NULL
   AND person_id IS NOT NULL
   AND support_int between 1 and 5
   AND voter_state IN ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA'))
-WHERE state_stratification <= 3000) b 
+WHERE state_stratification <= 5000) b 
 using(person_id)
 LEFT JOIN
 (SELECT person_id::varchar,
@@ -50,14 +50,15 @@ LEFT JOIN
 FROM bernie_data_commons.master_xwalk) c
 using(person_id)
 left join
-(select person_id, party_dem, party_independent from bernie_data_commons.rainbow_modeling_frame)
+(select person_id, party_dem, party_independent, non_party_reg_state  from bernie_data_commons.rainbow_modeling_frame)
 using(person_id)
-where party_dem = 1 or party_independent = 1
+where (party_dem = 1 or party_independent = 1 or non_party_reg_state = 1)
 );
 
 DROP TABLE IF EXISTS bernie_nmarchio2.delivery;
 CREATE TABLE bernie_nmarchio2.delivery AS
 (select person_id, voterbase_id, coalesce(TO_DATE(contactdate_field, 'YYYY-MM-DD'), TO_DATE(survey_date, 'YYYY-MM-DD')) as date 
 	from bernie_nmarchio2.test)
+
 
 
