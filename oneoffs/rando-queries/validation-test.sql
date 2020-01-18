@@ -39,7 +39,7 @@ SELECT person_id::varchar,
 FROM bernie_data_commons.contactcontacts_joined
 WHERE support_id IS NOT NULL
   AND person_id IS NOT NULL
-  AND support_int IN (1,2,3,4,5)
+  AND support_int between 1 and 5
   AND voter_state IN ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA'))
 WHERE state_stratification <= 3000) b 
 using(person_id)
