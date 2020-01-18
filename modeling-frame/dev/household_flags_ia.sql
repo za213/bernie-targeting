@@ -80,5 +80,7 @@ select count(person_id)
 ,count(household_event_rsvp) as c_household_event_rsvp
 ,sum(household_event_attendee) as s_household_event_attendee
 ,count(household_event_attendee) as c_household_event_attendee
+,sum(household_ctc) as s_household_ctc
+,count(household_ctc) as c_household_ctc
 from modeling.household_flags_ia
 */
