@@ -1,4 +1,4 @@
--- ActionKit-Mobilize DUPS ACROSS PERSON ID
+-- ActionKit-Mobilize 
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_actionkit_mobilize;
 CREATE TABLE bernie_nmarchio2.universe_actionkit_mobilize AS
 (SELECT *,
@@ -188,7 +188,7 @@ CREATE TABLE bernie_nmarchio2.universe_slack AS
   ON (xwalk_master.email = slack.profile_email AND xwalk_master.rownum = 1)
   GROUP BY 1, 2));
 
-
+-- Universe of potential people
 CREATE TEMP TABLE engagement_xwalk AS
 (SELECT coalesce(myc_ak.person_id,pid.person_id) AS person_id ,
        myc_ak.st_myc_van_id ,
