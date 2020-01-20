@@ -17,7 +17,8 @@ CREATE TABLE bernie_nmarchio2.events_users_enhanced AS
        base_ids.user_modified_date ,
        base_ids.user_address_latitude ,
        base_ids.user_address_longitude ,
-       new_ids.score as match_score
+       new_ids.score as match_score ,
+       ROW_NUMBER() OVER(PARTITION BY base_ids.source_data||base_ids.user_id ORDER BY base_ids.user_email NULLS LAST) AS dupe
 FROM bernie_nmarchio2.events_users base_ids
 LEFT JOIN
   (SELECT source_id,
@@ -26,13 +27,14 @@ LEFT JOIN
    FROM
      (SELECT source_id,
              matched_id,
-             score
+             score , 
+             ROW_NUMBER() OVER(PARTITION BY source_id ORDER BY score DESC) AS rank
       FROM bernie_nmarchio2.events_users_match_output WHERE score >= 0.6) match
    LEFT JOIN
      (SELECT DISTINCT person_id,
              voterbase_id,
              ROW_NUMBER() OVER(PARTITION BY voterbase_id ORDER BY person_id NULLS LAST) AS rownum
-      FROM bernie_data_commons.master_xwalk) xwalk ON MATCH.matched_id = xwalk.voterbase_id AND xwalk.rownum = 1) new_ids 
+      FROM bernie_data_commons.master_xwalk) xwalk ON match.matched_id = xwalk.voterbase_id AND xwalk.rownum = 1 AND match.rank = 1) new_ids 
   ON base_ids.unique_id = new_ids.source_id);
 
 CREATE TEMP TABLE person_id_xwalk AS
