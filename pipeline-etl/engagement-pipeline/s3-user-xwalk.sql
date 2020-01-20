@@ -25,16 +25,12 @@ LEFT JOIN
           person_id,
           score
    FROM
-     (SELECT source_id,
-             matched_id,
-             score , 
-             ROW_NUMBER() OVER(PARTITION BY source_id ORDER BY score DESC) AS rank
-      FROM bernie_nmarchio2.events_users_match_output WHERE score >= 0.6) match
+   (SELECT source_id, matched_id, score FROM 
+    (SELECT *, ROW_NUMBER() OVER(PARTITION BY source_id ORDER BY score DESC) AS rank FROM bernie_nmarchio2.events_users_match_output WHERE score >= 0.6) WHERE rank = 1) match
    LEFT JOIN
-     (SELECT DISTINCT person_id,
-             voterbase_id,
-             ROW_NUMBER() OVER(PARTITION BY voterbase_id ORDER BY person_id NULLS LAST) AS rownum
-      FROM bernie_data_commons.master_xwalk) xwalk ON match.matched_id = xwalk.voterbase_id AND xwalk.rownum = 1 AND match.rank = 1) new_ids 
+   (SELECT person_id, voterbase_id FROM 
+    (SELECT person_id, voterbase_id, ROW_NUMBER() OVER(PARTITION BY voterbase_id ORDER BY person_id NULLS LAST) AS dupe FROM bernie_data_commons.master_xwalk) WHERE dupe = 1) xwalk 
+  ON match.matched_id = xwalk.voterbase_id) new_ids 
   ON base_ids.unique_id = new_ids.source_id);
 
 CREATE TEMP TABLE person_id_xwalk AS
