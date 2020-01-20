@@ -73,8 +73,7 @@ CREATE TEMP TABLE user_universe_2 AS
 
 DROP TABLE IF EXISTS bernie_nmarchio2.events_users;
 CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
-  (SELECT *
-   FROM
+  (SELECT * FROM
      (SELECT coalesce(user_universe_2.source_data,'0')||'_'||coalesce(user_universe_2.user_email,'0')|| '_' ||coalesce(user_universe_2.user_id,'0') as unique_id,
      	     user_universe_2.person_id, --first_value(user_universe_2.person_id) over(partition by user_universe_2.user_email order by user_universe_2.user_email NULLS LAST rows between unbounded preceding and unbounded following) as person_id,
              user_universe_2.source_data,
@@ -90,7 +89,8 @@ CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
              user_universe_2.user_phone, --first_value(user_universe_2.user_phone) over(partition by user_universe_2.user_email order by user_universe_2.user_email NULLS LAST rows between unbounded preceding and unbounded following) as user_phone,
              user_universe_2.user_modified_date,
              p.user_address_latitude,
-             p.user_address_longitude
+             p.user_address_longitude,
+             ROW_NUMBER() OVER(PARTITION BY user_universe_2.source_data||user_universe_2.user_id ORDER BY user_universe_2.person_id NULLS LAST) AS dup
              FROM user_universe_2
       LEFT JOIN
         (SELECT person_id,
@@ -101,7 +101,7 @@ CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
                 voting_zip AS user_zip,
                 voting_address_latitude AS user_address_latitude,
                 voting_address_longitude AS user_address_longitude
-         FROM phoenix_analytics.person) p using(person_id) ));
+         FROM phoenix_analytics.person) p using(person_id) ) where dup = 1);
 
 -- Coalesced table of all event details
 DROP TABLE IF EXISTS bernie_nmarchio2.events_details;
