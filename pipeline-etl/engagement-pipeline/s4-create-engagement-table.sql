@@ -380,6 +380,53 @@ ON akm_3.user_email = xwalk.email
 WHERE COALESCE(akm_1.actionkit_mobilize_universe::int,akm_2.actionkit_mobilize_universe::int,akm_3.actionkit_mobilize_universe::int,myc.mycampaign_universe::int,bern.bern_universe::int,surveys.survey_universe::int,spoke.spoke_universe::int,slack_1.slack_universe::int,slack_2.slack_universe::int) IS NOT NULL
 );
 
+DROP TABLE IF EXISTS bernie_nmarchio2.engagement_analytics;
+CREATE TABLE bernie_nmarchio2.engagement_analytics AS
+(SELECT 
+CASE
+    WHEN canvass_actions > 0 THEN '1 - Canvass Action'
+    WHEN slack_phonebank_actions > 0 THEN '2 - Text/Phone Action'
+    WHEN volunteer_actions > 0 THEN '3 - Volunteer Action'
+    WHEN volunteering_rsvps > 0 THEN '4 - Volunteer RSVP'
+    WHEN constituency_activist > 0 THEN '5 - Volunteer Recruit'
+    WHEN rally_town_hall_action > 0 THEN '6 - Rally/Town Hall Attendee'
+    WHEN rally_town_hall_rsvps > 0 THEN '7 - Rally/Town Hall RSVP'   
+    WHEN spoke_survey_id > 0 THEN '8 - Supporter from Spoke'        
+    WHEN mycampaign_id > 0 THEN '9 - Supporter from MyCampaign'
+    ELSE '5 - Volunteer Recruit'
+END AS engagement_segment, 
+CASE
+    WHEN is_student > 0 THEN '1 - Student'
+    WHEN is_teacher > 0 THEN '2 - Teacher'
+    WHEN is_labor > 0 THEN '3 - Labor'
+    ELSE '4 - Other'
+END AS student_teacher_labor,
+*
+FROM 
+(SELECT person_id,
+       email,
+       st_myc_van_id,
+       mobilize_id,
+       actionkit_id,
+       bern_id,
+       sum(attended_canvass+canvass_myc+mvp_myc) AS canvass_actions,
+       sum(slack_vol+attended_phonebank+attended_training) AS slack_phonebank_actions,
+       sum(volunteer_shifts_myc+activist_myc+attended_solidarity_action+attended_friend_to_friend+attended_small_event) AS volunteer_actions,
+       sum(attended_other+bern_attempted_voter_lookup+signups_solidarity_action+signups_training+signups_small_event+signups_friend_to_friend+volunteer_yes_id+volunteer_yes_maybe_id+signups_canvass+signups_phonebank+volunteer_signup_myc) AS volunteering_rsvps,
+       sum(bern_universe+constituencies_myc+other_activist_myc+bern_is_student+student_myc+teacher_myc+bern_is_union+labor_myc) AS constituency_activist,
+       sum(attended_rally_town_hall+attended_barnstorm+events_myc) AS rally_town_hall_action,
+       sum(signups_other+spoke_rsvp_yes+event_rsvp_yes_maybe_id+rally_rsvp_myc+signups_barnstorm+signups_rally_town_hall+spoke_rsvp_maybe) AS rally_town_hall_rsvps,       
+       sum(donors_myc) AS donor,
+       sum(mycampaign_universe) AS mycampaign_id,
+       sum(spoke_universe+survey_universe) AS spoke_survey_id,
+       sum(email_myc+legacy_2016_myc) AS campaign_supporter,
+       sum(commit2caucus_id+sticker_id+bernie_id+persuaded_id+support_1_id) AS bernie_base,
+       sum(CASE WHEN bern_is_student > 0 OR student_myc > 0 THEN 1 ELSE 0 END) AS is_student,
+       sum(CASE WHEN teacher_myc > 0 THEN 1 ELSE 0 END) AS is_teacher,
+       sum(CASE WHEN bern_is_union > 0 OR labor_myc > 0 THEN 1 ELSE 0 END) AS is_labor
+FROM bernie_nmarchio2.universe_engagement
+GROUP BY 1,2,3,4,5,6))
+
 drop table if exists bernie_nmarchio2.events_users_match_input;
 drop table if exists bernie_nmarchio2.events_users_match_output;
 drop table if exists bernie_nmarchio2.events_users;
@@ -393,6 +440,7 @@ drop table if exists bernie_nmarchio2.universe_surveyresponse;
 
 GRANT USAGE ON SCHEMA bernie_nmarchio2 TO GROUP bernie_data;
 GRANT SELECT ON bernie_nmarchio2.universe_engagement TO GROUP bernie_data;
+GRANT SELECT ON bernie_nmarchio2.engagement_analytics TO GROUP bernie_data;
 GRANT SELECT ON bernie_nmarchio2.events_details TO GROUP bernie_data;
 GRANT SELECT ON bernie_nmarchio2.events_signups TO GROUP bernie_data;
 GRANT SELECT ON bernie_nmarchio2.events_users_enhanced TO GROUP bernie_data;
