@@ -1,8 +1,11 @@
-
-
--- ActionKit-Mobilize
+-- ActionKit-Mobilize DUPS ACROSS PERSON ID
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_actionkit_mobilize;
 CREATE TABLE bernie_nmarchio2.universe_actionkit_mobilize AS
+(SELECT *,
+	ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY attended DESC) AS rank_person_id, 
+	ROW_NUMBER() OVER(PARTITION BY user_id_actionkit ORDER BY attended DESC) AS rank_actionkit_id,
+	ROW_NUMBER() OVER(PARTITION BY user_email ORDER BY attended DESC) AS rank_email
+    FROM 
 (SELECT source_data ,
        user_id ,
        person_id ,
@@ -46,13 +49,13 @@ CREATE TABLE bernie_nmarchio2.universe_actionkit_mobilize AS
 (SELECT * FROM
    (SELECT * FROM bernie_nmarchio2.events_signups WHERE source_data = 'actionkit') sign_ak
  LEFT JOIN
-   (SELECT *, ROW_NUMBER() OVER(PARTITION BY ak_event_id ORDER BY mobilize_id NULLS LAST) AS rownum FROM bernie_nmarchio2.events_details) evnt_ak ON (sign_ak.ak_event_id = evnt_ak.ak_event_id AND evnt_ak.rownum = 1))
+   (SELECT *, ROW_NUMBER() OVER(PARTITION BY ak_event_id ORDER BY mobilize_id NULLS LAST) AS dup FROM bernie_nmarchio2.events_details) evnt_ak ON (sign_ak.ak_event_id = evnt_ak.ak_event_id AND evnt_ak.dup = 1))
 UNION ALL 
 (SELECT * FROM
    (SELECT * FROM bernie_nmarchio2.events_signups WHERE source_data = 'mobilize') sign_mob
  LEFT JOIN
-   (SELECT *, ROW_NUMBER() OVER(PARTITION BY mobilize_id ORDER BY ak_event_id NULLS LAST) AS rownum FROM bernie_nmarchio2.events_details) evnt_mob ON (sign_mob.mobilize_id = evnt_mob.mobilize_id AND evnt_mob.rownum = 1)))
-GROUP BY 1,2,3,4,5,6);
+   (SELECT *, ROW_NUMBER() OVER(PARTITION BY mobilize_id ORDER BY ak_event_id NULLS LAST) AS dup FROM bernie_nmarchio2.events_details) evnt_mob ON (sign_mob.mobilize_id = evnt_mob.mobilize_id AND evnt_mob.dup = 1)))
+GROUP BY 1,2,3,4,5,6));
 
 -- MyCampaign Activist Codes
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_myc;
@@ -89,14 +92,15 @@ CREATE TABLE bernie_nmarchio2.universe_myc AS
 -- Bern App
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_bern;
 CREATE TABLE bernie_nmarchio2.universe_bern AS
- (SELECT person_id::varchar(10) ,
+ (SELECT 
+ 	   person_id::varchar(10) ,
        bern_id ,
-       bern_canvasser_id ,
+       --bern_canvasser_id ,
        1 AS bern_universe ,
-       total_points as bern_total_points ,
-       CASE WHEN is_student = 't' then 1 else 0 end as bern_is_student ,
-       CASE WHEN is_union = 't' then 1 else 0 end as bern_is_union ,
-       CASE WHEN attempted_voter_lookup = 't' then 1 else 0 end as bern_attempted_voter_lookup
+       SUM(total_points) as bern_total_points ,
+       SUM(CASE WHEN is_student = 't' then 1 else 0 end) as bern_is_student ,
+       SUM(CASE WHEN is_union = 't' then 1 else 0 end) as bern_is_union ,
+       SUM(CASE WHEN attempted_voter_lookup = 't' then 1 else 0 end) as bern_attempted_voter_lookup
        FROM
   (SELECT * FROM bern_app.canvass_canvasser) canv
  LEFT JOIN
@@ -104,15 +108,16 @@ CREATE TABLE bernie_nmarchio2.universe_bern AS
           bern_id,
           bern_canvasser_id,
           ROW_NUMBER() OVER(PARTITION BY bern_id ORDER BY email NULLS LAST) AS rownum
- FROM bernie_data_commons.master_xwalk) xwalk ON canv.id = xwalk.bern_id AND xwalk.rownum = 1);
+ FROM bernie_data_commons.master_xwalk) xwalk ON canv.id = xwalk.bern_id AND xwalk.rownum = 1 
+ GROUP BY 1,2,3);
 
 -- Survey Responses
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_surveyresponse;
 CREATE TABLE bernie_nmarchio2.universe_surveyresponse AS
-(SELECT * FROM (
- SELECT person_id::varchar(10) ,
-        actionkit_id ,
-        st_myc_van_id ,
+(SELECT * FROM
+(SELECT person_id::varchar(10) ,
+        -- actionkit_id ,
+        -- st_myc_van_id ,
         1 AS survey_universe ,
         CASE WHEN surveyresponseid IN (1) THEN 1 ELSE 0 END AS support_1_id ,
         CASE WHEN surveyresponseid IN (1,2) THEN 1 ELSE 0 END AS support_1_2_id ,
@@ -130,9 +135,10 @@ CREATE TABLE bernie_nmarchio2.universe_surveyresponse AS
         CASE WHEN surveyresponseid IN (32,34,94) THEN 1 WHEN surveyresponseid IN (33) THEN 0 ELSE NULL END AS volunteer_yes_maybe_id ,
         CASE WHEN surveyresponseid IN (35,36) THEN 1 ELSE 0 END AS event_rsvp_yes_maybe_id ,
         CASE WHEN surveyresponseid IN (37,38) THEN 1 ELSE 0 END AS has_will_donate_id ,
-        row_number() over (partition BY person_id ORDER BY contactdate ASC) AS dup
+        row_number() over (partition BY person_id ORDER BY contactdate DESC) AS dup
  FROM
-  (SELECT * FROM contacts.surveyresponses) sr INNER JOIN bernie_data_commons.contactcontacts_joined ccj using(contactcontact_id) LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid)) WHERE dup = 1);
+  (SELECT * FROM contacts.surveyresponses) sr INNER JOIN bernie_data_commons.contactcontacts_joined ccj using(contactcontact_id) LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid)) 
+	WHERE dup = 1);
 
 -- Spoke
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_spoke;
@@ -151,14 +157,12 @@ CREATE TABLE bernie_nmarchio2.universe_spoke AS
            sr.*,
            srt.*,
            contactdate,
-           row_number() over (partition BY person_id ORDER BY contactdate ASC) AS dup,
+           row_number() over (partition BY person_id ORDER BY contactdate DESC) AS dup,
            json_extract_path_text(lower(surveyresponseopen), 'support_init') AS support_init,
            json_extract_path_text(lower(surveyresponseopen), 'support_final') AS support_final,
            json_extract_path_text(lower(surveyresponseopen), 'support_change') AS support_change
            FROM
-   (SELECT *
-    FROM contacts.surveyresponses
-    WHERE surveyquestionid = 28) sr
+   (SELECT * FROM contacts.surveyresponses WHERE surveyquestionid = 28) sr
  INNER JOIN bernie_data_commons.contactcontacts_joined ccj using(contactcontact_id)
  LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid)
  WHERE ccj.lalvoterid IS NOT NULL) WHERE dup = 1 AND person_id IS NOT NULL); 
@@ -166,16 +170,60 @@ CREATE TABLE bernie_nmarchio2.universe_spoke AS
 -- Slack
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_slack;
 CREATE TABLE bernie_nmarchio2.universe_slack AS
- (SELECT person_id::varchar(10), 
+(SELECT
+	st_myc_van_id, 
+    email,
+	1 AS slack_universe,
+	CASE WHEN slack_vol >= 1 THEN 1 ELSE 0 END AS slack_vol
+	FROM
+ (SELECT --person_id::varchar(10), 
          st_myc_van_id, 
-         1 AS slack_universe,
-         CASE WHEN deleted = 'f' THEN 1 ELSE 0 END AS slack_vol, 
-         profile_email AS email
+         profile_email AS email,
+         SUM(CASE WHEN deleted = 'f' THEN 1 ELSE 0 END) AS slack_vol
  FROM
   (SELECT id AS slack_id, name, deleted, profile_email FROM slack.vol_users) slack
  LEFT JOIN
-  (SELECT person_id::varchar(10), st_myc_van_id, email, ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY email NULLS LAST) AS rownum
- FROM bernie_data_commons.master_xwalk) xwalk_master ON (xwalk_master.email = slack.profile_email AND xwalk_master.rownum = 1));
+  (SELECT st_myc_van_id, email, ROW_NUMBER() OVER(PARTITION BY st_myc_van_id ORDER BY email NULLS LAST) AS rownum
+ FROM bernie_data_commons.master_xwalk) xwalk_master 
+  ON (xwalk_master.email = slack.profile_email AND xwalk_master.rownum = 1)
+  GROUP BY 1, 2));
+
+
+CREATE TEMP TABLE engagement_xwalk AS
+(SELECT coalesce(myc_ak.person_id,pid.person_id) AS person_id ,
+       myc_ak.st_myc_van_id ,
+       coalesce(myc_ak.bern_id ,bid.bern_id) AS bern_id ,
+       myc_ak.actionkit_id ,
+       coalesce(myc_ak.email ,eid.email) AS email
+FROM
+  (SELECT coalesce(myc.person_id,ak.person_id) AS person_id ,
+          coalesce(myc.st_myc_van_id,ak.st_myc_van_id) AS st_myc_van_id ,
+          coalesce(myc.bern_id,ak.bern_id) AS bern_id ,
+          coalesce(myc.actionkit_id,ak.actionkit_id) AS actionkit_id ,
+          coalesce(myc.email,ak.email) AS email
+   FROM
+     (SELECT DISTINCT person_id,
+                      st_myc_van_id ,
+                      bern_id,
+                      actionkit_id,
+                      email
+      FROM bernie_data_commons.master_xwalk_st_myc WHERE st_myc_van_id IS NOT NULL) myc
+   FULL JOIN
+     (SELECT DISTINCT person_id,
+                      st_myc_van_id ,
+                      bern_id,
+                      actionkit_id,
+                      email
+      FROM bernie_data_commons.master_xwalk_ak WHERE actionkit_id IS NOT NULL) ak using(actionkit_id)) myc_ak
+FULL JOIN
+  (SELECT DISTINCT bern_id
+   FROM bernie_data_commons.master_xwalk WHERE bern_id IS NOT NULL) bid ON myc_ak.bern_id = bid.bern_id
+FULL JOIN
+  (SELECT DISTINCT person_id
+   FROM bernie_data_commons.master_xwalk WHERE person_id IS NOT NULL) pid ON myc_ak.person_id = pid.person_id
+FULL JOIN
+  (SELECT DISTINCT email
+   FROM bernie_data_commons.master_xwalk WHERE email IS NOT NULL) eid ON myc_ak.email = eid.email);
 
 -- Engagement Universe
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_engagement;
@@ -275,7 +323,8 @@ CREATE TABLE bernie_nmarchio2.universe_engagement AS
 
  FROM (
 -- Crosswalk
-(SELECT * FROM bernie_data_commons.master_xwalk) xwalk
+(SELECT DISTINCT st_myc_van_id, email, actionkit_id, person_id, bern_id 
+	FROM engagement_xwalk WHERE person_id IS NOT NULL OR st_myc_van_id IS NOT NULL OR email IS NOT NULL OR actionkit_id IS NOT NULL OR bern_id IS NOT NULL) xwalk
 -- Survey responses
 LEFT JOIN
 (SELECT * FROM bernie_nmarchio2.universe_surveyresponse WHERE person_id IS NOT NULL) surveys
@@ -294,25 +343,25 @@ LEFT JOIN
 ON bern.bern_id = xwalk.bern_id
 -- Slack
 LEFT JOIN
-(SELECT * FROM bernie_nmarchio2.universe_slack) slack_1
-ON (slack_1.st_myc_van_id = xwalk.st_myc_van_id AND slack_1.st_myc_van_id IS NOT NULL) 
+(SELECT * FROM bernie_nmarchio2.universe_slack WHERE st_myc_van_id IS NOT NULL) slack_1
+ON slack_1.st_myc_van_id = xwalk.st_myc_van_id 
 LEFT JOIN
-(SELECT * FROM bernie_nmarchio2.universe_slack) slack_2
-ON (slack_2.email = xwalk.email AND slack_2.st_myc_van_id IS NULL AND slack_2.email IS NOT NULL)
+(SELECT * FROM bernie_nmarchio2.universe_slack WHERE st_myc_van_id IS NULL AND email IS NOT NULL) slack_2
+ON slack_2.email = xwalk.email
 -- ActionKit
 LEFT JOIN 
-(SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize) akm_1
-ON (akm_1.user_id_actionkit = xwalk.actionkit_id AND akm_1.user_id_actionkit IS NOT NULL) 
+(SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize WHERE user_id_actionkit IS NOT NULL AND rank_actionkit_id = 1) akm_1
+ON akm_1.user_id_actionkit = xwalk.actionkit_id
 LEFT JOIN
-(SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize) akm_2
-ON (akm_2.person_id = xwalk.person_id AND akm_2.user_id_actionkit IS NULL AND akm_2.person_id IS NOT NULL) 
+(SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize WHERE user_id_actionkit IS NULL AND person_id IS NOT NULL AND rank_person_id = 1) akm_2
+ON akm_2.person_id = xwalk.person_id
 LEFT JOIN
-(SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize) akm_3
-ON (akm_3.user_email = xwalk.email AND akm_3.user_id_actionkit IS NULL AND akm_3.person_id IS NULL AND akm_3.user_email IS NOT NULL) 
+(SELECT * FROM bernie_nmarchio2.universe_actionkit_mobilize WHERE user_id_actionkit IS NULL AND person_id IS NULL AND user_email IS NOT NULL AND rank_email = 1) akm_3
+ON akm_3.user_email = xwalk.email
 )
 WHERE COALESCE(akm_1.actionkit_mobilize_universe::int,akm_2.actionkit_mobilize_universe::int,akm_3.actionkit_mobilize_universe::int,myc.mycampaign_universe::int,bern.bern_universe::int,surveys.survey_universe::int,spoke.spoke_universe::int,slack_1.slack_universe::int,slack_2.slack_universe::int) IS NOT NULL
 );
-							 
+
 drop table if exists bernie_nmarchio2.events_users_match_input;
 drop table if exists bernie_nmarchio2.events_users_match_output;
 drop table if exists bernie_nmarchio2.events_users;
@@ -330,4 +379,4 @@ GRANT SELECT ON bernie_nmarchio2.events_details TO GROUP bernie_data;
 GRANT SELECT ON bernie_nmarchio2.events_signups TO GROUP bernie_data;
 GRANT SELECT ON bernie_nmarchio2.events_users_enhanced TO GROUP bernie_data;
 GRANT SELECT ON bernie_nmarchio2.events_users_xwalk TO GROUP bernie_data;
-							 							 
+				 
