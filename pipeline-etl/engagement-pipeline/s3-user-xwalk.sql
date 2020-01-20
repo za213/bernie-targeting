@@ -31,7 +31,7 @@ LEFT JOIN
    LEFT JOIN
      (SELECT person_id,
              voterbase_id,
-             ROW_NUMBER() OVER(PARTITION BY voterbase_id ORDER BY person_id NULLS LAST) AS rownum
+             ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY voterbase_id NULLS LAST) AS rownum
       FROM bernie_data_commons.master_xwalk) xwalk ON MATCH.matched_id = xwalk.voterbase_id AND xwalk.rownum = 1) new_ids 
   ON base_ids.unique_id = new_ids.source_id);
 
