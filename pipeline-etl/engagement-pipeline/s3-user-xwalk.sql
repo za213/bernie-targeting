@@ -16,7 +16,8 @@ CREATE TABLE bernie_nmarchio2.events_users_enhanced AS
        base_ids.user_phone ,
        base_ids.user_modified_date ,
        base_ids.user_address_latitude ,
-       base_ids.user_address_longitude
+       base_ids.user_address_longitude ,
+       new_ids.score as match_score
 FROM bernie_nmarchio2.events_users base_ids
 LEFT JOIN
   (SELECT source_id,
@@ -26,7 +27,7 @@ LEFT JOIN
      (SELECT source_id,
              matched_id,
              score
-      FROM bernie_nmarchio2.events_users_match_output WHERE score >= 0.6) MATCH
+      FROM bernie_nmarchio2.events_users_match_output WHERE score >= 0.6) match
    LEFT JOIN
      (SELECT person_id,
              voterbase_id,
