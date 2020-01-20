@@ -26,7 +26,7 @@ LEFT JOIN
      (SELECT source_id,
              matched_id,
              score
-      FROM bernie_nmarchio2.events_users_match_output WHERE score >= 0.5) MATCH
+      FROM bernie_nmarchio2.events_users_match_output WHERE score >= 0.6) MATCH
    LEFT JOIN
      (SELECT person_id,
              voterbase_id,
