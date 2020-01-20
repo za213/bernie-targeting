@@ -283,8 +283,8 @@ CREATE TABLE bernie_nmarchio2.universe_engagement AS
 ,COALESCE(akm_1.active_81_90_days,akm_2.active_81_90_days,akm_3.active_81_90_days,0) AS active_81_90_days
 ,COALESCE(akm_1.active_91_100_days,akm_2.active_91_100_days,akm_3.active_91_100_days,0) AS active_91_100_days
 ,COALESCE(akm_1.active_over_100_days,akm_2.active_over_100_days,akm_3.active_over_100_days,0) AS active_over_100_days
-,COALESCE(akm_1.spoke_rsvp_yes,akm_2.spoke_rsvp_yes,akm_3.spoke_rsvp_yes) AS spoke_rsvp_yes 
-,COALESCE(akm_1.spoke_rsvp_maybe,akm_2.spoke_rsvp_maybe,akm_3.spoke_rsvp_maybe) AS spoke_rsvp_maybe 
+,COALESCE(akm_1.spoke_rsvp_yes,akm_2.spoke_rsvp_yes,akm_3.spoke_rsvp_yes,0) AS spoke_rsvp_yes 
+,COALESCE(akm_1.spoke_rsvp_maybe,akm_2.spoke_rsvp_maybe,akm_3.spoke_rsvp_maybe,0) AS spoke_rsvp_maybe 
  
 -- MyCampaign
 ,COALESCE(myc.mycampaign_universe,0) AS mycampaign_universe
