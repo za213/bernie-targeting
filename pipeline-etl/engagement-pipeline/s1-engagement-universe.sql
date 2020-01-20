@@ -103,6 +103,7 @@ CREATE TABLE bernie_nmarchio2.events_users DISTKEY (person_id) AS
 -- Coalesced table of all event details
 DROP TABLE IF EXISTS bernie_nmarchio2.events_details;
 CREATE TABLE bernie_nmarchio2.events_details AS
+(SELECT * FROM
   (SELECT coalesce(ak.ak_event_id,'0')||'_'||coalesce(mob.mobilize_id,'0')||'_'||coalesce(ak.event_campaign,'0') as unique_id ,
   	      ak.ak_event_id::varchar(256) ,
           mob.mobilize_id::varchar(256) ,
@@ -140,7 +141,8 @@ CREATE TABLE bernie_nmarchio2.events_details AS
           ELSE 'other' END AS event_type_v2,
           ak.event_name::varchar(256) ,
           mob.event_campaign_mob::varchar(256) ,
-          ak.event_campaign::varchar(256) 
+          ak.event_campaign::varchar(256) ,
+          ROW_NUMBER() OVER(PARTITION BY coalesce(ak.ak_event_id,'0')||coalesce(mob.mobilize_id,'0') ORDER BY coalesce(xwalk.mobilize_start_utc::timestamptz,xwalk.ak_start_utc::timestamptz) DESC, coalesce(ak.event_lon_ak,mob.event_lon_mob)::varchar(256)||coalesce(ak.event_lat_ak,mob.event_lat_mob)::varchar(256) NULLS LAST) AS rownum
    FROM 
           (SELECT event.id::int AS ak_event_id,
                   event.address1::varchar(256) AS event_address_line_1_ak,
@@ -186,4 +188,5 @@ CREATE TABLE bernie_nmarchio2.events_details AS
                    lower(title::varchar(256)) AS event_title_mob,
                    event_campaign__slug::varchar(256) AS event_campaign_mob
             FROM mobilize.events_comprehensive) mob ON mob.mobilize_id = xwalk.mobilize_id
-   );
+   ) WHERE rownum = 1);
+
