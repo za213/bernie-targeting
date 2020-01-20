@@ -29,9 +29,9 @@ LEFT JOIN
              score
       FROM bernie_nmarchio2.events_users_match_output WHERE score >= 0.6) match
    LEFT JOIN
-     (SELECT person_id,
+     (SELECT DISTINCT person_id,
              voterbase_id,
-             ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY voterbase_id NULLS LAST) AS rownum
+             ROW_NUMBER() OVER(PARTITION BY voterbase_id ORDER BY person_id NULLS LAST) AS rownum
       FROM bernie_data_commons.master_xwalk) xwalk ON MATCH.matched_id = xwalk.voterbase_id AND xwalk.rownum = 1) new_ids 
   ON base_ids.unique_id = new_ids.source_id);
 
