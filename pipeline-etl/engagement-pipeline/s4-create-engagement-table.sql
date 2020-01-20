@@ -43,20 +43,35 @@ CREATE TABLE bernie_nmarchio2.universe_actionkit_mobilize AS
        SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 71 AND 80 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_71_80_days ,
        SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 81 AND 90 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_81_90_days ,
        SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) BETWEEN 91 AND 100 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_91_100_days ,
-       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) >= 101 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_over_100_days 
+       SUM(CASE WHEN datediff(d, TO_DATE(user_modified_date, 'YYYY-MM-DD'), CURRENT_DATE) >= 101 AND user_attended = 't' THEN 1 ELSE 0 END) AS active_over_100_days ,
+       SUM(spoke_rsvp_yes) AS spoke_rsvp_yes ,
+       SUM(spoke_rsvp_maybe) AS spoke_rsvp_maybe
        FROM
 (SELECT * FROM 
-(SELECT * FROM
+(SELECT * FROM 
+(SELECT source_data ,user_id ,person_id ,user_email ,user_id_mobilize ,user_id_actionkit ,user_attended , event_type_v2 ,user_modified_date ,sign_ak.ak_event_id FROM
    (SELECT * FROM bernie_nmarchio2.events_signups WHERE source_data = 'actionkit') sign_ak
  LEFT JOIN
    (SELECT *, ROW_NUMBER() OVER(PARTITION BY ak_event_id ORDER BY mobilize_id NULLS LAST) AS dup FROM bernie_nmarchio2.events_details) evnt_ak ON (sign_ak.ak_event_id = evnt_ak.ak_event_id AND evnt_ak.dup = 1))
 UNION ALL 
-(SELECT * FROM
+(SELECT source_data ,user_id ,person_id ,user_email ,user_id_mobilize ,user_id_actionkit ,user_attended , event_type_v2 ,user_modified_date ,sign_mob.ak_event_id FROM
    (SELECT * FROM bernie_nmarchio2.events_signups WHERE source_data = 'mobilize') sign_mob
  LEFT JOIN
-   (SELECT *, ROW_NUMBER() OVER(PARTITION BY mobilize_id ORDER BY ak_event_id NULLS LAST) AS dup FROM bernie_nmarchio2.events_details) evnt_mob ON (sign_mob.mobilize_id = evnt_mob.mobilize_id AND evnt_mob.dup = 1)))
+   (SELECT *, ROW_NUMBER() OVER(PARTITION BY mobilize_id ORDER BY ak_event_id NULLS LAST) AS dup FROM bernie_nmarchio2.events_details) evnt_mob ON (sign_mob.mobilize_id = evnt_mob.mobilize_id AND evnt_mob.dup = 1))) akmob
+LEFT JOIN
+  (SELECT campaign_contact_id,
+          event_id AS ak_event_id_spoke,
+          mobilize_id AS mobilize_id_spoke,
+          mobilize_timeslot_id AS mobilize_timeslot_id_spoke,
+          user_id AS user_id_spoke,
+          CASE WHEN response = 'yes' THEN 1 ELSE 0 END AS spoke_rsvp_yes,
+          CASE WHEN response = 'maybe' THEN 1 ELSE 0 END AS spoke_rsvp_maybe,
+          ROW_NUMBER() OVER(PARTITION BY event_id||user_id ORDER BY email NULLS LAST) AS dup
+   FROM bernie_data_commons.spoke_campaign_contact_event_assignments
+   WHERE event_id IS NOT NULL AND mobilize_id IS NOT NULL AND user_id_type = 'AK') akspoke 
+  ON akspoke.user_id_spoke = akmob.user_id AND akspoke.ak_event_id_spoke = akmob.ak_event_id AND akspoke.dup = 1)
 GROUP BY 1,2,3,4,5,6));
-
+ 
 -- MyCampaign Activist Codes
 DROP TABLE IF EXISTS bernie_nmarchio2.universe_myc;
 CREATE TABLE bernie_nmarchio2.universe_myc AS
@@ -268,6 +283,9 @@ CREATE TABLE bernie_nmarchio2.universe_engagement AS
 ,COALESCE(akm_1.active_81_90_days,akm_2.active_81_90_days,akm_3.active_81_90_days,0) AS active_81_90_days
 ,COALESCE(akm_1.active_91_100_days,akm_2.active_91_100_days,akm_3.active_91_100_days,0) AS active_91_100_days
 ,COALESCE(akm_1.active_over_100_days,akm_2.active_over_100_days,akm_3.active_over_100_days,0) AS active_over_100_days
+,COALESCE(akm_1.spoke_rsvp_yes,akm_2.spoke_rsvp_yes,akm_3.spoke_rsvp_yes) AS spoke_rsvp_yes ,
+,COALESCE(akm_1.spoke_rsvp_maybe,akm_2.spoke_rsvp_maybe,akm_3.spoke_rsvp_maybe) AS spoke_rsvp_maybe 
+ 
 -- MyCampaign
 ,COALESCE(myc.mycampaign_universe,0) AS mycampaign_universe
 ,COALESCE(myc.mvp_myc,0) AS mvp_myc
