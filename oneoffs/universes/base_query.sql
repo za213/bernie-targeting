@@ -8,7 +8,9 @@ sortkey(person_id)
 as 
 (SELECT person_id,
        state_code,
-       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, current_support_raw DESC, turnout_priority ASC) as rank_order,
+       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC,  support_targets_100 DESC, turnout_priority ASC) as rank_order_100,
+       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, support_targets_20 DESC, turnout_priority ASC) as rank_order_20,
+       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, support_targets_10 DESC, turnout_priority ASC) as rank_order_10,
        bern_flags,
        current_support_raw,
        turnout_priority,
