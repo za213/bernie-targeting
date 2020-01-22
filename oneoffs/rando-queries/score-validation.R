@@ -31,15 +31,18 @@ library(reshape2)
 
 df <- civis::read_civis(sql(query), database = 'Bernie 2020') 
 
-state_list <- c('AL','AR','NC','OK','TN','VA','TX','UT')
+#state_list <- c('AL','AR','NC','OK','TN','VA','TX','UT')
 #state_list <- c('AL','AR','NC','OK','TN','VA','TX','CO','ME','MA','MN','VT','UT')
 #state_list <- c('NH','NV','SC')
+#state_list <- c('CA')
 #state_list <- c('IA')
+
+
   
 df_test <- df %>% 
   mutate(contactdate_field=as.Date(contactdate_field,format="%Y-%m-%d"),
          survey_date=as.Date(survey_date,format="%Y-%m-%d")) %>%
-  filter(state_coalesced %in% state_list) %>%
+  #filter(state_coalesced %in% state_list) %>%
   mutate(support_int_1_0 = case_when(support_int == 1 ~ 1,
                                      support_int == 2 ~ 1,
                                      TRUE ~ 0),
@@ -57,10 +60,34 @@ df_field <- df_test %>% filter(support_int_field > 0)
 df_3rd_party <- df_test %>% filter(support_int > 0)
 df_vols <- df_test
 
-
 # round(cor(df_vols %>% select(support_score,current_support_raw,vol_target_1_0,in_ak_mob_myc_bern_1_0 )),2)
 # round(cor(df_3rd_party %>% select( support_int_1_0,support_score,current_support_raw)),2)
 # round(cor(df_field %>% select(support_int_field_1_0,support_score,current_support_raw)),2)
+all_states <- c('AL','AR','NC','OK','TN','VA','TX','CO','ME','MA','MN','VT','UT','NH','NV','SC','CA','IA')#unique(df_test$state_coalesced)
+
+df_consolidated <- data.frame("source" = c(''), 
+                     "id_type" = c(''),
+                     "state" = c(''), 
+                     "auc" = c(0))
+
+for (i in all_states) {
+  df_3rd_party_i <- df_3rd_party %>% filter(state_coalesced %in% i )
+  df_field_i <- df_field %>% filter(state_coalesced %in% i )
+  auc3civis<- round(auc(roc(df_3rd_party_i$support_int_1_0, df_3rd_party_i$support_score)),3)
+  aucfcivis<-round(auc(roc(df_field_i$support_int_field_1_0, df_field_i$support_score) ),3) 
+  auc3bench<-round(auc(roc(df_3rd_party_i$support_int_1_0, df_3rd_party_i$current_support_raw/100) ),3)
+  aucfbench<-round(auc(roc(df_field_i$support_int_field_1_0, df_field_i$current_support_raw/100) ),3)
+  
+  df_sub <- data.frame("source" = c('Civis','Civis','Bench','Bench'), 
+                       "id_type" = c('3rd', 'Field', '3rd', 'Field'),
+                       "state" = c(i,i,i,i), 
+                       "auc" = c(auc3civis, aucfcivis,auc3bench,aucfbench))
+  
+  df_consolidated <- rbind(df_sub,df_consolidated)
+}
+
+write.csv(df_consolidated, '/Users/nm/Desktop/validation/validaton.csv')
+
 
 #Civis
 (auc_3rd_civis <- round(auc(roc(df_3rd_party$support_int_1_0, df_3rd_party$support_score)),3))
