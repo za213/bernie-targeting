@@ -5,13 +5,13 @@
 set query_group to 'importers';
 set wlm_query_slot_count to 3;
 
---truncate bernie_data_commons.rainbow_modeling_frame;
-drop table if exists bernie_data_commons.rainbow_modeling_frame; 
-create table bernie_data_commons.rainbow_modeling_frame
---insert into bernie_data_commons.rainbow_modeling_frame
-distkey(person_id)
-sortkey(person_id)
-as 
+truncate bernie_data_commons.rainbow_modeling_frame;
+--drop table if exists bernie_data_commons.rainbow_modeling_frame; 
+--create table bernie_data_commons.rainbow_modeling_frame
+insert into bernie_data_commons.rainbow_modeling_frame
+--distkey(person_id)
+--sortkey(person_id)
+--as 
 (select p.person_id
   ,p.state_code
   ,p.census_block_group_2010
@@ -1001,7 +1001,7 @@ where p.is_deceased = false -- is alive
 and p.reg_record_merged = false -- removes duplicated registration addresses
 and p.reg_on_current_file = true --  voter was on the last voter file that the DNC processed and not eligible to vote in primaries
 and p.reg_voter_flag = true -- voters who are registered to vote (i.e. have a registration status of active or inactive) even if they have moved states and their new state has not updated their file to reflect this yet
-and p.state_code in ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA')
+--and p.state_code in ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA')
 );
 
 grant select on table bernie_data_commons.rainbow_modeling_frame to group bernie_data;
