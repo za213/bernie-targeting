@@ -1,5 +1,5 @@
 
-q3 <- "select *,
+query <- "select *,
 NTILE(100) OVER (ORDER BY support_score) AS support_score_100,
 NTILE(100) OVER (ORDER BY current_support_raw) AS current_support_raw_100,
 NTILE(100) OVER (ORDER BY current_support_composite) AS current_support_composite_100,
@@ -29,11 +29,12 @@ library(civis)
 library(dplyr)
 library(reshape2)
 
-df <- civis::read_civis(sql(q3), database = 'Bernie 2020') 
+df <- civis::read_civis(sql(query), database = 'Bernie 2020') 
 
+state_list <- c('AL','AR','NC','OK','TN','VA','TX','UT')
 #state_list <- c('AL','AR','NC','OK','TN','VA','TX','CO','ME','MA','MN','VT','UT')
-state_list <- c('NH','NV','SC')
-#state_list <- c('CA')
+#state_list <- c('NH','NV','SC')
+#state_list <- c('IA')
   
 df_test <- df %>% 
   mutate(contactdate_field=as.Date(contactdate_field,format="%Y-%m-%d"),
@@ -55,8 +56,8 @@ df_test <- df %>%
 df_field <- df_test %>% filter(support_int_field > 0)
 df_3rd_party <- df_test %>% filter(support_int > 0)
 df_vols <- df_test
-#  'IA',
-# 
+
+
 # round(cor(df_vols %>% select(support_score,current_support_raw,vol_target_1_0,in_ak_mob_myc_bern_1_0 )),2)
 # round(cor(df_3rd_party %>% select( support_int_1_0,support_score,current_support_raw)),2)
 # round(cor(df_field %>% select(support_int_field_1_0,support_score,current_support_raw)),2)
@@ -75,7 +76,7 @@ df_vols <- df_test
 # Plots
 df_3rd_party_long <- df_3rd_party %>% select(current_support_raw_100, support_score_100, support_int_1_0) %>% melt(id.vars = 'support_int_1_0')
 
-ggplot2::ggplot(df_3rd_party_long, ggplot2::aes(value, color = as.character(support_int_1_0) )) + 
+(p3 <- ggplot2::ggplot(df_3rd_party_long, ggplot2::aes(value, color = as.character(support_int_1_0) )) + 
   ggplot2::geom_density( alpha = .6) +
   ggplot2::scale_x_continuous( ) +
   ggplot2::theme_bw() +
@@ -86,11 +87,11 @@ ggplot2::ggplot(df_3rd_party_long, ggplot2::aes(value, color = as.character(supp
   scale_color_discrete(name = "1 = (1,2 IDs)") +
   ggplot2::theme(legend.position ="bottom",
                  text = ggplot2::element_text(size = 13, color = "#161616"))+
-  facet_wrap(vars(variable))
+  facet_wrap(vars(variable)))
 
 df_field_long <- df_field %>% select(current_support_raw_100, support_score_100, support_int_field_1_0) %>% melt(id.vars = 'support_int_field_1_0')
 
-ggplot2::ggplot(df_field_long , ggplot2::aes(value, color = as.character(support_int_field_1_0) )) + 
+(pf <- ggplot2::ggplot(df_field_long , ggplot2::aes(value, color = as.character(support_int_field_1_0) )) + 
   ggplot2::geom_density( alpha = .6) +
   ggplot2::scale_x_continuous( ) +
   ggplot2::theme_bw() +
@@ -101,11 +102,11 @@ ggplot2::ggplot(df_field_long , ggplot2::aes(value, color = as.character(support
   scale_color_discrete(name = "1 = (1,2 IDs)") +
   ggplot2::theme(legend.position ="bottom",
                  text = ggplot2::element_text(size = 13, color = "#161616"))+
-  facet_wrap(vars(variable))
+  facet_wrap(vars(variable)))
 
 df_vols_long <- df_vols %>% select(current_support_raw_100, support_score_100, in_ak_mob_myc_bern_1_0, vol_target_1_0) %>% melt(id.vars = c('in_ak_mob_myc_bern_1_0','vol_target_1_0'))
 
-ggplot2::ggplot(df_vols_long , ggplot2::aes(value, color = as.character(in_ak_mob_myc_bern_1_0) )) + 
+(pv1 <- ggplot2::ggplot(df_vols_long , ggplot2::aes(value, color = as.character(in_ak_mob_myc_bern_1_0) )) + 
   ggplot2::geom_density( alpha = .6) +
   ggplot2::scale_x_continuous( ) +
   ggplot2::theme_bw() +
@@ -116,9 +117,9 @@ ggplot2::ggplot(df_vols_long , ggplot2::aes(value, color = as.character(in_ak_mo
   scale_color_discrete(name = "1 = True") +
   ggplot2::theme(legend.position ="bottom",
                  text = ggplot2::element_text(size = 13, color = "#161616"))+
-  facet_wrap(vars(variable))
+  facet_wrap(vars(variable)))
 
-ggplot2::ggplot(df_vols_long , ggplot2::aes(value, color = as.character(vol_target_1_0) )) + 
+(pv2 <- ggplot2::ggplot(df_vols_long , ggplot2::aes(value, color = as.character(vol_target_1_0) )) + 
   ggplot2::geom_density( alpha = .6) +
   ggplot2::scale_x_continuous( ) +
   ggplot2::theme_bw() +
@@ -129,4 +130,11 @@ ggplot2::ggplot(df_vols_long , ggplot2::aes(value, color = as.character(vol_targ
   scale_color_discrete(name = "1 = True") +
   ggplot2::theme(legend.position ="bottom",
                  text = ggplot2::element_text(size = 13, color = "#161616"))+
-  facet_wrap(vars(variable))
+  facet_wrap(vars(variable)))
+
+ggsave('/Users/nm/Desktop/validation/p3.png',p3)
+ggsave('/Users/nm/Desktop/validation/pf.png',pf)
+ggsave('/Users/nm/Desktop/validation/pv1.png',pv1)
+ggsave('/Users/nm/Desktop/validation/pv2.png',pv2)
+
+
