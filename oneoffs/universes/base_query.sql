@@ -87,3 +87,7 @@ LEFT JOIN
 FROM phoenix_analytics.person p
 LEFT JOIN phoenix_analytics.person_votes pv using(person_id)
 LEFT JOIN bernie_data_commons.person_primary_votes ppv using(person_id) WHERE person_id is not null) using(person_id)));
+
+
+
+
