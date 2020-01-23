@@ -34,7 +34,7 @@ FROM
     state_code,
     coalesce(current_support_raw,0) AS current_support_raw
     FROM bernie_data_commons.all_scores 
-    WHERE state_code IN ('AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VA','VT','PR','ID','MI','MS','MO','ND','WA','WY','AZ','FL','IL','OH','GA','ND'))
+    WHERE state_code IN ('IA','NV','SC','NH','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VA','VT','PR','ID','MI','MS','MO','ND','WA','WY','AZ','FL','IL','OH','GA','ND'))
 LEFT JOIN
   (SELECT person_id::varchar,
           CASE
