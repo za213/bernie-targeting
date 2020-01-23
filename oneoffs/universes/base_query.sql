@@ -8,21 +8,24 @@ sortkey(person_id)
 as 
 (SELECT person_id,
        state_code,
-       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC,  support_targets_100 DESC, turnout_priority ASC) as rank_order_100,
-       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, support_targets_20 DESC, turnout_priority ASC) as rank_order_20,
-       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, support_targets_10 DESC, turnout_priority ASC) as rank_order_10,
        bern_flags,
        current_support_raw,
        turnout_priority,
        CASE WHEN bern_flags = 1 THEN 100 ELSE current_support_raw_100 END AS support_targets_100,
+       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, current_support_raw_100 DESC, turnout_priority ASC) as rank_order_100,
+       CASE WHEN bern_flags = 1 THEN 50 ELSE current_support_raw_50 END AS support_targets_50,
+       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, current_support_raw_50 DESC, turnout_priority ASC) as rank_order_50,
        CASE WHEN bern_flags = 1 THEN 20 ELSE current_support_raw_20 END AS support_targets_20,
-       CASE WHEN bern_flags = 1 THEN 10 ELSE current_support_raw_10 END AS support_targets_10
+       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, current_support_raw_20 DESC, turnout_priority ASC) as rank_order_20,
+       CASE WHEN bern_flags = 1 THEN 10 ELSE current_support_raw_10 END AS support_targets_10,
+       row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, current_support_raw_10 DESC, turnout_priority ASC) as rank_order_10
 FROM
 (SELECT person_id::varchar,
     state_code,
        current_support_raw,
        coalesce(bern_flags,0) AS bern_flags,
        NTILE(100) OVER (PARTITION BY state_code||'_'||coalesce(bern_flags,0) ORDER BY current_support_raw ASC) AS current_support_raw_100,
+       NTILE(50) OVER (PARTITION BY state_code||'_'||coalesce(bern_flags,0)ORDER BY current_support_raw ASC) AS current_support_raw_50,
        NTILE(20) OVER (PARTITION BY state_code||'_'||coalesce(bern_flags,0)ORDER BY current_support_raw ASC) AS current_support_raw_20,
        NTILE(10) OVER (PARTITION BY state_code||'_'||coalesce(bern_flags,0) ORDER BY current_support_raw ASC) AS current_support_raw_10,
        turnout_priority
@@ -89,7 +92,3 @@ LEFT JOIN
 FROM phoenix_analytics.person p
 LEFT JOIN phoenix_analytics.person_votes pv using(person_id)
 LEFT JOIN bernie_data_commons.person_primary_votes ppv using(person_id) WHERE person_id is not null) using(person_id)));
-
-
-
-
