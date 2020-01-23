@@ -1,6 +1,7 @@
 
 -- https://github.com/Bernie-2020/universe_review/blob/master/GOTV%20Universes/gotv_person_flags.sql
 
+
 drop table if exists bernie_data_commons.march_universe; 
 create table bernie_data_commons.march_universe
 distkey(person_id)
@@ -37,20 +38,22 @@ FROM
     WHERE state_code IN ('AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VA','VT','PR','ID','MI','MS','MO','ND','WA','WY','AZ','FL','IL','OH','GA','ND'))
 LEFT JOIN
   (SELECT person_id::varchar,
-          CASE
-              WHEN actionkit_id IS NOT NULL
-                   OR st_myc_van_id IS NOT NULL
-                   OR student_hash IS NOT NULL
-                   OR field_support_int = 1
-                   OR f_ctc_dem = 1
-                   OR f_ctc_npp = 1
-                   OR f_ctc_other_party = 1
-                   OR field_support_int = 1
-                   OR f_donor_in_household = 1
-                   OR f_event_rsvp_in_household = 1
-                   OR f_event_attendee_in_household = 1
-                   OR f_in_student_roster_reg = 1
-                   OR f_in_student_roster_unreg = 1 THEN 1 ELSE 0
+          CASE WHEN
+               f_attended_2_events = 1
+               OR f_rsvpd_3_or_more_events = 1
+               OR f_donor_in_household = 1
+               OR f_event_attendee_in_household = 1
+               OR f_rsvpd_2_events = 1
+               OR f_id_1_other_party = 1
+               OR f_hosted_1_event = 1
+               OR f_id_1_last_60_days = 1
+               OR f_id_1_npp = 1
+               OR f_id_1_dem = 1
+               OR f_ctc_dem = 1
+               OR f_ctc_last_60_days = 1
+               OR f_ctc_npp = 1
+               OR f_donated = 1
+               OR f_core_donut_top50 = 1 THEN 1 ELSE 0
           END AS bern_flags
    FROM gotv_universes.gotv_person_flags WHERE person_id IS NOT NULL AND bern_flags = 1) 
   using(person_id)
@@ -92,4 +95,6 @@ LEFT JOIN
 FROM phoenix_analytics.person p
 LEFT JOIN phoenix_analytics.person_votes pv using(person_id)
 LEFT JOIN bernie_data_commons.person_primary_votes ppv using(person_id) WHERE person_id is not null) using(person_id)));
+
+
 
