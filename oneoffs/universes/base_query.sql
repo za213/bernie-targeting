@@ -1,6 +1,6 @@
 
 -- https://github.com/Bernie-2020/universe_review/blob/master/GOTV%20Universes/gotv_person_flags.sql
-
+-- https://github.com/Bernie-2020/data-analytics/blob/master/ad_hoc/person_primary_votes.sql
 
 drop table if exists bernie_data_commons.march_universe; 
 create table bernie_data_commons.march_universe
