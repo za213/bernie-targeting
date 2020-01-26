@@ -7,15 +7,18 @@ begin;
 set query_group to 'importers';
 set wlm_query_slot_count to 3;
 
-DROP TABLE IF EXISTS bernie_nmarchio2.base_query_universe;
-CREATE TABLE bernie_nmarchio2.base_query_universe
+DROP TABLE IF EXISTS bernie_nmarchio2.base_universe;
+CREATE TABLE bernie_nmarchio2.base_universe
 distkey(person_id) 
 sortkey(person_id) AS
   (SELECT person_id::varchar,
           state_code,
           current_support_raw,
+          NTILE(100) OVER (PARTITION BY state_code ORDER BY current_support_raw ASC) AS current_support_raw_100,
           sanders_very_excited_score,
+          NTILE(100) OVER (PARTITION BY state_code ORDER BY sanders_very_excited_score ASC) AS sanders_very_excited_score_100,
           sanders_strong_support_score,
+          NTILE(100) OVER (PARTITION BY state_code ORDER BY field_id_1_score ASC) AS field_id_1_score_100,
           field_id_1_score,
           vote_history,
           party_affiliation,
@@ -26,7 +29,6 @@ sortkey(person_id) AS
               WHEN support_int = 1 THEN 1 
               WHEN person_flags = 1 THEN 1 
               ELSE 0 END AS bern_flags,
-          support_int,
           turnout_current --,
           --civis_2018_turnout,
           --ts_tsmart_presidential_primary_turnout_score
@@ -39,8 +41,7 @@ sortkey(person_id) AS
              coalesce(field_id_1_score,0) AS field_id_1_score,
              coalesce(turnout_current,0) AS turnout_current
       FROM bernie_data_commons.all_scores
-      --WHERE state_code IN ('SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VA','VT','PR','ID','MI','MS','MO','ND','WA','WY','AZ','FL','IL','OH','GA','ND'))
-      WHERE state_code IN ('AL','AR','CO','ME','MA','MN','NC','OK','TN','TX','UT','VA','VT','PR','ID','MI','MS','MO','ND','WA','WY','AZ','FL','IL','OH','GA','ND'))
+      WHERE state_code IN ('AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA'))
    LEFT JOIN
      (SELECT person_id::varchar,
         CASE 
@@ -227,8 +228,6 @@ sortkey(person_id) AS
           current_support_raw_100,
           sanders_very_excited_score,
           sanders_very_excited_score_100,
-          sanders_strong_support_score,
-          sanders_strong_support_score_100,
           field_id_1_score,
           field_id_1_score_100,
           purpose_of_contact,
@@ -246,12 +245,6 @@ sortkey(person_id) AS
           --ts_tsmart_presidential_primary_turnout_score
    FROM
 (select *,
-
-        NTILE(100) OVER (PARTITION BY state_code ORDER BY current_support_raw ASC) AS current_support_raw_100,
-        NTILE(100) OVER (PARTITION BY state_code ORDER BY sanders_very_excited_score ASC) AS sanders_very_excited_score_100,
-        NTILE(100) OVER (PARTITION BY state_code ORDER BY sanders_strong_support_score ASC) AS sanders_strong_support_score_100,
-        NTILE(100) OVER (PARTITION BY state_code ORDER BY field_id_1_score ASC) AS field_id_1_score_100,
-
         CASE WHEN (bern_flags = 1 
                 OR registration_action = '1 - Dem Primary Eligible' 
                 OR party_affiliation = 'Democratic' 
@@ -259,19 +252,25 @@ sortkey(person_id) AS
             ELSE '2 - Non-target' END AS dem_primary_electorate, -- This defines the upper bound of the GOTV universe
 
         CASE
-            WHEN dem_primary_electorate = '2 - Non-target' THEN '6 - Non-target'
+            WHEN dem_primary_electorate = '2 - Non-target' 
+                THEN '6 - Non-target'
             WHEN (vote_history = '1 - Newly registered' OR vote_history = '2 - Dem Primary or 2018 voter')
                 AND registration_action = '1 - Dem Primary Eligible' 
-                AND registered_in_state = '1 - Registered in current state'  THEN '1 - Vote-ready, active voter'
+                AND registered_in_state = '1 - Registered in current state'  
+                    THEN '1 - Vote-ready, active voter'
             WHEN registered_in_state = '1 - Registered in current state'
-                 AND registration_action = '1 - Dem Primary Eligible'
-                 AND vote_history IN ('3 - Lapsed voter','4 - No vote but eligible','5 - Other') THEN '2 - Vote-ready, less active voter'
+                AND registration_action = '1 - Dem Primary Eligible'
+                AND vote_history IN ('3 - Lapsed voter','4 - No vote but eligible','5 - Other') 
+                    THEN '2 - Vote-ready, less active voter'
             WHEN registration_action = '2 - Must Register as Dem'
-                 AND registered_in_state = '1 - Registered in current state' THEN '3 - Must register as Dem'
+                AND registered_in_state = '1 - Registered in current state' 
+                    THEN '3 - Must register as Dem'
             WHEN registration_action = '1 - Dem Primary Eligible'
-                 AND registered_in_state IN ('2 - Registered in different state','3 - Likely absentee voter') THEN '4 - Must mail absentee or register in current state'
+                AND registered_in_state IN ('2 - Registered in different state','3 - Likely absentee voter') 
+                    THEN '4 - Must mail absentee or register in current state'
             WHEN registered_in_state IN ('2 - Registered in different state','3 - Likely absentee voter')
-                 AND registration_action = '2 - Must Register as Dem' THEN '5 - Must register as Dem, mail absentee or register in current state'
+                AND registration_action = '2 - Must Register as Dem' 
+                    THEN '5 - Must register as Dem, mail absentee or register in current state'
             ELSE '6 - Non-target' END AS voter_readiness, -- This adds flags for barriers that may hinder primary participation
 
         CASE 
@@ -300,8 +299,3 @@ sortkey(person_id) AS
 FROM bernie_nmarchio2.base_query_universe)));
 
 commit;
-
-
-
-
-
