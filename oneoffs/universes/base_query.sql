@@ -2,69 +2,34 @@
 -- https://github.com/Bernie-2020/universe_review/blob/master/GOTV%20Universes/gotv_person_flags.sql
 -- https://github.com/Bernie-2020/data-analytics/blob/master/ad_hoc/person_primary_votes.sql
 
-DROP TABLE IF EXISTS bernie_nmarchio2.march_universe;
-CREATE TABLE bernie_nmarchio2.march_universe 
+begin;
+
+set query_group to 'importers';
+set wlm_query_slot_count to 3;
+
+DROP TABLE IF EXISTS bernie_nmarchio2.base_query_universe;
+CREATE TABLE bernie_nmarchio2.base_query_universe
 distkey(person_id) 
 sortkey(person_id) AS
-(SELECT *,
-    -- Rank order each segment
-    row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, gotv_segment ASC, gotv_segment_10 DESC, vote_history ASC, current_support_raw DESC) as gotv_rank -- placeholder swap vote_history with the contact_purpose bucket that orders groups according to chronology of GOTV contact actions
-    FROM
-  (SELECT person_id,
-          state_code,
-          gotv_segment,
-          -- Decile each segment
-          NTILE(10) OVER (PARTITION BY state_code||'_'||gotv_segment ORDER BY current_support_raw ASC) AS gotv_segment_10,
-          bern_flags,
-          current_support_raw,
-          current_support_raw_100,
-          sanders_very_excited_score,
-          sanders_very_excited_score_100,
-          sanders_strong_support_score,
-          sanders_strong_support_score_100,
-          field_id_1_score,
-          field_id_1_score_100,
-          vote_history,
-          party_affiliation,
-          registration_action,
-          early_vote_mode,
-          registered_in_state,
-          dem_primary_electorate,
-          turnout_current,
-          civis_2018_turnout,
-          ts_tsmart_presidential_primary_turnout_score
-   FROM
   (SELECT person_id::varchar,
           state_code,
           current_support_raw,
-          NTILE(100) OVER (PARTITION BY state_code ORDER BY current_support_raw ASC) AS current_support_raw_100,
           sanders_very_excited_score,
-          NTILE(100) OVER (PARTITION BY state_code ORDER BY sanders_very_excited_score ASC) AS sanders_very_excited_score_100,
           sanders_strong_support_score,
-          NTILE(100) OVER (PARTITION BY state_code ORDER BY sanders_strong_support_score ASC) AS sanders_strong_support_score_100,
           field_id_1_score,
-          NTILE(100) OVER (PARTITION BY state_code ORDER BY field_id_1_score ASC) AS field_id_1_score_100,
           vote_history,
           party_affiliation,
           registration_action,
           early_vote_mode,
           registered_in_state,
-          coalesce(bern_flags,0) AS bern_flags,
-          CASE WHEN (bern_flags = 1 
-                   OR registration_action = '1 - Dem Primary Eligible' 
-                   OR party_affiliation = 'Democratic' 
-                   OR current_support_raw_100 > 70) THEN '1 - Potential GOTV target' -- find flags to remove the hostile people from GOTV universe
-               ELSE '2 - Non-target' END AS dem_primary_electorate,
-          CASE WHEN bern_flags = 1 then '1 - Verified Supporter'
-               WHEN (vote_history = '1 - Newly registered' OR vote_history = '2 - Dem Primary or 2018 voter')
-                   AND registration_action = '1 - Dem Primary Eligible' 
-                   AND registered_in_state = '1 - Registered in current state'
-                   AND (current_support_raw_100 >= 80 AND sanders_very_excited_score_100 >= 80) THEN '2 - Vote-ready Supporter'
-               WHEN dem_primary_electorate = '1 - Potential GOTV target' THEN '3 - Motivate Target'
-               ELSE '4 - Non-target' END AS gotv_segment, -- refine segmenting / this is placeholder
-          turnout_current,
-          civis_2018_turnout,
-          ts_tsmart_presidential_primary_turnout_score
+          CASE 
+              WHEN support_int = 1 THEN 1 
+              WHEN person_flags = 1 THEN 1 
+              ELSE 0 END AS bern_flags,
+          support_int,
+          turnout_current --,
+          --civis_2018_turnout,
+          --ts_tsmart_presidential_primary_turnout_score
    FROM
      (SELECT person_id::varchar,
              state_code,
@@ -74,7 +39,8 @@ sortkey(person_id) AS
              coalesce(field_id_1_score,0) AS field_id_1_score,
              coalesce(turnout_current,0) AS turnout_current
       FROM bernie_data_commons.all_scores
-      WHERE state_code IN ('SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VA','VT','PR','ID','MI','MS','MO','ND','WA','WY','AZ','FL','IL','OH','GA','ND'))
+      --WHERE state_code IN ('SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VA','VT','PR','ID','MI','MS','MO','ND','WA','WY','AZ','FL','IL','OH','GA','ND'))
+      WHERE state_code IN ('AL','AR','CO','ME','MA','MN','NC','OK','TN','TX','UT','VA','VT','PR','ID','MI','MS','MO','ND','WA','WY','AZ','FL','IL','OH','GA','ND'))
    LEFT JOIN
      (SELECT person_id::varchar,
         CASE 
@@ -92,10 +58,12 @@ sortkey(person_id) AS
              OR f_ctc_last_60_days = 1
              OR f_ctc_npp = 1
              OR f_donated = 1
-             OR f_core_donut_top50 = 1 THEN 1 
-             ELSE 0 END AS bern_flags -- refine logic / this is placeholder
+             OR f_core_donut_top50 = 1 THEN 1
+             ELSE 0 END AS person_flags -- refine logic / this is placeholder
       FROM gotv_universes.gotv_person_flags
-      WHERE person_id IS NOT NULL AND bern_flags = 1) using(person_id)
+      WHERE person_id IS NOT NULL AND person_flags = 1) using(person_id)
+   LEFT JOIN
+     (SELECT person_id::varchar, support_int from bernie_data_commons.contactcontacts_joined where unique_id_flag = 1) ccj using(person_id)
    LEFT JOIN
      (SELECT person_id::varchar,
         CASE 
@@ -218,24 +186,120 @@ sortkey(person_id) AS
                 OR pv.vote_g_2016_method_absentee = 1
                 OR pv.vote_p_2016_method_absentee = 1) THEN '3 - Likely absentee voter'
            WHEN (poos.to_state_code <> pncoa.state_code) THEN '2 - Registered in different state'
-           ELSE '1 - Registered in current state' END AS registered_in_state, -- verify logic
+           ELSE '1 - Registered in current state' END AS registered_in_state -- verify logic
 
-          as18.civis_2018_turnout,
-          tc.ts_tsmart_presidential_primary_turnout_score
+          --as18.civis_2018_turnout,
+          --tc.ts_tsmart_presidential_primary_turnout_score
 
       FROM phoenix_analytics.person p
       LEFT JOIN phoenix_scores.all_scores_2020 as20 using(person_id)
-      LEFT JOIN phoenix_scores.all_scores_2018 as18 using(person_id)
+      --LEFT JOIN phoenix_scores.all_scores_2018 as18 using(person_id)
       LEFT JOIN phoenix_analytics.person_ncoas_current pncoa using(person_id)
-      LEFT JOIN phoenix_consumer.tsmart_consumer tc using(person_id)
+      --LEFT JOIN phoenix_consumer.tsmart_consumer tc using(person_id)
       LEFT JOIN phoenix_analytics.person_votes pv using(person_id)
       LEFT JOIN phoenix_analytics.person_out_of_state poos using(person_id)
       LEFT JOIN phoenix_analytics.person_early_votes pev using(person_id)
       LEFT JOIN bernie_data_commons.person_primary_votes ppv using(person_id) 
-      WHERE person_id IS NOT NULL) using(person_id)) 
-));
+      WHERE person_id IS NOT NULL) using(person_id));
+
+commit;
 
 
+begin;
+
+set query_group to 'importers';
+set wlm_query_slot_count to 3;
+
+DROP TABLE IF EXISTS bernie_nmarchio2.march_universe;
+CREATE TABLE bernie_nmarchio2.march_universe 
+distkey(person_id) 
+sortkey(person_id) AS
+(SELECT *,
+    -- Rank order each gotv_segment
+    row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, gotv_segment ASC, purpose_of_contact ASC, current_support_raw DESC) as gotv_rank 
+
+    FROM
+  (SELECT person_id,
+          state_code,
+          gotv_segment,
+          bern_flags,
+          current_support_raw,
+          current_support_raw_100,
+          sanders_very_excited_score,
+          sanders_very_excited_score_100,
+          sanders_strong_support_score,
+          sanders_strong_support_score_100,
+          field_id_1_score,
+          field_id_1_score_100,
+          purpose_of_contact,
+          voter_readiness,
+          registration_action,
+          registered_in_state,
+          early_vote_mode,
+          vote_history,
+          party_affiliation,
+          dem_primary_electorate,
+          turnout_current,
+          -- Decile each gotv_segment
+          NTILE(10) OVER (PARTITION BY state_code||'_'||gotv_segment ORDER BY current_support_raw ASC) AS current_support_raw_10_by_state_gotv_segment
+          --civis_2018_turnout,
+          --ts_tsmart_presidential_primary_turnout_score
+   FROM
+(select *,
+
+        NTILE(100) OVER (PARTITION BY state_code ORDER BY current_support_raw ASC) AS current_support_raw_100,
+        NTILE(100) OVER (PARTITION BY state_code ORDER BY sanders_very_excited_score ASC) AS sanders_very_excited_score_100,
+        NTILE(100) OVER (PARTITION BY state_code ORDER BY sanders_strong_support_score ASC) AS sanders_strong_support_score_100,
+        NTILE(100) OVER (PARTITION BY state_code ORDER BY field_id_1_score ASC) AS field_id_1_score_100,
+
+        CASE WHEN (bern_flags = 1 
+                OR registration_action = '1 - Dem Primary Eligible' 
+                OR party_affiliation = 'Democratic' 
+                OR current_support_raw_100 >= 70) THEN '1 - Target universe' -- Find flags to remove the hostile people from GOTV universe
+            ELSE '2 - Non-target' END AS dem_primary_electorate, -- This defines the upper bound of the GOTV universe
+
+        CASE
+            WHEN dem_primary_electorate = '2 - Non-target' THEN '6 - Non-target'
+            WHEN (vote_history = '1 - Newly registered' OR vote_history = '2 - Dem Primary or 2018 voter')
+                AND registration_action = '1 - Dem Primary Eligible' 
+                AND registered_in_state = '1 - Registered in current state'  THEN '1 - Vote-ready, active voter'
+            WHEN registered_in_state = '1 - Registered in current state'
+                 AND registration_action = '1 - Dem Primary Eligible'
+                 AND vote_history IN ('3 - Lapsed voter','4 - No vote but eligible','5 - Other') THEN '2 - Vote-ready, less active voter'
+            WHEN registration_action = '2 - Must Register as Dem'
+                 AND registered_in_state = '1 - Registered in current state' THEN '3 - Must register as Dem'
+            WHEN registration_action = '1 - Dem Primary Eligible'
+                 AND registered_in_state IN ('2 - Registered in different state','3 - Likely absentee voter') THEN '4 - Must mail absentee or register in current state'
+            WHEN registered_in_state IN ('2 - Registered in different state','3 - Likely absentee voter')
+                 AND registration_action = '2 - Must Register as Dem' THEN '5 - Must register as Dem, mail absentee or register in current state'
+            ELSE '6 - Non-target' END AS voter_readiness, -- This adds flags for barriers that may hinder primary participation
+
+        CASE 
+            WHEN dem_primary_electorate = '1 - Target universe'
+                AND voter_readiness IN ('1 - Vote-ready, active voter', '2 - Vote-ready, less active voter')
+                AND (current_support_raw_100 >= 80 OR sanders_very_excited_score_100 >= 80 OR field_id_1_score_100 >= 80 OR bern_flags = 1) 
+                   THEN '1 - Vote-ready GOTV target'
+            WHEN dem_primary_electorate = '1 - Target universe'
+                AND voter_readiness IN ( '3 - Must register as Dem', '4 - Must mail absentee or register in current state',  '5 - Must register as Dem, mail absentee or register in current state')
+                AND (current_support_raw_100 >= 80 OR sanders_very_excited_score_100 >= 80 OR field_id_1_score_100 >= 80 OR bern_flags = 1)
+                   THEN '2 - Registration-action GOTV target'
+            WHEN dem_primary_electorate = '1 - Target universe'
+                AND voter_readiness IN ('1 - Vote-ready, active voter', '2 - Vote-ready, less active voter')
+                   THEN '3 - Vote-ready persuasion target'
+            WHEN dem_primary_electorate = '1 - Target universe'
+                AND voter_readiness NOT IN ('1 - Vote-ready, active voter', '2 - Vote-ready, less active voter')
+                   THEN '4 - Registration-action and persuasion'
+            ELSE '5 - Non-target' END AS purpose_of_contact, -- This breaks out persuasion from GOTV contact universes
+
+        CASE 
+            WHEN bern_flags = 1 THEN '1 - Verified Supporter'
+            WHEN purpose_of_contact IN ('1 - Vote-ready GOTV target','2 - Registration-action GOTV target') THEN '2 - GOTV target'
+            WHEN purpose_of_contact IN ('3 - Vote-ready persuasion target','4 - Registration-action and persuasion') THEN '3 - Persuasion target'
+            ELSE '4 - Non-target' END AS gotv_segment -- This breaks out supporters, top GOTV targets, persuasion voters, and non-targets
+
+FROM bernie_nmarchio2.base_query_universe)));
+
+commit;
 
 
 
