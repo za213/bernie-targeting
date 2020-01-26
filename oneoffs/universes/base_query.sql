@@ -4,8 +4,7 @@
 
 begin;
 
-set query_group to 'importers';
-set wlm_query_slot_count to 3;
+set wlm_query_slot_count to 5;
 
 DROP TABLE IF EXISTS bernie_nmarchio2.base_universe;
 CREATE TABLE bernie_nmarchio2.base_universe
@@ -17,9 +16,8 @@ sortkey(person_id) AS
           NTILE(100) OVER (PARTITION BY state_code ORDER BY current_support_raw ASC) AS current_support_raw_100,
           sanders_very_excited_score,
           NTILE(100) OVER (PARTITION BY state_code ORDER BY sanders_very_excited_score ASC) AS sanders_very_excited_score_100,
-          sanders_strong_support_score,
-          NTILE(100) OVER (PARTITION BY state_code ORDER BY field_id_1_score ASC) AS field_id_1_score_100,
           field_id_1_score,
+          NTILE(100) OVER (PARTITION BY state_code ORDER BY field_id_1_score ASC) AS field_id_1_score_100,
           vote_history,
           party_affiliation,
           registration_action,
@@ -208,8 +206,7 @@ commit;
 
 begin;
 
-set query_group to 'importers';
-set wlm_query_slot_count to 3;
+set wlm_query_slot_count to 5;
 
 DROP TABLE IF EXISTS bernie_nmarchio2.march_universe;
 CREATE TABLE bernie_nmarchio2.march_universe 
@@ -296,6 +293,7 @@ sortkey(person_id) AS
             WHEN purpose_of_contact IN ('3 - Vote-ready persuasion target','4 - Registration-action and persuasion') THEN '3 - Persuasion target'
             ELSE '4 - Non-target' END AS gotv_segment -- This breaks out supporters, top GOTV targets, persuasion voters, and non-targets
 
-FROM bernie_nmarchio2.base_query_universe)));
+FROM bernie_nmarchio2.base_universe)));
 
 commit;
+
