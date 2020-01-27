@@ -297,3 +297,4 @@ FROM bernie_nmarchio2.base_universe)));
 
 commit;
 
+
