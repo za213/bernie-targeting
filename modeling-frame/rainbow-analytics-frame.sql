@@ -384,10 +384,10 @@ WHEN (pv.vote_g_2018_method_early = 1
 
 ,CASE 
 WHEN p.is_permanent_absentee = 't' THEN '3 - Absentee voter'
-WHEN poos.to_state_code <> pncoa.state_code AND (pv.vote_g_2018_method_absentee = 1 OR pv.vote_p_2018_method_absentee = 1) THEN '3 - Absentee voter'
+WHEN poos.to_state_code <> p.ncoa_to_state AND (pv.vote_g_2018_method_absentee = 1 OR pv.vote_p_2018_method_absentee = 1) THEN '3 - Absentee voter'
 WHEN absent.requested_ballot = 1 THEN '3 - Absentee voter'
 WHEN p.ncoa_since_reg_date = 't' and p.out_of_state_ncoa = 't' THEN '3 - Absentee voter'
-WHEN (poos.to_state_code <> pncoa.state_code) THEN '2 - Registered in different state'
+WHEN (poos.to_state_code <> p.ncoa_to_state) THEN '2 - Registered in different state'
 ELSE '1 - Registered in current state' END AS registered_in_state_3way
 
 ,case 
@@ -635,14 +635,12 @@ when greatest(
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_military_persuasion then 'Investing in the military and defense to keep America safe from terrorism'
 else 'Undecided' end as fav_cultural_issue_10way
 
-
 from phoenix_analytics.person p 
 left join phoenix_analytics.person_votes pv using(person_id)
 left join phoenix_scores.all_scores_2020 as20 using(person_id) 
 left join phoenix_scores.all_scores_2018 as18 using(person_id) 
 left join phoenix_scores.all_scores_2016 as16 using(person_id) 
 left join phoenix_consumer.tsmart_consumer tc using(person_id) 
-left join phoenix_analytics.person_ncoas_current pncoa using(person_id)
 left join phoenix_analytics.person_out_of_state poos using(person_id)
 left join phoenix_analytics.person_early_votes pev using(person_id)
 left join bernie_data_commons.person_primary_votes ppv using(person_id)
@@ -663,4 +661,4 @@ and p.reg_voter_flag = true -- voters who are registered to vote (i.e. have a re
 --and p.state_code in ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA')
 );
 
-grant select on table bernie_data_commons.rainbow_analytics_frame to group bernie_data;
+grant select on bernie_data_commons.rainbow_analytics_frame to group bernie_data;
