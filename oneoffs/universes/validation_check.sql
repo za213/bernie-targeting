@@ -5,7 +5,8 @@ distkey(person_id)
 sortkey(person_id) AS
 (select * from 
 -- Person table restricted to states and valid universe
-(SELECT person_id::varchar
+(SELECT person_id::varchar,
+  state_code
   FROM phoenix_analytics.person
   WHERE is_deceased = FALSE
     AND reg_record_merged = FALSE
@@ -33,7 +34,7 @@ ELSE 0 END AS validation_id1
  ,case 
 WHEN datediff(d, '2020-01-17', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state = 'MN' THEN 1 
 WHEN datediff(d, '2020-01-22', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state IN ('TN','AR','MO','AL','KY','GA','MS') THEN 1
-WHEN datediff(d, '2020-12-01', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') THEN 1
+WHEN datediff(d, '2019-12-01', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') THEN 1
 ELSE 0 END as validtime1
 -- Candidate Support DVs
 ,case when first_choice = 'Bernie Sanders' then 1 when first_choice is not null or first_choice <> 'Donald Trump' then 0 else NULL end as first_choice_bernie
@@ -41,13 +42,16 @@ ELSE 0 END as validtime1
 ,case when first_choice = 'Joe Biden' then 1 when first_choice is not null or first_choice <> 'Donald Trump' then 0 else NULL end as first_choice_biden
 ,case when first_choice = 'Elizabeth Warren' then 1 when first_choice is not null or first_choice <> 'Donald Trump' then 0 else NULL end as first_choice_warren
 ,case when first_choice = 'Pete Buttigieg' then 1 when first_choice is not null or first_choice <> 'Donald Trump' then 0 else NULL end as first_choice_buttigieg
+,case when first_choice IS NOT NULL then 1 when first_choice is not null or first_choice <> 'Donald Trump' then 0 else NULL end as first_choice_any
 -- Support ID DVs
 ,case when support_int = 1 then 1 when support_int is not null or support_int <> 0 or first_choice <> 'Donald Trump' then 0 else NULL end as support_1_id
 ,case when support_int = 2 then 1 when support_int is not null or support_int <> 0 or first_choice <> 'Donald Trump' then 0 else NULL end as support_2_id
+,case when support_int IN (1,2) then 1 when support_int is not null or support_int <> 0 or first_choice <> 'Donald Trump' then 0 else NULL end as support_1_2_id
 ,case when support_int = 3 then 1 when support_int is not null or support_int <> 0 or first_choice <> 'Donald Trump' then 0 else NULL end as support_3_id
 ,case when support_int = 4 then 1 when support_int is not null or support_int <> 0 or first_choice <> 'Donald Trump' then 0 else NULL end as support_4_id
 ,case when support_int = 5 then 1 when support_int is not null or support_int <> 0 or first_choice <> 'Donald Trump' then 0 else NULL end as support_5_id
-,case when support_int IN (1,2) then 1 when support_int is not null or support_int <> 0 or first_choice <> 'Donald Trump' then 0 else NULL end as support_1_2_id
+,case when support_int IN (1,2,3,4,5) then 1 when support_int is not null or support_int <> 0 or first_choice <> 'Donald Trump' then 0 else NULL end as support_1_2_3_4_5_id
+
 FROM bernie_data_commons.third_party_ids) third
 LEFT JOIN
 (select person_id::varchar as pid1, 1 as holdout1 from haystaq.set_no_current where set_no=3) ho 
@@ -69,14 +73,15 @@ FROM
         case 
         WHEN datediff(d, '2020-01-17', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state = 'MN' THEN 1 
         WHEN datediff(d, '2020-01-22', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('TN','AR','MO','AL','KY','GA','MS') THEN 1
-        WHEN datediff(d, '2020-12-01', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') THEN 1
+        WHEN datediff(d, '2019-12-01', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') THEN 1
         ELSE 0 END as validtime2, 
         COUNT(DISTINCT CASE WHEN support_int = 1 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1 ,
-        COUNT(DISTINCT CASE WHEN support_int = 1 OR support_int = 2  AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1_2 ,
+        COUNT(DISTINCT CASE WHEN support_int IN (1,2) AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1_2 ,
         COUNT(DISTINCT CASE WHEN support_int = 2 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_2 ,
         COUNT(DISTINCT CASE WHEN support_int = 3 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_3 ,
         COUNT(DISTINCT CASE WHEN support_int = 4 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_4 ,
-        COUNT(DISTINCT CASE WHEN support_int = 5 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_5 
+        COUNT(DISTINCT CASE WHEN support_int = 5 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_5 ,
+        COUNT(DISTINCT CASE WHEN support_int IN (1,2,3,4,5) AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1_2_3_4_5
         FROM bernie_data_commons.ccj_dnc 
         WHERE unique_id_flag = 1 AND person_id IS NOT NULL GROUP BY 1,2,3,4) ccj
         LEFT JOIN 
@@ -97,5 +102,7 @@ UNION ALL
 UNION ALL
 (select person_id::varchar, 'VA Universe' as gotv_univ_state from gotv_universes.VA_gotv_universe_20200124))
 using(person_id)
+where coalesce(validtime1::varchar, first_choice_bernie::varchar, first_choice_trump::varchar, first_choice_biden::varchar, first_choice_warren::varchar, first_choice_buttigieg::varchar, support_1_id::varchar, support_2_id::varchar, support_3_id::varchar, support_4_id::varchar, support_5_id::varchar, support_1_2_id::varchar, support_1_2_3_4_5_id::varchar, pid1::varchar, holdout1::varchar, validation_id1::varchar, contact_made::varchar, negative_result::varchar, validtime2::varchar, ccj_id_1::varchar, ccj_id_1_2::varchar, ccj_id_2::varchar, ccj_id_3::varchar, ccj_id_4::varchar, ccj_id_5::varchar, ccj_id_1_2_3_4_5::varchar, pid2::varchar, holdout2::varchar, validation_id2::varchar, gotv_univ_state::varchar) is not null
 );
+
 
