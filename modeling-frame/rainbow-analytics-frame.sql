@@ -652,8 +652,9 @@ left join bernie_nmarchio2.geo_block_covariates bg on p.census_block_group_2010 
 left join phoenix_census.acs_current acs on p.census_block_group_2010 = acs.block_group_id 
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
-left join (SELECT person_id::varchar, 1 AS requested_ballot FROM (SELECT (state_code||'-'||myv_van_id) AS st_myv_van_id, election_id FROM phoenix_demssanders20_vansync.contacts_absentees WHERE date_request_received::date > '2019-11-08') 
-          left join bernie_data_commons.master_xwalk_st_myv using(st_myv_van_id)) absent using(person_id) voteinfo using(person_id)
+left join (SELECT person_id::varchar, 1 AS requested_ballot FROM 
+	             (SELECT (state_code||'-'||myv_van_id) AS st_myv_van_id, election_id FROM phoenix_demssanders20_vansync.contacts_absentees WHERE date_request_received::date > '2019-11-08') 
+          left join bernie_data_commons.master_xwalk_st_myv using(st_myv_van_id)) absent using(person_id) 
 
 where p.is_deceased = false -- is alive
 and p.reg_record_merged = false -- removes duplicated registration addresses
