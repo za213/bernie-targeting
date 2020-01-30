@@ -13,6 +13,7 @@ sortkey(person_id)
 as 
 (select
 p.person_id
+,p.voting_address_id
 ,p.reg_voter_flag
 ,p.state_code
 ,p.state_fips
