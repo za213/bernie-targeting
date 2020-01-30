@@ -2,24 +2,30 @@
 set query_group to 'importers';
 set wlm_query_slot_count to 3;
 
+/*
 truncate bernie_data_commons.rainbow_analytics_frame; 
 insert into bernie_data_commons.rainbow_analytics_frame
---drop table if exists bernie_data_commons.rainbow_analytics_frame; 
---create table bernie_data_commons.rainbow_analytics_frame
---distkey(person_id)
---sortkey(person_id)
---as 
+*/
+drop table if exists bernie_data_commons.rainbow_analytics_frame; 
+create table bernie_data_commons.rainbow_analytics_frame
+distkey(person_id)
+sortkey(person_id)
+as 
 (select
-
 p.person_id
 ,p.reg_voter_flag
 ,p.state_code
+,p.state_fips
 ,p.voting_address_latitude as v_latitude
 ,p.voting_address_longitude as v_longitude
 ,left(p.census_block_group_2010,5) as county_fips
+,p.county_name
 ,p.census_block_group_2010
 ,p.voting_city
-    
+,p.dnc_precinct_id
+,p.van_precinct_id
+,p.us_cong_district_latest
+
 ,case 
 when p.age_combined::int is not null and p.age_combined::int between 18 and 34 then '1 - 18-34'
 when p.age_combined::int is not null and p.age_combined::int between 36 and 49 then '2 - 35-49'
@@ -187,6 +193,15 @@ when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_
 when greatest(as20.civis_2020_cultural_religion_jewish,as20.civis_2020_cultural_religion_mormon,as20.civis_2020_cultural_religion_muslim,as20.civis_2020_cultural_religion_catholic,as20.civis_2020_cultural_religion_evangelical,as20.civis_2020_cultural_religion_mainline_protestant,as20.civis_2020_cultural_religion_hindu,as20.civis_2020_cultural_religion_buddhist) = as20.civis_2020_cultural_religion_buddhist and as20.civis_2020_cultural_religion_buddhist >= 0.78 then '8 - Buddhist'
 else '9 - Other' end as religion_9way
 
+,case 
+when as20.civis_2020_partisanship >= .66 then '1 - Democrat'
+when as20.civis_2020_partisanship > .33 and as20.civis_2020_partisanship < .66 then '2 - Moderate'
+when as20.civis_2020_partisanship <= 0.33 then '3 - Republican' 
+when tc.ts_tsmart_partisan_score >= 66 then '1 - Democrat'
+when tc.ts_tsmart_partisan_score > 33 and tc.ts_tsmart_partisan_score < 66 then '2 - Moderate'
+when tc.ts_tsmart_partisan_score <= 33 then '3 - Republican' 
+else '2 - Moderate' end as party_3way
+
 ,case
 when coalesce(p.party_name_dnc,l2.parties_description) = 'Democratic' or p.party_id = 1 then '1 - Democrat'
 when coalesce(p.party_name_dnc,l2.parties_description) = 'Green' or p.party_id = 5 then '2 - Green'
@@ -203,14 +218,21 @@ when as20.civis_2020_partisanship >= .4 and as20.civis_2020_partisanship < .6 th
 when as20.civis_2020_partisanship < .4 then '5 - Republican'
 else '6 - Other' end as party_6way
 
-,case 
-when as20.civis_2020_partisanship >= .66 then '1 - Democrat'
-when as20.civis_2020_partisanship > .33 and as20.civis_2020_partisanship < .66 then '2 - Moderate'
-when as20.civis_2020_partisanship <= 0.33 then '3 - Republican' 
-when tc.ts_tsmart_partisan_score >= 66 then '1 - Democrat'
-when tc.ts_tsmart_partisan_score > 33 and tc.ts_tsmart_partisan_score < 66 then '2 - Moderate'
-when tc.ts_tsmart_partisan_score <= 33 then '3 - Republican' 
-else '2 - Moderate' end as party_3way
+,CASE 
+WHEN p.party_name_dnc = 'Democratic' OR p.party_id = 1 THEN '1 - Democratic' 
+WHEN p.party_name_dnc = 'Green' OR p.party_id = 5 THEN '2 - Green' 
+WHEN p.party_name_dnc = 'Independent' OR p.party_id = 6 THEN '3 - Independent' 
+WHEN p.party_name_dnc = 'Nonpartisan' OR p.party_id = 7 THEN '4 - Nonpartisan' 
+WHEN p.party_name_dnc = 'Unaffiliated' OR p.party_id = 8 THEN '5 - Unaffiliated' 
+WHEN p.party_name_dnc = 'Libertarian' OR p.party_id = 4 THEN '6 - Libertarian' 
+WHEN p.party_name_dnc = 'Republican' OR p.party_id = 2 THEN '7 - Republican' 
+WHEN p.party_name_dnc = 'Other' OR p.party_id = 3 THEN '8 - Other' 
+when as20.civis_2020_partisanship >= .85 then '1 - Democrat'
+when as20.civis_2020_partisanship >= .7 and as20.civis_2020_partisanship < .85 then '2 - Green'
+when as20.civis_2020_partisanship >= .6 and as20.civis_2020_partisanship < .7 then '3 - Independent'
+when as20.civis_2020_partisanship >= .4 and as20.civis_2020_partisanship < .6 then '6 - Libertarian'
+when as20.civis_2020_partisanship < .4 then '7 - Republican'
+ELSE '8 - Other' END AS party_8way
 
 ,case
 when as20.civis_2020_ideology_liberal >= .8 then '1 - Very liberal'
@@ -240,7 +262,9 @@ when (pv.vote_p_2008_party_d = 1 or
 	  pv.vote_pp_2000_party_d = 1 or
 	  pv.vote_pp_2004_party_d = 1 or 
 	  pv.vote_pp_2008_party_d = 1 or
-	  pv.vote_pp_2016_party_d = 1) then '2 - Voted in a Dem Primary (2008-18)'
+	  pv.vote_pp_2016_party_d = 1 or
+	  ppv.voted_16pp_flag = 1 or
+      ppv.voted_08pp_flag = 1 ) then '2 - Voted in a Dem Primary (2008-18)'
 when (pv.vote_g_2008_novote_eligible = 1 or
 	  pv.vote_g_2010_novote_eligible = 1 or 
 	  pv.vote_g_2012_novote_eligible = 1 or
@@ -255,6 +279,57 @@ when (pv.vote_g_2018 = 1 or
 	  pv.vote_g_2008 = 1) then '4 - Voted only in a General (2008-18)'
 else '5 - Other' end as vote_history_5way
 
+,CASE 
+WHEN (pv.vote_p_2018_party_d = 1
+  OR pv.vote_p_2017_party_d = 1 
+  OR pv.vote_p_2016_party_d = 1 
+  OR pv.vote_p_2015_party_d = 1 
+  OR pv.vote_p_2014_party_d = 1 
+  OR pv.vote_p_2013_party_d = 1 
+  OR pv.vote_p_2012_party_d = 1 
+  OR pv.vote_p_2011_party_d = 1 
+  OR pv.vote_p_2010_party_d = 1 
+  OR pv.vote_p_2009_party_d = 1 
+  OR pv.vote_p_2008_party_d = 1 
+  OR pv.vote_p_2007_party_d = 1 
+  OR pv.vote_p_2006_party_d = 1 
+  OR pv.vote_p_2005_party_d = 1 
+  OR pv.vote_p_2004_party_d = 1 
+  OR pv.vote_p_2003_party_d = 1 
+  OR pv.vote_p_2002_party_d = 1 
+  OR pv.vote_p_2001_party_d = 1 
+  OR pv.vote_p_2000_party_d = 1 
+  OR pv.vote_p_1998_party_d = 1 
+  OR pv.vote_p_1996_party_d = 1 
+  OR pv.vote_pp_2016_party_d = 1 
+  OR pv.vote_pp_2012_party_d = 1 
+  OR pv.vote_pp_2008_party_d = 1 
+  OR pv.vote_pp_2004_party_d = 1 
+  OR pv.vote_pp_2000_party_d = 1 
+  OR pv.vote_pp_1996_party_d = 1 
+  OR ppv.voted_16pp_flag = 1 
+  OR ppv.voted_08pp_flag = 1 
+  OR ppv.voted_04pp_flag = 1) THEN '1 - Dem Primary voter (2004-2018)'
+WHEN (pv.vote_g_2018 = 1) THEN '2 - General voter (2018)'
+WHEN p.registration_date::date > '2018-11-08' THEN '3 - Registered since 2018' 
+WHEN (pv.vote_g_2016 = 1
+  OR pv.vote_g_2014 = 1
+  OR pv.vote_g_2012 = 1
+  OR pv.vote_g_2010 = 1
+  OR pv.vote_g_2008 = 1
+  OR pv.vote_g_2006 = 1
+  OR pv.vote_g_2004 = 1
+  OR pv.vote_g_2002 = 1
+  OR pv.vote_g_2000 = 1
+  OR pv.vote_g_1998 = 1) THEN '4 - Voted in any General (1998-2016)' 
+WHEN (pv.vote_g_2008_novote_eligible = 1
+  OR pv.vote_g_2010_novote_eligible = 1
+  OR pv.vote_g_2012_novote_eligible = 1
+  OR pv.vote_g_2014_novote_eligible = 1
+  OR pv.vote_g_2016_novote_eligible = 1
+  OR pv.vote_g_2018_novote_eligible = 1) THEN '5 - No vote but eligible (2008-2018)'  
+  ELSE '6 - Other' END AS vote_history_6way
+
 ,case 
 when (pv.vote_pp_2016_method_early = 1 or
   pv.vote_p_2017_method_early = 1 or
@@ -266,6 +341,54 @@ when (pv.vote_g_2016 = 1 or
   pv.vote_g_2017 = 1 or
   pv.vote_g_2018 = 1) then '2 - Voted only in a General (2016-18)'
 else '3 - Did not vote (2016-18)' end as early_voting_3way
+
+,CASE 
+WHEN ((pv.vote_g_2008_method_early = 1 OR pv.vote_p_2008_method_early = 1) AND pev.voted_early_by_mail_2008 = 1)
+  OR ((pv.vote_g_2010_method_early = 1 OR pv.vote_p_2010_method_early = 1) AND pev.voted_early_by_mail_2010 = 1)
+  OR ((pv.vote_g_2008_method_early = 1 OR pv.vote_p_2012_method_early = 1) AND pev.voted_early_by_mail_2012 = 1)
+  OR ((pv.vote_g_2008_method_early = 1 OR pv.vote_p_2014_method_early = 1) AND pev.voted_early_by_mail_2014 = 1)
+  OR ((pv.vote_g_2008_method_early = 1 OR pv.vote_p_2016_method_early = 1) AND pev.voted_early_by_mail_2016 = 1)
+  OR (pev.voted_2019 = 1 AND pev.voted_early_by_mail_2019 = 1) THEN '1 - Early vote by mail' 
+WHEN ((pv.vote_g_2008_method_early = 1 OR pv.vote_p_2008_method_early = 1) AND pev.voted_early_in_person_2008 = 1)
+  OR ((pv.vote_g_2010_method_early = 1 OR pv.vote_p_2010_method_early = 1) AND pev.voted_early_in_person_2010 = 1)
+  OR ((pv.vote_g_2012_method_early = 1 OR pv.vote_p_2012_method_early = 1) AND pev.voted_early_in_person_2012 = 1)
+  OR ((pv.vote_g_2014_method_early = 1 OR pv.vote_p_2014_method_early = 1) AND pev.voted_early_in_person_2014 = 1)
+  OR ((pv.vote_g_2016_method_early = 1 OR pv.vote_p_2016_method_early = 1) AND pev.voted_early_in_person_2016 = 1)
+  OR (pev.voted_2019 = 1 AND pev.voted_early_in_person_2019 = 1) THEN '2 - Early vote in person' 
+WHEN (pv.vote_g_2018_method_early = 1
+  OR pv.vote_g_2017_method_early = 1
+  OR pv.vote_g_2016_method_early = 1
+  OR pv.vote_g_2015_method_early = 1
+  OR pv.vote_g_2014_method_early = 1
+  OR pv.vote_g_2013_method_early = 1
+  OR pv.vote_g_2012_method_early = 1
+  OR pv.vote_g_2011_method_early = 1
+  OR pv.vote_g_2010_method_early = 1
+  OR pv.vote_g_2009_method_early = 1
+  OR pv.vote_g_2008_method_early = 1
+  OR pv.vote_p_2018_method_early = 1
+  OR pv.vote_p_2017_method_early = 1
+  OR pv.vote_p_2016_method_early = 1
+  OR pv.vote_p_2015_method_early = 1
+  OR pv.vote_p_2014_method_early = 1
+  OR pv.vote_p_2013_method_early = 1
+  OR pv.vote_p_2012_method_early = 1
+  OR pv.vote_p_2011_method_early = 1
+  OR pv.vote_p_2010_method_early = 1
+  OR pv.vote_p_2009_method_early = 1
+  OR pv.vote_p_2008_method_early = 1
+  OR pv.vote_pp_2016_method_early = 1
+  OR pv.vote_pp_2012_method_early = 1
+  OR pv.vote_pp_2008_method_early = 1) THEN '3 - Early vote mail or in person' 
+  ELSE '4 - Non-early voter' END AS early_vote_history_3way
+
+,CASE 
+WHEN p.is_permanent_absentee = 't' THEN '3 - Absentee voter'
+WHEN poos.to_state_code <> pncoa.state_code AND (pv.vote_g_2018_method_absentee = 1 OR pv.vote_p_2018_method_absentee = 1) THEN '3 - Absentee voter'
+WHEN absent.requested_ballot = 1 THEN '3 - Absentee voter'
+WHEN p.ncoa_since_reg_date = 't' and p.out_of_state_ncoa = 't' THEN '3 - Absentee voter'
+WHEN (poos.to_state_code <> pncoa.state_code) THEN '2 - Registered in different state'
+ELSE '1 - Registered in current state' END AS registered_in_state_3way
 
 ,case 
 when (pv.vote_pp_2008_method_absentee = 1 or
@@ -282,6 +405,15 @@ when (pv.vote_g_2014_method_absentee = 1 or
   pv.vote_g_2017_method_absentee = 1 or
   pv.vote_g_2018_method_absentee = 1) then '3 - Voted absentee in a General (2014-2018)'
 else '4 - Did not vote absentee (2014-18)' end as absentee_voting_4way
+
+,CASE 
+WHEN p.state_code IN ('AL','AR','GA','IL','IN','MI','MO','MS','MT','MN','ND','OH','SC','TN','TX','UT','VA','VT','WI','WA') THEN '1 - Dem Primary Eligible' --open
+WHEN p.state_code IN ('OK','NE') AND (party_8way IN ('1 - Democratic','3 - Independent') or party_3way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
+WHEN p.state_code IN ('SD','RI') AND (party_8way IN ('1 - Democratic','3 - Independent','4 - Nonpartisan','5 - Unaffiliated') or party_3way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
+WHEN p.state_code = 'CA' AND (party_8way IN ('1 - Democratic','4 - Nonpartisan','5 - Unaffiliated') or party_3way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
+WHEN p.state_code IN ('CO','ID','MA','NC','NH') AND (party_8way IN ('1 - Democratic','4 - Nonpartisan','5 - Unaffiliated') or party_3way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
+WHEN p.state_code IN ('AK','AZ','CT','DC','DE','FL','HI','IA','KS','KY','LA','MD','ME','NJ','NM','NV','NY','OR','PA','WV','WY') AND (party_8way = '1 - Democratic' or party_3way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
+ELSE '2 - Must Register as Dem' END AS dem_primary_eligible_2way
 
 ,case 
 when greatest(
@@ -503,18 +635,25 @@ when greatest(
 ,as18.civis_2018_choice_persuasion)  = as18.civis_2018_military_persuasion then 'Investing in the military and defense to keep America safe from terrorism'
 else 'Undecided' end as fav_cultural_issue_10way
 
+
 from phoenix_analytics.person p 
 left join phoenix_analytics.person_votes pv using(person_id)
 left join phoenix_scores.all_scores_2020 as20 using(person_id) 
 left join phoenix_scores.all_scores_2018 as18 using(person_id) 
 left join phoenix_scores.all_scores_2016 as16 using(person_id) 
 left join phoenix_consumer.tsmart_consumer tc using(person_id) 
+left join phoenix_analytics.person_ncoas_current pncoa using(person_id)
+left join phoenix_analytics.person_out_of_state poos using(person_id)
+left join phoenix_analytics.person_early_votes pev using(person_id)
+left join bernie_data_commons.person_primary_votes ppv using(person_id)
 left join bernie_nmarchio2.geo_county_covariates cty on left(p.census_block_group_2010,5) = lpad(cty.county_fip_id,5,'00000')
 left join bernie_nmarchio2.geo_tract_covariates trct on left(p.census_block_group_2010,11) = lpad(trct.tract_id,11,'00000000000')
 left join bernie_nmarchio2.geo_block_covariates bg on p.census_block_group_2010 = lpad(bg.block_group_id, 12,'000000000000') 
 left join phoenix_census.acs_current acs on p.census_block_group_2010 = acs.block_group_id 
 left join bernie_data_commons.master_xwalk_dnc x using(person_id)
 left join l2.demographics l2 using(lalvoterid)
+left join (SELECT person_id::varchar, 1 AS requested_ballot FROM (SELECT (state_code||'-'||myv_van_id) AS st_myv_van_id, election_id FROM phoenix_demssanders20_vansync.contacts_absentees WHERE date_request_received::date > '2019-11-08') 
+          left join bernie_data_commons.master_xwalk_st_myv using(st_myv_van_id)) absent using(person_id) voteinfo using(person_id)
 
 where p.is_deceased = false -- is alive
 and p.reg_record_merged = false -- removes duplicated registration addresses
