@@ -1,18 +1,18 @@
-
--- https://github.com/Bernie-2020/universe_review/blob/master/GOTV%20Universes/gotv_person_flags.sql
--- https://github.com/Bernie-2020/data-analytics/blob/master/ad_hoc/person_primary_votes.sql
-
 begin;
 
-set wlm_query_slot_count to 4;
+set wlm_query_slot_count to 5;
 
 DROP TABLE IF EXISTS bernie_nmarchio2.base_universe;
 CREATE TABLE bernie_nmarchio2.base_universe
 distkey(person_id) 
 sortkey(person_id) AS
   (SELECT p.person_id::varchar,
+  	      xwalk.actionkit_id, 
+  	      xwalk.jsonid,
+  	      p.voting_address_id,
+
+  	      -- Geographic codes
           p.state_code,
-          p.voting_address_id,
           p.county_fips,
           p.county_name,
           p.dnc_precinct_id,
@@ -20,83 +20,275 @@ sortkey(person_id) AS
           p.voting_address_latitude,
           p.voting_address_longitude,
 
-          voteinfo.party_affiliation,
-          voteinfo.civis_2020_partisanship,
-          voteinfo.vote_history,
-          voteinfo.registered_in_state,
-          voteinfo.registration_action,
-          voteinfo.early_vote_mode,
+          -- Party
+          voterinfo.party_8way,
+          voterinfo.party_3way,
+          voterinfo.civis_2020_partisanship,
 
-          rainbo.party_3way,
-          rainbo.race_5way,
-          rainbo.spanish_language_2way,
-          rainbo.age_5way,
-          rainbo.ideology_5way,
-          rainbo.education_2way,
-          rainbo.income_5way,
-          rainbo.gender_2way,
-          rainbo.urban_3way,
-          rainbo.child_in_hh_2way,
-          rainbo.marital_2way,
-          rainbo.religion_9way,
-          bdcas.donut_segment,
+          -- Vote information
+          voterinfo.vote_history_6way,
+          voterinfo.early_vote_history_3way,
+          voterinfo.registered_in_state_3way,
+          voterinfo.dem_primary_eligible_2way,
+
+          -- Demographics
+          voterinfo.race_5way,
+          voterinfo.spanish_language_2way,
+          voterinfo.age_5way,
+          voterinfo.ideology_5way,
+          voterinfo.education_2way,
+          voterinfo.income_5way,
+          voterinfo.gender_2way,
+          voterinfo.urban_3way,
+          voterinfo.child_in_hh_2way,
+          voterinfo.marital_2way,
+          voterinfo.religion_9way,
+          nct.flag_muslim,
+          nct.flag_student_age,
+          nct.flag_union,
+          nct.flag_veteran,
 
           -- Support scores
+          bdcas.donut_segment,
           bdcas.current_support_raw,
-          NTILE(100) OVER (PARTITION BY p.state_code ORDER BY bdcas.current_support_raw ASC) AS current_support_raw_100,
+          bdcas.current_support_raw_100,
           bdcas.field_id_1_score,
-          NTILE(100) OVER (PARTITION BY p.state_code ORDER BY bdcas.field_id_1_score ASC) AS field_id_1_score_100,
+          bdcas.field_id_1_score_100,
           bdcas.field_id_composite_score,
-          NTILE(100) OVER (PARTITION BY p.state_code ORDER BY bdcas.field_id_composite_score ASC) AS field_id_composite_score_100,
-
-          -- Supplementary scores
-          bdcas.sanders_very_excited_score,
-          NTILE(10) OVER (PARTITION BY p.state_code ORDER BY bdcas.sanders_very_excited_score ASC) AS sanders_very_excited_score_10,
+          bdcas.field_id_composite_score_100,
           bdcas.turnout_current,
-          round((bdcas.current_support_raw * bdcas.turnout_current * voteinfo.civis_2020_partisanship),4) AS bernie_net_votes_current,
-          NTILE(10) OVER (PARTITION BY p.state_code ORDER BY bernie_net_votes_current ASC) AS bernie_net_votes_current_10,
+          bdcas.turnout_current_100,
           bdcas.sanders_strong_support_score,
-          NTILE(10) OVER (PARTITION BY p.state_code ORDER BY bdcas.sanders_strong_support_score ASC) AS sanders_strong_support_score_10,
+          bdcas.sanders_strong_support_score_100,
+          bdcas.sanders_very_excited_score,
+          bdcas.sanders_very_excited_score_100,
           bdcas.biden_support,
-          NTILE(10) OVER (PARTITION BY p.state_code ORDER BY bdcas.biden_support ASC) AS biden_support_10,
+          bdcas.biden_support_100,
           bdcas.warren_support,
-          NTILE(10) OVER (PARTITION BY p.state_code ORDER BY bdcas.warren_support ASC) AS warren_support_10,
+          bdcas.warren_support_100,
           bdcas.buttigieg_support,
-          NTILE(10) OVER (PARTITION BY p.state_code ORDER BY bdcas.buttigieg_support ASC) AS buttigieg_support_10,
-
+          bdcas.buttigieg_support_100,
+          round((bdcas.current_support_raw * bdcas.turnout_current),4) AS bernie_net_votes_current,
+ 
           -- Message targeting
-          voteinfo.civis_2018_one_pct_persuasion,
-          voteinfo.civis_2018_marijuana_persuasion,
-          voteinfo.civis_2018_college_persuasion,
-          voteinfo.civis_2018_welcome_persuasion,
-          voteinfo.civis_2018_sexual_assault_persuasion,
-          voteinfo.civis_2018_economic_persuasion,
+          voterinfo.civis_2018_one_pct_persuasion,
+          voterinfo.civis_2018_marijuana_persuasion,
+          voterinfo.civis_2018_college_persuasion,
+          voterinfo.civis_2018_welcome_persuasion,
+          voterinfo.civis_2018_sexual_assault_persuasion,
+          voterinfo.civis_2018_economic_persuasion,
 
-          CASE WHEN ccj.contact_made > 0 THEN 1 ELSE 0 END AS contact_made ,
-          CASE WHEN ccj.negative_result > 0 THEN 1 ELSE 0 END AS negative_contact ,
-          CASE WHEN ccj.id_1 > 0 THEN 1 ELSE 0 END AS id1 ,
-          CASE WHEN ccj.id_2 > 0 THEN 1 ELSE 0 END AS id2 ,
-          CASE WHEN ccj.id_3 > 0 THEN 1 ELSE 0 END AS id3 ,
-          CASE WHEN ccj.id_4 > 0 THEN 1 ELSE 0 END AS id4 ,
-          CASE WHEN ccj.id_5 > 0 THEN 1 ELSE 0 END AS id5 ,
-          CASE WHEN id1_household = 1 AND ccj.id_1 <> 1 THEN 1 ELSE 0 END AS id1_household ,
+          -- Spoke model
+          spokemodel.spoke_support_1box,
+          spokemodel.spoke_persuasion_1plus,
+          spokemodel.spoke_persuasion_1minus,
+          spokemodel.spoke_support_1box_100,
+          spokemodel.spoke_persuasion_1plus_100,
+          spokemodel.spoke_persuasion_1minus_100 ,
 
-          CASE WHEN p_household.donor_household = 1 THEN 1 ELSE 0 END AS donors_and_housemates ,
-          CASE WHEN p_household.event_household = 1 THEN 1 ELSE 0 END AS event_attendee_or_rsvp_and_housemates ,
-          CASE WHEN p_household.volunteer_household = 1 THEN 1 ELSE 0 END AS volunteers_and_housemates ,
+          -- Vol model
+          volmodel.attendee,
+          volmodel.kickoff_party_rally_barnstorm_attendee,
+          volmodel.canvasser_phonebank_attendee,
+          volmodel.bernie_action,
+          volmodel.attendee_100,
+          volmodel.kickoff_party_rally_barnstorm_attendee_100,
+          volmodel.canvasser_phonebank_attendee_100,
+          volmodel.bernie_action_100,
 
+          -- Third Party IDs
+          thirdp.thirdp_survey_date,
+          thirdp.thirdp_first_choice_bernie,
+          thirdp.thirdp_first_choice_trump,
+          thirdp.thirdp_first_choice_biden,
+          thirdp.thirdp_first_choice_warren,
+          thirdp.thirdp_first_choice_buttigieg,
+          thirdp.thirdp_first_choice_biden_warren_buttigieg,
+          thirdp.thirdp_first_choice_any,
+          thirdp.thirdp_support_1_id,
+          thirdp.thirdp_support_2_id,
+          thirdp.thirdp_support_1_2_id,
+          thirdp.thirdp_support_3_id,
+          thirdp.thirdp_support_4_id,
+          thirdp.thirdp_support_5_id,
+          thirdp.thirdp_support_1_2_3_4_5_id,
+          thirdp.thirdp_holdout_id,
+
+          -- Field IDs
+          ccj.ccj_contactdate,
+          ccj.ccj_contact_made,
+          ccj.ccj_negative_result,
+          ccj.ccj_id_1,
+          ccj.ccj_id_1_2,
+          ccj.ccj_id_2,
+          ccj.ccj_id_3,
+          ccj.ccj_id_4,
+          ccj.ccj_id_5,
+          ccj.ccj_id_1_2_3_4_5,
+          ccj.ccj_holdout_id,
+          CASE WHEN id1_household = 1 AND ccj.ccj_id_1 <> 1 THEN 1 ELSE 0 END AS id1_household ,
+
+          -- Donor / Activism Flags
+          CASE WHEN vol.action_taken = 1 
+              OR p_household.donor_household = 1
+              OR p_household.event_household = 1 
+              OR p_household.volunteer_household = 1 THEN 1
+              ELSE 0 END AS activism_flags,
+
+          -- Electorate definition
+          CASE WHEN voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
+                    OR voterinfo.party_8way = '1 - Democratic' 
+                    OR voterinfo.civis_2020_partisanship >= .66
+                    OR activism_flags = 1
+                    OR id1_household = 1
+                    OR ccj.ccj_id_1_2 = 1
+                    OR thirdp.thirdp_support_1_2_id = 1
+                    OR thirdp.thirdp_first_choice_bernie = 1 
+                    OR bdcas.donut_segment = '1_core_bernie'
+                    OR bdcas.current_support_raw_100 >= 90
+                    OR bdcas.field_id_1_score_100 >= 90
+                    OR bdcas.field_id_composite_score_100 >= 90
+                    THEN '1 - Target universe' 
+              ELSE '2 - Non-target' END AS electorate_2way,
+
+          -- Vote readiness bucket
           CASE
-          --WHEN person_flags = 1 THEN 1 
-              --WHEN ccj.negative_contact = 1 THEN 0
-              WHEN vol.action_taken = 1 
-              OR donors_and_housemates = 1 
-              OR event_attendee_or_rsvp_and_housemates = 1 
-              OR volunteers_and_housemates = 1 THEN 1
-              ELSE 0 END AS activism_flags
-        
+              WHEN     electorate_2way = '2 - Non-target' 
+                       THEN '6 - Non-target'
+              WHEN     voterinfo.registered_in_state_3way = '1 - Registered in current state' 
+                   AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
+                   AND voterinfo.vote_history_6way IN ('1 - Dem Primary voter (2004-2018)','2 - General voter (2018)','3 - Registered since 2018')
+                       THEN '1 - Vote-ready'
+              WHEN     voterinfo.registered_in_state_3way = '1 - Registered in current state' 
+                   AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
+                   AND voterinfo.vote_history_6way IN ('4 - Voted in any General (1998-2016)','5 - No vote but eligible (2008-2018)','6 - Other')
+                       THEN '2 - Vote-ready lapsed'
+              WHEN     voterinfo.registered_in_state_3way = '1 - Registered in current state' 
+                   AND voterinfo.dem_primary_eligible_2way = '2 - Must Register as Dem'
+                       THEN '3 - Register as Dem'
+              WHEN     voterinfo.registered_in_state_3way = '2 - Registered in different state'
+                       THEN '4 - Register in current state'
+              WHEN     voterinfo.registered_in_state_3way = '3 - Absentee voter' 
+                   AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
+                       THEN '5 - Absentee voter'
+              ELSE '6 - Non-target' END AS vote_ready_6way
+
+          -- Turnout hardcode
+          ,CASE
+               WHEN state_code = 'AK' THEN 9670
+               WHEN state_code = 'AL' THEN 585289
+               WHEN state_code = 'AR' THEN 342274
+               WHEN state_code = 'AZ' THEN 571468
+               WHEN state_code = 'CA' THEN 6018522
+               WHEN state_code = 'CO' THEN 149356
+               WHEN state_code = 'CT' THEN 381324
+               WHEN state_code = 'DC' THEN 153810
+               WHEN state_code = 'DE' THEN 113819
+               WHEN state_code = 'FL' THEN 2173879
+               WHEN state_code = 'GA' THEN 1245209
+               WHEN state_code = 'HI' THEN 41768
+               WHEN state_code = 'IA' THEN 250505
+               WHEN state_code = 'ID' THEN 26167
+               WHEN state_code = 'IL' THEN 2121029
+               WHEN state_code = 'IN' THEN 1380352
+               WHEN state_code = 'KS' THEN 39438
+               WHEN state_code = 'KY' THEN 751349
+               WHEN state_code = 'LA' THEN 428631
+               WHEN state_code = 'MA' THEN 1399670
+               WHEN state_code = 'MD' THEN 986563
+               WHEN state_code = 'ME' THEN 47163
+               WHEN state_code = 'MI' THEN 612426
+               WHEN state_code = 'MN' THEN 237218
+               WHEN state_code = 'MO' THEN 886564
+               WHEN state_code = 'MS' THEN 459992
+               WHEN state_code = 'MT' THEN 312276
+               WHEN state_code = 'NC' THEN 1911873
+               WHEN state_code = 'ND' THEN 22166
+               WHEN state_code = 'NE' THEN 42171
+               WHEN state_code = 'NH' THEN 314456
+               WHEN state_code = 'NJ' THEN 1223933
+               WHEN state_code = 'NM' THEN 172104
+               WHEN state_code = 'NV' THEN 152800
+               WHEN state_code = 'NY' THEN 2022340
+               WHEN state_code = 'OH' THEN 2460003
+               WHEN state_code = 'OK' THEN 458344
+               WHEN state_code = 'OR' THEN 759661
+               WHEN state_code = 'PA' THEN 2474351
+               WHEN state_code = 'RI' THEN 196369
+               WHEN state_code = 'SC' THEN 644796
+               WHEN state_code = 'SD' THEN 107874
+               WHEN state_code = 'TN' THEN 708904
+               WHEN state_code = 'TX' THEN 3644760
+               WHEN state_code = 'UT' THEN 164423
+               WHEN state_code = 'VA' THEN 1124566
+               WHEN state_code = 'VT' THEN 161611
+               WHEN state_code = 'WA' THEN 296955
+               WHEN state_code = 'WA' THEN 834590
+               WHEN state_code = 'WI' THEN 1188457
+               WHEN state_code = 'WV' THEN 457510
+               WHEN state_code = 'WY' THEN 9736
+               ELSE NULL
+           END AS pturnout_2008 
+
+           ,CASE
+               WHEN state_code = 'AK' THEN 10625
+               WHEN state_code = 'AL' THEN 405741
+               WHEN state_code = 'AR' THEN 226662
+               WHEN state_code = 'AZ' THEN 510054
+               WHEN state_code = 'CA' THEN 5426227
+               WHEN state_code = 'CO' THEN 133362
+               WHEN state_code = 'CT' THEN 333325
+               WHEN state_code = 'DC' THEN 107166
+               WHEN state_code = 'DE' THEN 97612
+               WHEN state_code = 'FL' THEN 1859835
+               WHEN state_code = 'GA' THEN 816925
+               WHEN state_code = 'HI' THEN 33791
+               WHEN state_code = 'IA' THEN 174353
+               WHEN state_code = 'ID' THEN 26110
+               WHEN state_code = 'IL' THEN 2053564
+               WHEN state_code = 'IN' THEN 651154
+               WHEN state_code = 'KS' THEN 40471
+               WHEN state_code = 'KY' THEN 464737
+               WHEN state_code = 'LA' THEN 315948
+               WHEN state_code = 'MA' THEN 1256710
+               WHEN state_code = 'MD' THEN 950290
+               WHEN state_code = 'ME' THEN 46938
+               WHEN state_code = 'MI' THEN 1226753
+               WHEN state_code = 'MN' THEN 213912
+               WHEN state_code = 'MO' THEN 640204
+               WHEN state_code = 'MS' THEN 229262
+               WHEN state_code = 'MT' THEN 131824
+               WHEN state_code = 'NC' THEN 1212235
+               WHEN state_code = 'ND' THEN 3978
+               WHEN state_code = 'NE' THEN 34208
+               WHEN state_code = 'NH' THEN 263848
+               WHEN state_code = 'NJ' THEN 806771
+               WHEN state_code = 'NM' THEN 221600
+               WHEN state_code = 'NV' THEN 92320
+               WHEN state_code = 'NY' THEN 2002696
+               WHEN state_code = 'OH' THEN 1279774
+               WHEN state_code = 'OK' THEN 341120
+               WHEN state_code = 'OR' THEN 709533
+               WHEN state_code = 'PA' THEN 1693382
+               WHEN state_code = 'RI' THEN 125167
+               WHEN state_code = 'SC' THEN 397501
+               WHEN state_code = 'SD' THEN 53798
+               WHEN state_code = 'TN' THEN 395424
+               WHEN state_code = 'TX' THEN 1556166
+               WHEN state_code = 'UT' THEN 89174
+               WHEN state_code = 'VA' THEN 808562
+               WHEN state_code = 'VT' THEN 135765
+               WHEN state_code = 'WA' THEN 248097
+               WHEN state_code = 'WA' THEN 865918
+               WHEN state_code = 'WI' THEN 1025722
+               WHEN state_code = 'WV' THEN 235437
+               WHEN state_code = 'WY' THEN 6842
+               ELSE NULL
+           END AS pturnout_2016
+
      FROM 
 
--- PERSON
+ -- PERSON
       (SELECT person_id::varchar,
               state_code,
               voting_address_id,
@@ -113,69 +305,150 @@ sortkey(person_id) AS
         AND reg_voter_flag = TRUE 
         AND state_code IN ('AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA')) p
 
--- IDs
+-- CROSSWALK
     LEFT JOIN
     (SELECT * FROM (SELECT person_id, actionkit_id, jsonid, row_number() OVER (PARTITION BY person_id ORDER BY actionkit_id NULLS LAST) AS rn FROM bernie_data_commons.master_xwalk_dnc) WHERE rn = 1) xwalk
     using(person_id)
 
--- SCORES
+-- SUPPORT SCORES
       LEFT JOIN
      (SELECT person_id::varchar,
              donut_segment,
-             coalesce(NULLIF(current_support_raw/100,0),.01) AS current_support_raw,
+             current_support_raw/100 AS current_support_raw,
+             current_support_rank_order as current_support_raw_100,
              field_id_1_score/100 AS field_id_1_score,
+             field_id_1_score_ntile as field_id_1_score_100,
              field_id_composite_score/100  AS field_id_composite_score,
-             coalesce(NULLIF(turnout_current/100,0),.01) AS turnout_current,
+             field_id_composite_score_ntile as field_id_composite_score_100,
+             turnout_current/100 AS turnout_current,
+             turnout_current_ntile as turnout_current_100,
              sanders_strong_support_score/100 AS sanders_strong_support_score,
+             sanders_strong_support_score_ntile as sanders_strong_support_score_100,
              sanders_very_excited_score/100 AS sanders_very_excited_score,
+             sanders_very_excited_score_ntile as sanders_very_excited_score_100,
              biden_support/100 AS biden_support,
+             biden_support_ntile as biden_support_100,
              warren_support/100 AS warren_support,
-             buttigieg_support/100 AS buttigieg_support
-      FROM bernie_data_commons.all_scores) bdcas
+             warren_support_ntile as warren_support_100,
+             buttigieg_support/100 AS buttigieg_support,
+             buttigieg_support_ntile as buttigieg_support_100
+      FROM bernie_data_commons.all_scores_ntile) bdcas
      using(person_id)
-      --WHERE state_code IN ('NC','TN'))
-   --LEFT JOIN
-     --(SELECT DISTINCT person_id::varchar,
-        --CASE 
-           --WHEN f_attended_2_events = 1
-             --OR f_rsvpd_3_or_more_events = 1
-             --OR f_donor_in_household = 1
-             --OR f_event_attendee_in_household = 1
-             --OR f_rsvpd_2_events = 1
-             ----OR f_id_1_other_party = 1
-             --OR f_hosted_1_event = 1
-             ----OR f_id_1_last_60_days = 1
-             ----OR f_id_1_npp = 1
-             ----OR f_id_1_dem = 1
-             --OR f_ctc_dem = 1
-             --OR f_ctc_last_60_days = 1
-             --OR f_ctc_npp = 1
-             --OR f_donated = 1
-             --OR f_core_donut_top50 = 1 THEN 1
-             --ELSE 0 END AS person_flags -- refine logic / this is placeholder
-      --FROM gotv_universes.gotv_person_flags
-      --WHERE person_id IS NOT NULL AND person_flags = 1) using(person_id)
 
-   --LEFT JOIN
-    --(SELECT person_id::varchar, support_int from bernie_data_commons.ccj_dnc where unique_id_flag = 1 and support_int IN  (1,2,3,4,5) ) ccjdnc 
-     --using(person_id)
-
--- DEMO INFO
-   LEFT JOIN bernie_data_commons.rainbow_analytics_frame rainbo 
-   using(person_id)
-
--- CONTACT INFO
+-- FIELD IDS
    LEFT JOIN 
-   (SELECT person_id::varchar , 
-           CASE WHEN resultcode IN ('Canvassed', 'Do Not Contact', 'Refused', 'Call Back', 'Language Barrier', 'Hostile', 'Come Back', 'Cultivation', 'Refused Contact', 'Spanish', 'Other', 'Not Interested') THEN 1 ELSE 0 END AS contact_made , 
-           CASE WHEN resultcode IN ('Do Not Contact','Hostile','Refused','Refused Contact') OR (support_int = 4 OR support_int = 5) THEN 1 ELSE 0 END AS negative_result ,
-           COUNT(DISTINCT CASE WHEN support_int = 1 AND unique_id_flag=TRUE THEN person_id END) AS id_1 ,
-           COUNT(DISTINCT CASE WHEN support_int = 2 AND unique_id_flag=TRUE THEN person_id END) AS id_2 ,
-           COUNT(DISTINCT CASE WHEN support_int = 3 AND unique_id_flag=TRUE THEN person_id END) AS id_3 ,
-           COUNT(DISTINCT CASE WHEN support_int = 4 AND unique_id_flag=TRUE THEN person_id END) AS id_4 ,
-           COUNT(DISTINCT CASE WHEN support_int = 5 AND unique_id_flag=TRUE THEN person_id END) AS id_5
-           FROM bernie_data_commons.ccj_dnc WHERE person_id IS NOT NULL GROUP BY 1,2,3) ccj
+    (select person_id::varchar
+            ,ccj_contactdate
+            ,coalesce(ccj_contact_made,0) as ccj_contact_made
+            ,coalesce(ccj_negative_result,0) as ccj_negative_result
+            ,coalesce(ccj_id_1,0) as ccj_id_1
+            ,coalesce(ccj_id_1_2,0) as ccj_id_1_2
+            ,coalesce(ccj_id_2,0) as ccj_id_2
+            ,coalesce(ccj_id_3,0) as ccj_id_3
+            ,coalesce(ccj_id_4,0) as ccj_id_4
+            ,coalesce(ccj_id_5,0) as ccj_id_5
+            ,coalesce(ccj_id_1_2_3_4_5,0) as ccj_id_1_2_3_4_5
+            ,case 
+            WHEN validtime = 1 then 1
+            WHEN holdout = 1 THEN 1
+            ELSE 0 END AS ccj_holdout_id
+    FROM 
+    (SELECT person_id::varchar 
+    
+            ,COUNT(distinct case when
+                   datediff(d, '2020-01-17', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state = 'MN' or
+                   datediff(d, '2020-01-22', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('TN','AR','MO','AL','KY','GA','MS') or
+                   datediff(d, '2019-12-01', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') THEN person_id END) as validtime
+            ,max(TO_DATE(contactdate, 'YYYY-MM-DD')) AS ccj_contactdate
+            ,COUNT(distinct CASE WHEN resultcode IN ('Canvassed', 'Do Not Contact', 'Refused', 'Call Back', 'Language Barrier', 'Hostile', 'Come Back', 'Cultivation', 'Refused Contact', 'Spanish', 'Other', 'Not Interested') THEN person_id END) AS ccj_contact_made 
+            ,COUNT(distinct CASE WHEN resultcode IN ('Do Not Contact','Hostile','Refused','Refused Contact') OR (support_int = 4 OR support_int = 5) THEN person_id END) AS ccj_negative_result 
+            ,COUNT(DISTINCT CASE WHEN support_int = 1 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1 
+            ,COUNT(DISTINCT CASE WHEN support_int IN (1,2) AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1_2 
+            ,COUNT(DISTINCT CASE WHEN support_int = 2 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_2 
+            ,COUNT(DISTINCT CASE WHEN support_int = 3 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_3 
+            ,COUNT(DISTINCT CASE WHEN support_int = 4 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_4 
+            ,COUNT(DISTINCT CASE WHEN support_int = 5 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_5 
+            ,COUNT(DISTINCT CASE WHEN support_int IN (1,2,3,4,5) AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1_2_3_4_5
+            FROM bernie_data_commons.ccj_dnc 
+            WHERE unique_id_flag = 1 AND person_id IS NOT NULL GROUP BY 1) ccj
+            LEFT JOIN 
+            (select person_id::varchar, 1 as holdout from haystaq.set_no_current where set_no=3) ho
+            using(person_id) where person_id is not null) ccj
    using(person_id)
+
+-- THIRD PARTY IDS
+   LEFT JOIN
+    (select person_id::varchar(10)
+           ,thirdp_survey_date
+           ,coalesce(thirdp_first_choice_bernie,0) as thirdp_first_choice_bernie
+           ,coalesce(thirdp_first_choice_trump,0) as thirdp_first_choice_trump
+           ,coalesce(thirdp_first_choice_biden,0) as thirdp_first_choice_biden
+           ,coalesce(thirdp_first_choice_warren,0) as thirdp_first_choice_warren
+           ,coalesce(thirdp_first_choice_buttigieg,0) as thirdp_first_choice_buttigieg
+           ,coalesce(thirdp_first_choice_biden_warren_buttigieg,0) as thirdp_first_choice_biden_warren_buttigieg
+           ,coalesce(thirdp_first_choice_any,0) as thirdp_first_choice_any
+           ,coalesce(thirdp_support_1_id,0) as thirdp_support_1_id
+           ,coalesce(thirdp_support_2_id,0) as thirdp_support_2_id
+           ,coalesce(thirdp_support_1_2_id,0) as thirdp_support_1_2_id
+           ,coalesce(thirdp_support_3_id,0) as thirdp_support_3_id
+           ,coalesce(thirdp_support_4_id,0) as thirdp_support_4_id
+           ,coalesce(thirdp_support_5_id,0) as thirdp_support_5_id
+           ,coalesce(thirdp_support_1_2_3_4_5_id,0) as thirdp_support_1_2_3_4_5_id
+           ,case 
+           when validtime = 1 THEN 1
+           WHEN holdout = 1 THEN 1
+           ELSE 0 END AS thirdp_holdout_id
+     from 
+    (select 
+     person_id::varchar(10)
+          ,COUNT(distinct case when
+               datediff(d, '2020-01-17', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state = 'MN' or
+               datediff(d, '2020-01-22', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state IN ('TN','AR','MO','AL','KY','GA','MS') or
+               datediff(d, '2019-12-01', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') then person_id END) as validtime
+          ,max(TO_DATE(survey_date, 'YYYY-MM-DD')) AS thirdp_survey_date
+          ,COUNT(distinct case when first_choice = 'Bernie Sanders' then person_id end) as thirdp_first_choice_bernie
+          ,COUNT(distinct case when first_choice = 'Donald Trump' then person_id end) as thirdp_first_choice_trump
+          ,COUNT(distinct case when first_choice = 'Joe Biden' then person_id end) as thirdp_first_choice_biden
+          ,COUNT(distinct case when first_choice = 'Elizabeth Warren' then person_id end) as thirdp_first_choice_warren
+          ,COUNT(distinct case when first_choice = 'Pete Buttigieg' then person_id end) as thirdp_first_choice_buttigieg
+          ,COUNT(distinct case when first_choice IN ('Pete Buttigieg','Elizabeth Warren','Joe Biden') then person_id end) as thirdp_first_choice_biden_warren_buttigieg
+          ,COUNT(distinct case when first_choice IS NOT NULL then person_id end) as thirdp_first_choice_any
+          ,COUNT(distinct case when support_int = 1 then person_id end) as thirdp_support_1_id
+          ,COUNT(distinct case when support_int = 2 then person_id end) as thirdp_support_2_id
+          ,COUNT(distinct case when support_int IN (1,2) then person_id end) as thirdp_support_1_2_id
+          ,COUNT(distinct case when support_int = 3 then person_id end) as thirdp_support_3_id
+          ,COUNT(distinct case when support_int = 4 then person_id end) as thirdp_support_4_id
+          ,COUNT(distinct case when support_int = 5 then person_id end) as thirdp_support_5_id
+          ,COUNT(distinct case when support_int IN (1,2,3,4,5) then person_id end) as thirdp_support_1_2_3_4_5_id
+    FROM bernie_data_commons.third_party_ids group by 1) third
+   LEFT JOIN
+    (select person_id::varchar, 1 as holdout from haystaq.set_no_current where set_no=3) ho 
+    using(person_id) where person_id is not null) thirdp
+    using(person_id)
+
+-- SPOKE AND VOL MODELS
+   LEFT JOIN
+    (SELECT person_id::varchar,
+           spoke_support_1box,
+           spoke_persuasion_1plus,
+           spoke_persuasion_1minus,
+           spoke_support_1box_100,
+           spoke_persuasion_1plus_100,
+           spoke_persuasion_1minus_100 
+    FROM scores.spoke_output_20191221) spokemodel
+    using(person_id)
+   LEFT JOIN
+    (SELECT person_id,
+           attendee,
+           kickoff_party_rally_barnstorm_attendee,
+           canvasser_phonebank_attendee,
+           bernie_action,
+           attendee_100,
+           kickoff_party_rally_barnstorm_attendee_100,
+           canvasser_phonebank_attendee_100,
+           bernie_action_100
+    FROM scores.actionpop_output_20191220) volmodel
+    using(person_id)
 
 -- VOLUNTEER INFO
     LEFT JOIN
@@ -190,7 +463,7 @@ sortkey(person_id) AS
            (SELECT person_id, 1 AS action_taken FROM (SELECT DISTINCT person_id FROM bernie_jshuman.donor_basetable WHERE n_donations > 0 OR n_clicks > 5)))) vol
     using(person_id)
 
--- HOUSEHOLD INFO
+-- HOUSEHOLD LEVEL INFO
     LEFT JOIN 
     (SELECT 
         voting_address_id ,
@@ -228,248 +501,51 @@ sortkey(person_id) AS
         GROUP BY 1,2,3,4,5) events ON events.person_id = xw.person_id GROUP BY 1) p_household 
         ON p_household.voting_address_id = p.voting_address_id
 
--- VOTER ELIGIBILITY INFO
-   LEFT JOIN
-     (SELECT person_id::varchar,
-        CASE 
-           WHEN p.registration_date::date > '2018-11-08' THEN '1 - Newly registered' 
-           WHEN (pv.vote_p_2018_party_d = 1
-             OR pv.vote_p_2017_party_d = 1 
-             OR pv.vote_p_2016_party_d = 1 
-             OR pv.vote_p_2015_party_d = 1 
-             OR pv.vote_p_2014_party_d = 1 
-             OR pv.vote_p_2013_party_d = 1 
-             OR pv.vote_p_2012_party_d = 1 
-             OR pv.vote_p_2011_party_d = 1 
-             OR pv.vote_p_2010_party_d = 1 
-             OR pv.vote_p_2009_party_d = 1 
-             OR pv.vote_p_2008_party_d = 1 
-             OR pv.vote_p_2007_party_d = 1 
-             OR pv.vote_p_2006_party_d = 1 
-             OR pv.vote_p_2005_party_d = 1 
-             OR pv.vote_p_2004_party_d = 1 
-             OR pv.vote_p_2003_party_d = 1 
-             OR pv.vote_p_2002_party_d = 1 
-             OR pv.vote_p_2001_party_d = 1 
-             OR pv.vote_p_2000_party_d = 1 
-             OR pv.vote_p_1998_party_d = 1 
-             OR pv.vote_p_1996_party_d = 1 
-             OR pv.vote_pp_2016_party_d = 1 
-             OR pv.vote_pp_2012_party_d = 1 
-             OR pv.vote_pp_2008_party_d = 1 
-             OR pv.vote_pp_2004_party_d = 1 
-             OR pv.vote_pp_2000_party_d = 1 
-             OR pv.vote_pp_1996_party_d = 1 
-             OR ppv.voted_16pp_flag = 1 
-             OR ppv.voted_08pp_flag = 1 
-             OR ppv.voted_04pp_flag = 1) THEN '2 - Dem Primary or 2018 voter'
-           WHEN (pv.vote_g_2018 = 1) THEN '2 - Dem Primary or 2018 voter'
-           WHEN (pv.vote_g_2016 = 1
-             OR pv.vote_g_2014 = 1
-             OR pv.vote_g_2012 = 1
-             OR pv.vote_g_2010 = 1
-             OR pv.vote_g_2008 = 1
-             OR pv.vote_g_2006 = 1
-             OR pv.vote_g_2004 = 1
-             OR pv.vote_g_2002 = 1
-             OR pv.vote_g_2000 = 1
-             OR pv.vote_g_1998 = 1) THEN '3 - Lapsed voter' 
-           WHEN (pv.vote_g_2008_novote_eligible = 1
-             OR pv.vote_g_2010_novote_eligible = 1
-             OR pv.vote_g_2012_novote_eligible = 1
-             OR pv.vote_g_2014_novote_eligible = 1
-             OR pv.vote_g_2016_novote_eligible = 1
-             OR pv.vote_g_2018_novote_eligible = 1) THEN '4 - No vote but eligible' 
-             ELSE '5 - Other' END AS vote_history , 
-       CASE 
-           WHEN p.party_name_dnc = 'Democratic' OR p.party_id = 1 THEN 'Democratic' 
-           WHEN p.party_name_dnc = 'Republican' OR p.party_id = 2 THEN 'Republican' 
-           WHEN p.party_name_dnc = 'Other' OR p.party_id = 3 THEN 'Other' 
-           WHEN p.party_name_dnc = 'Libertarian' OR p.party_id = 4 THEN 'Libertarian' 
-           WHEN p.party_name_dnc = 'Green' OR p.party_id = 5 THEN 'Green' 
-           WHEN p.party_name_dnc = 'Independent' OR p.party_id = 6 THEN 'Independent' 
-           WHEN p.party_name_dnc = 'Nonpartisan' OR p.party_id = 7 THEN 'Nonpartisan' 
-           WHEN p.party_name_dnc = 'Unaffiliated' OR p.party_id = 8 THEN 'Unaffiliated' 
-           WHEN as20.civis_2020_partisanship >= .66 THEN 'Democratic' 
-           WHEN as20.civis_2020_partisanship between .66 and .33 THEN 'Nonpartisan' 
-           WHEN as20.civis_2020_partisanship <= .33 THEN 'Republican' 
-           --('AL','GA','HI','IL','IN','MI','MN','MO','MS','MT','ND','OH','SC','TN','TX','VA','VT','WA','WI') 
-           ELSE 'Other' END AS party_affiliation , -- verify logic
-      CASE 
-           WHEN p.state_code IN ('AL','AR','GA','IL','IN','MI','MO','MS','MT','MN','ND','OH','SC','TN','TX','UT','VA','VT','WI','WA') THEN '1 - Dem Primary Eligible' --open
-           WHEN p.state_code IN ('OK','NE') AND party_affiliation IN ('Democratic','Independent') THEN '1 - Dem Primary Eligible' -- mixed
-           WHEN p.state_code IN ('SD','RI') AND party_affiliation IN ('Democratic','Independent','Nonpartisan','Unaffiliated') THEN '1 - Dem Primary Eligible' -- mixed
-           WHEN p.state_code = 'CA' AND party_affiliation IN ('Democratic','Nonpartisan','Unaffiliated') THEN '1 - Dem Primary Eligible' -- mixed
-           WHEN p.state_code IN ('CO','ID','MA','NC','NH') AND party_affiliation IN ('Democratic', 'Unaffiliated','Nonpartisan') THEN '1 - Dem Primary Eligible' -- mixed
-           WHEN p.state_code IN ('AK','AZ','CT','DC','DE','FL','HI','IA','KS','KY','LA','MD','ME','NJ','NM','NV','NY','OR','PA','WV','WY') AND party_affiliation = 'Democratic' THEN '1 - Dem Primary Eligible' -- mixed
-           ELSE '2 - Must Register as Dem' END AS registration_action , -- verify logic
-      CASE 
-           WHEN ((pv.vote_g_2008_method_early = 1 OR pv.vote_p_2008_method_early = 1) AND pev.voted_early_by_mail_2008 = 1)
-             OR ((pv.vote_g_2010_method_early = 1 OR pv.vote_p_2010_method_early = 1) AND pev.voted_early_by_mail_2010 = 1)
-             OR ((pv.vote_g_2008_method_early = 1 OR pv.vote_p_2012_method_early = 1) AND pev.voted_early_by_mail_2012 = 1)
-             OR ((pv.vote_g_2008_method_early = 1 OR pv.vote_p_2014_method_early = 1) AND pev.voted_early_by_mail_2014 = 1)
-             OR ((pv.vote_g_2008_method_early = 1 OR pv.vote_p_2016_method_early = 1) AND pev.voted_early_by_mail_2016 = 1)
-             OR (pev.voted_2019 = 1 AND pev.voted_early_by_mail_2019 = 1) THEN '1 - EV By Mail' 
-           WHEN ((pv.vote_g_2008_method_early = 1 OR pv.vote_p_2008_method_early = 1) AND pev.voted_early_in_person_2008 = 1)
-             OR ((pv.vote_g_2010_method_early = 1 OR pv.vote_p_2010_method_early = 1) AND pev.voted_early_in_person_2010 = 1)
-             OR ((pv.vote_g_2012_method_early = 1 OR pv.vote_p_2012_method_early = 1) AND pev.voted_early_in_person_2012 = 1)
-             OR ((pv.vote_g_2014_method_early = 1 OR pv.vote_p_2014_method_early = 1) AND pev.voted_early_in_person_2014 = 1)
-             OR ((pv.vote_g_2016_method_early = 1 OR pv.vote_p_2016_method_early = 1) AND pev.voted_early_in_person_2016 = 1)
-             OR (pev.voted_2019 = 1 AND pev.voted_early_in_person_2019 = 1) THEN '2 - EV In Person' 
-           WHEN (pv.vote_g_2018_method_early = 1
-             OR pv.vote_g_2017_method_early = 1
-             OR pv.vote_g_2016_method_early = 1
-             OR pv.vote_g_2015_method_early = 1
-             OR pv.vote_g_2014_method_early = 1
-             OR pv.vote_g_2013_method_early = 1
-             OR pv.vote_g_2012_method_early = 1
-             OR pv.vote_g_2011_method_early = 1
-             OR pv.vote_g_2010_method_early = 1
-             OR pv.vote_g_2009_method_early = 1
-             OR pv.vote_g_2008_method_early = 1
-             OR pv.vote_p_2018_method_early = 1
-             OR pv.vote_p_2017_method_early = 1
-             OR pv.vote_p_2016_method_early = 1
-             OR pv.vote_p_2015_method_early = 1
-             OR pv.vote_p_2014_method_early = 1
-             OR pv.vote_p_2013_method_early = 1
-             OR pv.vote_p_2012_method_early = 1
-             OR pv.vote_p_2011_method_early = 1
-             OR pv.vote_p_2010_method_early = 1
-             OR pv.vote_p_2009_method_early = 1
-             OR pv.vote_p_2008_method_early = 1
-             OR pv.vote_pp_2016_method_early = 1
-             OR pv.vote_pp_2012_method_early = 1
-             OR pv.vote_pp_2008_method_early = 1) THEN '3 - EV Mail/In Person' 
-             ELSE '4 - Non-Early Voter' END AS early_vote_mode , -- verify logic
-      CASE 
-           WHEN p.is_permanent_absentee = 't' THEN '3 - Absentee voter'
-           WHEN poos.to_state_code <> pncoa.state_code 
-             AND (pv.vote_g_2018_method_absentee = 1 
-               OR pv.vote_p_2018_method_absentee = 1) THEN '3 - Absentee voter'
-           WHEN absent.requested_ballot = 1 THEN '3 - Absentee voter'
-           WHEN p.ncoa_since_reg_date = 't' and p.out_of_state_ncoa = 't' THEN '3 - Absentee voter'
-           WHEN (poos.to_state_code <> pncoa.state_code) THEN '2 - Registered in different state'
-           ELSE '1 - Registered in current state' END AS registered_in_state, -- verify logic
+-- CONSTITUENCIES
+LEFT JOIN 
+  (SELECT person_id::varchar,
+          flag_muslim,
+          flag_student_age,
+          flag_union,
+          flag_veteran
+   FROM bernie_data_commons.national_constituency_table) nct
+  using(person_id)
 
-          --as18.civis_2018_turnout::FLOAT8 as civis_2018_turnout,
-          as20.civis_2020_partisanship::FLOAT8,
-          as18.civis_2018_economic_persuasion::FLOAT8,
-          as18.civis_2018_one_pct_persuasion::FLOAT8,
-          as18.civis_2018_marijuana_persuasion::FLOAT8,
-          as18.civis_2018_college_persuasion::FLOAT8,
-          as18.civis_2018_welcome_persuasion::FLOAT8,
-          as18.civis_2018_sexual_assault_persuasion::FLOAT8
-          --(tc.ts_tsmart_presidential_primary_turnout_score::FLOAT8/100) as ts_tsmart_presidential_primary_turnout_score
+-- VOTER INFO
+   LEFT JOIN
+     (SELECT 
+     	p.person_id::varchar,
+     	rainbo.vote_history_6way,
+     	rainbo.early_vote_history_3way,
+     	rainbo.registered_in_state_3way,
+     	rainbo.dem_primary_eligible_2way,
+     	rainbo.party_8way,
+        rainbo.party_3way,
+        rainbo.race_5way,
+        rainbo.spanish_language_2way,
+        rainbo.age_5way,
+        rainbo.ideology_5way,
+        rainbo.education_2way,
+        rainbo.income_5way,
+        rainbo.gender_2way,
+        rainbo.urban_3way,
+        rainbo.child_in_hh_2way,
+        rainbo.marital_2way,
+        rainbo.religion_9way,
+        as20.civis_2020_partisanship::FLOAT8,
+        as18.civis_2018_economic_persuasion::FLOAT8,
+        as18.civis_2018_one_pct_persuasion::FLOAT8,
+        as18.civis_2018_marijuana_persuasion::FLOAT8,
+        as18.civis_2018_college_persuasion::FLOAT8,
+        as18.civis_2018_welcome_persuasion::FLOAT8,
+        as18.civis_2018_sexual_assault_persuasion::FLOAT8         
 
       FROM phoenix_analytics.person p
       LEFT JOIN phoenix_scores.all_scores_2020 as20 using(person_id)
       LEFT JOIN phoenix_scores.all_scores_2018 as18 using(person_id)
-      LEFT JOIN phoenix_analytics.person_ncoas_current pncoa using(person_id)
-      --LEFT JOIN phoenix_consumer.tsmart_consumer tc using(person_id)
-      LEFT JOIN phoenix_analytics.person_votes pv using(person_id)
-      LEFT JOIN phoenix_analytics.person_out_of_state poos using(person_id)
-      LEFT JOIN phoenix_analytics.person_early_votes pev using(person_id)
-      LEFT JOIN bernie_data_commons.person_primary_votes ppv using(person_id)
-      LEFT JOIN (SELECT person_id::varchar, 1 AS requested_ballot FROM (SELECT (state_code||'-'||myv_van_id) AS st_myv_van_id, election_id FROM phoenix_demssanders20_vansync.contacts_absentees WHERE date_request_received::date > '2019-11-08') 
-        LEFT JOIN bernie_data_commons.master_xwalk_st_myv using(st_myv_van_id)) absent using(person_id)
-      ) voteinfo using(person_id)
+      LEFT JOIN bernie_data_commons.rainbow_analytics_frame rainbo using(person_id)) voterinfo 
+     using(person_id)
     
   );
 
 commit;
-
-begin;
-
-set wlm_query_slot_count to 5;
-
-DROP TABLE IF EXISTS bernie_nmarchio2.march_universe;
-CREATE TABLE bernie_nmarchio2.march_universe 
-distkey(person_id) 
-sortkey(person_id) AS
-(SELECT *,
-    -- Rank order each gotv_segment
-    row_number() OVER (PARTITION BY state_code ORDER BY bern_flags DESC, gotv_segment ASC, purpose_of_contact ASC, current_support_raw DESC) as gotv_rank 
-
-    FROM
-  (SELECT person_id,
-          state_code,
-          gotv_segment,
-          bern_flags,
-          current_support_raw,
-          current_support_raw_100,
-          sanders_very_excited_score,
-          sanders_very_excited_score_100,
-          field_id_1_score,
-          field_id_1_score_100,
-          purpose_of_contact,
-          voter_readiness,
-          registration_action,
-          registered_in_state,
-          early_vote_mode,
-          vote_history,
-          party_affiliation,
-          dem_primary_electorate,
-          turnout_current,
-          -- Decile each gotv_segment
-          NTILE(10) OVER (PARTITION BY state_code||'_'||gotv_segment ORDER BY current_support_raw ASC) AS current_support_raw_10_by_state_gotv_segment
-          --civis_2018_turnout,
-          --ts_tsmart_presidential_primary_turnout_score
-   FROM
-(select *,
-        CASE WHEN (bern_flags = 1 
-                OR registration_action = '1 - Dem Primary Eligible' 
-                OR party_affiliation = 'Democratic' 
-                OR current_support_raw_100 >= 70) THEN '1 - Target universe' -- Find flags to remove the hostile people from GOTV universe
-            ELSE '2 - Non-target' END AS dem_primary_electorate, -- This defines the upper bound of the GOTV universe
-
-        CASE
-            WHEN dem_primary_electorate = '2 - Non-target' 
-                THEN '6 - Non-target'
-            WHEN (vote_history = '1 - Newly registered' OR vote_history = '2 - Dem Primary or 2018 voter')
-                AND registration_action = '1 - Dem Primary Eligible' 
-                AND registered_in_state = '1 - Registered in current state'  
-                    THEN '1 - Vote-ready, active voter'
-            WHEN registered_in_state = '1 - Registered in current state'
-                AND registration_action = '1 - Dem Primary Eligible'
-                AND vote_history IN ('3 - Lapsed voter','4 - No vote but eligible','5 - Other') 
-                    THEN '2 - Vote-ready, less active voter'
-            WHEN registration_action = '2 - Must Register as Dem'
-                AND registered_in_state = '1 - Registered in current state' 
-                    THEN '3 - Must register as Dem'
-            WHEN registration_action = '1 - Dem Primary Eligible'
-                AND registered_in_state IN ('2 - Registered in different state','3 - Likely absentee voter') 
-                    THEN '4 - Must mail absentee or register in current state'
-            WHEN registered_in_state IN ('2 - Registered in different state','3 - Likely absentee voter')
-                AND registration_action = '2 - Must Register as Dem' 
-                    THEN '5 - Must register as Dem, mail absentee or register in current state'
-            ELSE '6 - Non-target' END AS voter_readiness, -- This adds flags for barriers that may hinder primary participation
-
-        CASE 
-            WHEN dem_primary_electorate = '1 - Target universe'
-                AND voter_readiness IN ('1 - Vote-ready, active voter', '2 - Vote-ready, less active voter')
-                AND (current_support_raw_100 >= 80 OR sanders_very_excited_score_100 >= 80 OR field_id_1_score_100 >= 80 OR bern_flags = 1) 
-                   THEN '1 - Vote-ready GOTV target'
-            WHEN dem_primary_electorate = '1 - Target universe'
-                AND voter_readiness IN ( '3 - Must register as Dem', '4 - Must mail absentee or register in current state',  '5 - Must register as Dem, mail absentee or register in current state')
-                AND (current_support_raw_100 >= 80 OR sanders_very_excited_score_100 >= 80 OR field_id_1_score_100 >= 80 OR bern_flags = 1)
-                   THEN '2 - Registration-action GOTV target'
-            WHEN dem_primary_electorate = '1 - Target universe'
-                AND voter_readiness IN ('1 - Vote-ready, active voter', '2 - Vote-ready, less active voter')
-                   THEN '3 - Vote-ready persuasion target'
-            WHEN dem_primary_electorate = '1 - Target universe'
-                AND voter_readiness NOT IN ('1 - Vote-ready, active voter', '2 - Vote-ready, less active voter')
-                   THEN '4 - Registration-action and persuasion'
-            ELSE '5 - Non-target' END AS purpose_of_contact, -- This breaks out persuasion from GOTV contact universes
-
-        CASE 
-            WHEN bern_flags = 1 THEN '1 - Verified Supporter'
-            WHEN purpose_of_contact IN ('1 - Vote-ready GOTV target','2 - Registration-action GOTV target') THEN '2 - GOTV target'
-            WHEN purpose_of_contact IN ('3 - Vote-ready persuasion target','4 - Registration-action and persuasion') THEN '3 - Persuasion target'
-            ELSE '4 - Non-target' END AS gotv_segment -- This breaks out supporters, top GOTV targets, persuasion voters, and non-targets
-
-FROM bernie_nmarchio2.base_universe)));
-
-commit;
-
-
