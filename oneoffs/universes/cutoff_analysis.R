@@ -1,23 +1,7 @@
-library(pROC)
-library(civis)
-library(dplyr)
-library(reshape2)
 
 querysql <- "select
 state_code, 
-      case 
-              when electorate_2way = '2 - Non-target' THEN '5 - Non-target' 
-              when (biden_support_100 <= 80 or spoke_persuasion_1minus_100 <= 50) and (current_support_raw_100 >= 90 or sanders_strong_support_score_100 >= 80) and (field_id_1_score_100 >= 80 or field_id_composite_score_100 >= 80) and  (spoke_support_1box_100 >= 75 and spoke_persuasion_1plus_100 >= 75) and (attendee_100 >= 80 or kickoff_party_rally_barnstorm_attendee_100 >= 80 or canvasser_phonebank_attendee_100 >= 80 or bernie_action_100  >= 80) then '1 - Support Tier 1'
-              when (biden_support_100 <= 80 or spoke_persuasion_1minus_100 <= 50) and (current_support_raw_100 >= 80 or sanders_strong_support_score_100 >= 80 or field_id_1_score_100 >= 80 or field_id_composite_score_100 >= 80) and  (spoke_support_1box_100 >= 75 or spoke_persuasion_1plus_100 >= 75) and (attendee_100 >= 80 or kickoff_party_rally_barnstorm_attendee_100 >= 80 or canvasser_phonebank_attendee_100 >= 80 or bernie_action_100  >= 80) then '2 - Support Tier 2'
-              when (biden_support_100 <= 90 or spoke_persuasion_1minus_100 <= 60) and (current_support_raw_100 >= 80 or sanders_strong_support_score_100 >= 80 or field_id_1_score_100 >= 80 or field_id_composite_score_100 >= 80 or spoke_support_1box_100 >= 80 or spoke_persuasion_1plus_100 >= 80 or attendee_100 >= 80 or kickoff_party_rally_barnstorm_attendee_100 >= 80 or canvasser_phonebank_attendee_100 >= 80 or bernie_action_100  >= 80) then '3 - Support Tier 3'
-           else '3 - Support Tier 4' end as score_thresholds2
-        ,CASE 
-        WHEN score_thresholds2 IN ('4 - Avoid','5 - Non-target')  then '4 - Avoid' 
-        WHEN activist_flag = 1 or donor_id = 1 then '0 - Donors and Activists'
-        WHEN score_thresholds2 = '1 - Support Tier 1' then '1 - GOTV Tier 1'
-        WHEN score_thresholds2 = '2 - Support Tier 2' then '2 - GOTV Tier 2'
-        WHEN score_thresholds2 = '3 - Support Tier 3' then '3 - GOTV Tier 3'
-        ELSE '4 - Non-target' END AS gotv_segment2,
+gotv_segment_validation,
 pturnout_2016 as primary_turnout_2016,
 ccj_holdout_id,
 activist_flag,
@@ -35,7 +19,7 @@ sum(ccj_id_1_2) as ccj12,
 avg(field_id_1_score_100) as field1score,
 avg(current_support_raw_100) as supportscore
 from
-bernie_nmarchio2.base_universe group by 1,2,3,4,5,6,7,8"
+bernie_nmarchio2.base_universe group by 1,2,3,4,5,6,7"
 
 df_qc <- civis::read_civis(sql(querysql ), database = 'Bernie 2020') 
 
@@ -44,7 +28,7 @@ names(df_qc)
 df_qc_out <- df_qc %>%
   #filter(ccj_holdout_id == 1) %>%
   #filter(vote_ready_6way %in% c('1 - Vote-ready','2 - Vote-ready lapsed')) %>%
-  group_by(state_code, ccj_holdout_id, gotv_segment2) %>% # 
+  group_by(state_code, ccj_holdout_id, gotv_segment_validation) %>% # 
   dplyr::summarize_at(vars(number_of_voters,ccj1,ccj2,ccj3,ccj4,ccj5,ccj1all,ccj12), funs(sum), na.rm=TRUE)  %>%
   ungroup() %>%
   mutate(ccj1rate = ccj1/ccj1all)
@@ -89,6 +73,10 @@ from bernie_nmarchio2.base_universe where ccj_holdout_id = 1 order by random() l
 df_search <- civis::read_civis(sql(criteria_search ), database = 'Bernie 2020') 
 
 
+library(pROC)
+library(civis)
+library(dplyr)
+library(reshape2)
 
 
 
