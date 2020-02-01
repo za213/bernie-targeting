@@ -1,7 +1,9 @@
 
+
 querysql <- "select
 state_code, 
 gotv_segment_validation,
+gotv_segment_juiced,
 pturnout_2016 as primary_turnout_2016,
 ccj_holdout_id,
 activist_flag,
@@ -19,7 +21,7 @@ sum(ccj_id_1_2) as ccj12,
 avg(field_id_1_score_100) as field1score,
 avg(current_support_raw_100) as supportscore
 from
-bernie_nmarchio2.base_universe group by 1,2,3,4,5,6,7"
+bernie_nmarchio2.base_universe group by 1,2,3,4,5,6,7,8"
 
 df_qc <- civis::read_civis(sql(querysql ), database = 'Bernie 2020') 
 
@@ -29,6 +31,7 @@ df_qc_out <- df_qc %>%
   #filter(ccj_holdout_id == 1) %>%
   #filter(vote_ready_6way %in% c('1 - Vote-ready','2 - Vote-ready lapsed')) %>%
   group_by(state_code, ccj_holdout_id, gotv_segment_validation) %>% # 
+  #group_by(state_code, gotv_segment_juiced) %>% 
   dplyr::summarize_at(vars(number_of_voters,ccj1,ccj2,ccj3,ccj4,ccj5,ccj1all,ccj12), funs(sum), na.rm=TRUE)  %>%
   ungroup() %>%
   mutate(ccj1rate = ccj1/ccj1all)
@@ -78,12 +81,8 @@ library(civis)
 library(dplyr)
 library(reshape2)
 
-
-
 names(df_search)
-
 df_search2 <- df_search %>% filter(state_code != 'CA')
-
 state_list <- unique(df_search2$state_code)
 
 # Plots
@@ -128,4 +127,5 @@ names(df_search)
 # spoke persuasion box  > 75
 # spoke 1 minus < 50 
 # attendee_100 > 80 (any ak model)
+
 
