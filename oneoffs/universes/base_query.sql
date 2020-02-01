@@ -814,31 +814,19 @@ LEFT JOIN
 commit;
 
 
-
 DROP TABLE IF EXISTS bernie_nmarchio2.gotv_universe;
 CREATE TABLE bernie_nmarchio2.gotv_universe 
 distkey(person_id) 
 sortkey(person_id) AS
 (select *,
 
-        case
-        when electorate_2way = '2 - Non-target' THEN '5 - Non-target' 
-        when (field_id_composite_score_100 <= 90 or field_id_1_score_100 <= 90) and (biden_support_100 >= 70 AND warren_support_100 >= 70 AND buttigieg_support_100 >= 70 AND spoke_persuasion_1minus_100 >= 70) THEN '4 - Avoid'
-        when (current_support_raw_100 >= 90 or field_id_composite_score_100 >= 90 or field_id_1_score_100 >= 90) then '1 - Support Tier 1'
-        when (current_support_raw_100 >= 80 or field_id_composite_score_100 >= 80 or field_id_1_score_100 >= 80) then '2 - Support Tier 2' 
-        else '3 - Support Tier 3' end as score_thresholds,
-
         CASE 
-        WHEN gotv_score_thresholds IN ('4 - Avoid','5 - Non-target') or ccj_id_4 = 1 or ccj_id_5 = 1 or thirdp_support_5_id = 1 then '4 - Avoid'
-        WHEN (gotv_score_thresholds = '1 - Support Tier 1' 
-        	or activist_donor_flag = 1 
-        	or ccj_id_1 = 1 
-        	or thirdp_support_1_id = 1 
-        	or thirdp_first_choice_bernie = 1)
-            and (vote_ready_6way IN ('1 - Vote-ready','2 - Vote-ready lapsed') then '1 - GOTV Tier 1'
-        WHEN gotv_score_thresholds IN ('1 - Support Tier 1', '2 - Support Tier 2') then '2 - GOTV Tier 2'
-        WHEN gotv_score_thresholds = '3 - Support Tier 3' then '3 - GOTV Tier 3'
-        ELSE '4 - Non-target' END AS gotv_segment,
+        WHEN score_thresholds IN ('4 - Avoid','5 - Non-target')  then '4 - Avoid' --or ccj_id_5 = 1 or thirdp_support_5_id = 1
+        WHEN activist_flag = 1 or donor_id = 1 then '0 - Donors and Activists'
+        WHEN score_thresholds = '1 - Support Tier 1' then '1 - GOTV Tier 1'
+        WHEN score_thresholds = '2 - Support Tier 2' then '2 - GOTV Tier 2'
+        WHEN score_thresholds = '3 - Support Tier 3' then '3 - GOTV Tier 3'
+        ELSE '5 - Non-target' END AS gotv_segment,
 
         round(1.0*sum((case when turnout_current = '1 - Target universe' then person_id end)) OVER (partition BY state_code ORDER BY gotv_segment ASC, current_support_raw DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS electorate_share_2016_current_support_raw,
         row_number() OVER (PARTITION BY state_code ORDER BY gotv_segment ASC, current_support_raw DESC) as gotv_rank_current_support_raw,
@@ -848,4 +836,5 @@ sortkey(person_id) AS
         
 FROM bernie_nmarchio2.base_universe
 );
+
 
