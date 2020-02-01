@@ -1,6 +1,4 @@
 
-
-
 -- ActionKit / Mobilize Recoded Events
 begin;
 
@@ -588,7 +586,8 @@ sortkey(person_id) AS
         AND reg_record_merged = FALSE
         AND reg_on_current_file = TRUE
         AND reg_voter_flag = TRUE 
-        AND state_code IN ('AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA')) p
+        -- AND state_code IN ('AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA')
+      ) p
 
 -- CROSSWALK
     LEFT JOIN
