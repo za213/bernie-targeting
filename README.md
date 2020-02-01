@@ -5,6 +5,9 @@
   * Workflow to [build modeling and analytics frame](https://platform.civisanalytics.com/spa/#/workflows/10551)
 * To request a model, issue a [Jira ticket](https://berniesanders.atlassian.net/jira/software/projects/MOD/boards/12) and tag Nico Marchio and Michael Futch.
 
+## GOTV Universe:
+* Visit the [Universes](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) folder for info about the `bernie_data_commons.base_universe` table for cutting GOTV lists.
+
 ## Modeling Frame:
 * Platform table: `bernie_data_commons.rainbow_modeling_frame`
 * [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) to create modeling frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) of features and descriptions
