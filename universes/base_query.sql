@@ -1,11 +1,11 @@
 
--- ActionKit / Mobilize Recoded Events
+
+
+-- ActionKit / Mobilize Recoded Events (recodes all events to standardized categories related to activism and campaign engagement)
 begin;
-
 set wlm_query_slot_count to 2;
-
-DROP TABLE IF EXISTS bernie_nmarchio2.akmobevents;
-CREATE TABLE bernie_nmarchio2.akmobevents
+DROP TABLE IF EXISTS bernie_nmarchio2.base_akmobevents;
+CREATE TABLE bernie_nmarchio2.base_akmobevents
 distkey(ak_event_id) 
 sortkey(ak_event_id, mobilize_event_id) as
 (SELECT distinct ak_event_id::varchar, mobilize_id::varchar as mobilize_event_id, event_recode from
@@ -36,31 +36,29 @@ sortkey(ak_event_id, mobilize_event_id) as
             ak_title ,
             ROW_NUMBER() OVER(PARTITION BY ak_event_id ||'_'||mobilize_id ORDER BY ak_event_id NULLS LAST, mobilize_id NULLS LAST) AS rownum
             FROM core_table_builds.events_xwalk) xwalk
-    Left JOIN
+    LEFT JOIN
           (SELECT event.id::int AS ak_event_id,
                   event.title AS event_title_ak ,
                   campaign.name AS event_name
                   FROM ak_bernie.events_event event LEFT JOIN (SELECT id AS campaign_id, name FROM ak_bernie.events_campaign) campaign USING(campaign_id)) ak 
           ON xwalk.ak_event_id = ak.ak_event_id AND xwalk.rownum = 1
-   LEFT JOIN
+    LEFT JOIN
           (SELECT id::varchar(256) AS mobilize_id,
                   lower(event_type::varchar(256)) AS event_type_mob,
                   lower(title::varchar(256)) AS event_title_mob
                   FROM mobilize.events_comprehensive) mob 
           ON mob.mobilize_id = xwalk.mobilize_id AND xwalk.rownum = 1) WHERE rownum = 1 and (ak_event_id is not null and mobilize_id is not null) and event_recode is not null);
-
 commit;
 
---  Activism Sidetable
+--  Activism Sidetable (all individuals in Bern app, volunteers / attendees / RSVPs in ActionKit and Mobilize, shift volunteers and supporters in MyCampaign, and activism-related Survey Responses)
 begin;
-
 set wlm_query_slot_count to 2;
-
-DROP TABLE IF EXISTS bernie_nmarchio2.activist_base;
-CREATE TABLE bernie_nmarchio2.activist_base
+DROP TABLE IF EXISTS bernie_nmarchio2.base_activists;
+CREATE TABLE bernie_nmarchio2.base_activists
 distkey(person_id) 
 sortkey(person_id) as
 (select person_id,
+	    voting_address_id,
 	    coalesce(myc.mvp_myc ,0) as mvp_myc ,
         coalesce(myc.activist_myc ,0) as activist_myc ,
         coalesce(myc.canvass_myc ,0) as canvass_myc ,
@@ -77,6 +75,16 @@ sortkey(person_id) as
         coalesce(surveys.student_id ,0) as student_id ,
         coalesce(surveys.volunteer_yes_id,0) as volunteer_yes_id,
         coalesce(slack.slack_vol,0) as slack_vol,
+        coalesce(akmob.rsvps,0) as rsvps,
+        coalesce(akmob.akmob_rsvps_canvass ,0) as akmob_rsvps_canvass ,
+        coalesce(akmob.akmob_rsvps_phonebank ,0) as akmob_rsvps_phonebank ,
+        coalesce(akmob.akmob_rsvps_small_event ,0) as akmob_rsvps_small_event ,
+        coalesce(akmob.akmob_rsvps_friend_to_friend ,0) as akmob_rsvps_friend_to_friend ,
+        coalesce(akmob.akmob_rsvps_training ,0) as akmob_rsvps_training ,
+        coalesce(akmob.akmob_rsvps_barnstorm ,0) as akmob_rsvps_barnstorm ,
+        coalesce(akmob.akmob_rsvps_rally_town_hall ,0) as akmob_rsvps_rally_town_hall ,
+        coalesce(akmob.akmob_rsvps_solidarity_action ,0) as akmob_rsvps_solidarity_action ,
+        coalesce(akmob.attended,0) as attended,
         coalesce(akmob.akmob_attended_canvass ,0) as akmob_attended_canvass ,
         coalesce(akmob.akmob_attended_phonebank ,0) as akmob_attended_phonebank ,
         coalesce(akmob.akmob_attended_small_event ,0) as akmob_attended_small_event ,
@@ -86,35 +94,29 @@ sortkey(person_id) as
         coalesce(akmob.akmob_attended_rally_town_hall ,0) as akmob_attended_rally_town_hall ,
         coalesce(akmob.akmob_attended_solidarity_action,0) as akmob_attended_solidarity_action,
         case 
-          when mvp_myc > 0
-               or activist_myc > 0
-               or canvass_myc > 0
-               or volunteer_myc > 0
-               or constituencies_myc > 0
-               or volunteer_shifts_myc > 0
-               or student_myc > 0
-               or teacher_myc > 0
-               or labor_myc > 0
-               or bernapp > 0
-               or sticker_id > 0
-               or commit2caucus_id > 0
-               or union_id > 0
-               or student_id > 0
-               or volunteer_yes_id > 0
-               or slack_vol > 0
-               or akmob_attended_canvass > 0
-               or akmob_attended_phonebank > 0
-               or akmob_attended_small_event > 0
-               or akmob_attended_friend_to_friend > 0
-               or akmob_attended_training > 0
-               or akmob_attended_barnstorm > 0
-               or akmob_attended_rally_town_hall > 0
-               or akmob_attended_solidarity_action  > 0 then 1
-          else 0 end as activist_flag
+        when rsvps >= 2 -- non-binary count
+          or attended > 0 -- non-binary count
+          or mvp_myc = 1
+          or activist_myc = 1
+          or canvass_myc = 1
+          or volunteer_myc = 1
+          or constituencies_myc = 1
+          or volunteer_shifts_myc = 1
+          or student_myc = 1
+          or teacher_myc = 1
+          or labor_myc = 1
+          or bernapp = 1
+          or sticker_id = 1
+          or commit2caucus_id = 1
+          or union_id = 1
+          or student_id = 1
+          or volunteer_yes_id = 1
+          or slack_vol = 1 then 1
+        else 0 end as activist_flag
  from 
 (SELECT person_id::varchar,
-              state_code,
-              voting_address_id
+        state_code,
+        voting_address_id
       FROM phoenix_analytics.person
       WHERE is_deceased = FALSE
         AND reg_record_merged = FALSE
@@ -144,23 +146,23 @@ sortkey(person_id) as
     left join
     -- Bern App
      (SELECT 
- 	       person_id::varchar(10) ,
- 	       count(distinct case when bern_id is not null or attempted_voter_lookup = 't' then person_id end) as bernapp
+           person_id::varchar(10) ,
+           count(distinct case when bern_id is not null or attempted_voter_lookup = 't' then person_id end) as bernapp
            FROM (SELECT * FROM bern_app.canvass_canvasser) canv
            LEFT JOIN
-           (SELECT person_id::varchar(10), bern_id, bern_canvasser_id FROM bernie_data_commons.master_xwalk) xwalk ON canv.id = xwalk.bern_id where person_id is not null
-           GROUP BY 1) bern 
+           (SELECT person_id::varchar(10), bern_id, bern_canvasser_id FROM bernie_data_commons.master_xwalk) xwalk ON canv.id = xwalk.bern_canvasser_id where person_id is not null
+           GROUP BY 1) bern
      using(person_id)
-    
+
     left join
     -- Survey Responses
     (select * from 
     (SELECT person_id::varchar(10) ,
-            count(distinct CASE WHEN surveyresponseid IN (40) THEN 1 WHEN surveyresponseid IN (106,107) THEN person_id END) AS sticker_id ,
-            count(distinct CASE WHEN surveyresponseid IN (99) THEN 1 WHEN surveyresponseid IN (100,101) THEN person_id END) AS commit2caucus_id ,
+            count(distinct CASE WHEN surveyresponseid IN (40) THEN person_id END) AS sticker_id ,
+            count(distinct CASE WHEN surveyresponseid IN (99) THEN person_id END) AS commit2caucus_id ,
             count(distinct CASE WHEN surveyresponseid IN (10) THEN person_id END) AS union_id ,
             count(distinct CASE WHEN surveyresponseid IN (9,103,104) THEN person_id END) AS student_id ,
-            count(distinct CASE WHEN surveyresponseid IN (32) THEN 1 WHEN surveyresponseid IN (33) THEN person_id END) AS volunteer_yes_id 
+            count(distinct CASE WHEN surveyresponseid IN (32) THEN person_id END) AS volunteer_yes_id 
             FROM contacts.surveyresponses sr 
             INNER JOIN bernie_data_commons.ccj_dnc ccj using(contactcontact_id) 
             LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid) 
@@ -184,19 +186,30 @@ sortkey(person_id) as
     left join
     -- ActionKit / Mobilize
     (SELECT person_id::varchar,
-           count(distinct CASE WHEN event_recode = 'canvass' THEN person_id END) AS akmob_attended_canvass ,
-           count(distinct CASE WHEN event_recode = 'phonebank' THEN person_id END) AS akmob_attended_phonebank ,
-           count(distinct CASE WHEN event_recode = 'small-event' THEN person_id END) AS akmob_attended_small_event ,
-           count(distinct CASE WHEN event_recode = 'friend-to-friend' THEN person_id END) AS akmob_attended_friend_to_friend ,
-           count(distinct CASE WHEN event_recode = 'training' THEN person_id END) AS akmob_attended_training ,
-           count(distinct CASE WHEN event_recode = 'barnstorm' THEN person_id END) AS akmob_attended_barnstorm ,
-           count(distinct CASE WHEN event_recode = 'rally-town-hall' THEN person_id END) AS akmob_attended_rally_town_hall ,
-           count(distinct CASE WHEN event_recode = 'solidarity-action' THEN person_id END) AS akmob_attended_solidarity_action 
+            count(person_id) as rsvps,
+            count(CASE WHEN event_recode = 'canvass' THEN person_id END) AS akmob_rsvps_canvass ,
+            count(CASE WHEN event_recode = 'phonebank' THEN person_id END) AS akmob_rsvps_phonebank ,
+            count(CASE WHEN event_recode = 'small-event' THEN person_id END) AS akmob_rsvps_small_event ,
+            count(CASE WHEN event_recode = 'friend-to-friend' THEN person_id END) AS akmob_rsvps_friend_to_friend ,
+            count(CASE WHEN event_recode = 'training' THEN person_id END) AS akmob_rsvps_training ,
+            count(CASE WHEN event_recode = 'barnstorm' THEN person_id END) AS akmob_rsvps_barnstorm ,
+            count(CASE WHEN event_recode = 'rally-town-hall' THEN person_id END) AS akmob_rsvps_rally_town_hall ,
+            count(CASE WHEN event_recode = 'solidarity-action' THEN person_id END) AS akmob_rsvps_solidarity_action ,
+            count(case when attended = 't' then person_id end) as attended,
+            count(CASE WHEN event_recode = 'canvass' and attended = 't' THEN person_id END) AS akmob_attended_canvass ,
+            count(CASE WHEN event_recode = 'phonebank' and attended = 't' THEN person_id END) AS akmob_attended_phonebank ,
+            count(CASE WHEN event_recode = 'small-event' and attended = 't' THEN person_id END) AS akmob_attended_small_event ,
+            count(CASE WHEN event_recode = 'friend-to-friend' and attended = 't' THEN person_id END) AS akmob_attended_friend_to_friend ,
+            count(CASE WHEN event_recode = 'training' and attended = 't' THEN person_id END) AS akmob_attended_training ,
+            count(CASE WHEN event_recode = 'barnstorm' and attended = 't' THEN person_id END) AS akmob_attended_barnstorm ,
+            count(CASE WHEN event_recode = 'rally-town-hall' and attended = 't' THEN person_id END) AS akmob_attended_rally_town_hall ,
+            count(CASE WHEN event_recode = 'solidarity-action' and attended = 't' THEN person_id END) AS akmob_attended_solidarity_action 
            from (
-    (select distinct person_id, event_recode from
+    (select distinct person_id, event_recode, attended from -- mobilize_id, mobilize_event_id,
       (SELECT DISTINCT user_id::varchar(256) AS mobilize_id ,
-                       event_id::varchar(256) AS mobilize_event_id 
-       FROM mobilize.participations_comprehensive WHERE attended = 't')
+                       event_id::varchar(256) AS mobilize_event_id ,
+                       attended
+       FROM mobilize.participations_comprehensive)
     LEFT JOIN
       (SELECT mobilize_id::varchar,
               person_id FROM (SELECT DISTINCT user_id AS mobilize_id, user__email_address::varchar(256) AS email FROM mobilize.participations_comprehensive WHERE mobilize_id IS NOT NULL AND email IS NOT NULL)
@@ -204,35 +217,205 @@ sortkey(person_id) as
        (SELECT * FROM (SELECT person_id, email, ROW_NUMBER() OVER(PARTITION BY email ORDER BY person_id NULLS LAST) AS dupe FROM bernie_data_commons.master_xwalk) WHERE dupe = 1 AND person_id IS NOT NULL) using(email)) 
       using(mobilize_id) 
       LEFT JOIN 
-      (select * from bernie_nmarchio2.akmobevents where mobilize_event_id is not null)
+      (select * from bernie_nmarchio2.base_akmobevents where mobilize_event_id is not null)
       using(mobilize_event_id))
     union all
-    (select distinct person_id, event_recode from
+    (select distinct person_id, event_recode, attended from -- actionkit_id, ak_event_id,
       (SELECT DISTINCT user_id::varchar(256) AS actionkit_id ,
-                       event_id::varchar(256) AS ak_event_id
-       FROM ak_bernie.events_eventsignup WHERE attended = 't')
+                       event_id::varchar(256) AS ak_event_id ,
+                       attended
+       FROM ak_bernie.events_eventsignup)
     LEFT JOIN
       (SELECT DISTINCT person_id::varchar,
                        actionkit_id::varchar
        FROM bernie_data_commons.master_xwalk_ak WHERE person_id IS NOT NULL) 
       using(actionkit_id)
     LEFT JOIN 
-      (select * from bernie_nmarchio2.akmobevents where ak_event_id is not null)
-      using(ak_event_id))) where person_id is not null and event_recode is not null
-    group by 1) akmob
+      (select * from bernie_nmarchio2.base_akmobevents where ak_event_id is not null)
+      using(ak_event_id))
+    ) where person_id is not null and event_recode is not null group by 1) akmob
     using(person_id) where activist_flag = 1);
+commit;
 
+-- Field / Third Party IDs Side Table
+begin;
+set wlm_query_slot_count to 3;
+DROP TABLE IF EXISTS bernie_nmarchio2.base_validation;
+CREATE TABLE bernie_nmarchio2.base_validation
+distkey(person_id) 
+sortkey(person_id) as
+(SELECT * FROM      
+	(SELECT person_id::varchar
+      FROM phoenix_analytics.person
+      WHERE is_deceased = FALSE
+        AND reg_record_merged = FALSE
+        AND reg_on_current_file = TRUE
+        AND reg_voter_flag = TRUE) p
+   LEFT JOIN
+-- FIELD IDS
+    (select person_id::varchar
+            ,ccj_contactdate
+            ,coalesce(ccj_contact_made,0) as ccj_contact_made
+            ,coalesce(ccj_negative_result,0) as ccj_negative_result
+            ,coalesce(ccj_id_1,0) as ccj_id_1
+            ,coalesce(ccj_id_1_2,0) as ccj_id_1_2
+            ,coalesce(ccj_id_2,0) as ccj_id_2
+            ,coalesce(ccj_id_3,0) as ccj_id_3
+            ,coalesce(ccj_id_4,0) as ccj_id_4
+            ,coalesce(ccj_id_5,0) as ccj_id_5
+            ,coalesce(ccj_id_1_2_3_4_5,0) as ccj_id_1_2_3_4_5
+            ,case 
+            WHEN validtime = 1 then 1
+            WHEN holdout = 1 THEN 1
+            ELSE 0 END AS ccj_holdout_id
+    FROM 
+    (SELECT person_id::varchar 
+    
+            ,COUNT(distinct case when
+                   datediff(d, '2020-01-17', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state = 'MN' or
+                   datediff(d, '2020-01-22', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('TN','AR','MO','AL','KY','GA','MS') or
+                   datediff(d, '2019-12-01', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') THEN person_id END) as validtime
+            ,max(TO_DATE(contactdate, 'YYYY-MM-DD')) AS ccj_contactdate
+            ,COUNT(distinct CASE WHEN resultcode IN ('Canvassed', 'Do Not Contact', 'Refused', 'Call Back', 'Language Barrier', 'Hostile', 'Come Back', 'Cultivation', 'Refused Contact', 'Spanish', 'Other', 'Not Interested') THEN person_id END) AS ccj_contact_made 
+            ,COUNT(distinct CASE WHEN resultcode IN ('Do Not Contact','Hostile','Refused','Refused Contact') OR (support_int = 4 OR support_int = 5) THEN person_id END) AS ccj_negative_result 
+            ,COUNT(DISTINCT CASE WHEN support_int = 1 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1 
+            ,COUNT(DISTINCT CASE WHEN support_int IN (1,2) AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1_2 
+            ,COUNT(DISTINCT CASE WHEN support_int = 2 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_2 
+            ,COUNT(DISTINCT CASE WHEN support_int = 3 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_3 
+            ,COUNT(DISTINCT CASE WHEN support_int = 4 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_4 
+            ,COUNT(DISTINCT CASE WHEN support_int = 5 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_5 
+            ,COUNT(DISTINCT CASE WHEN support_int IN (1,2,3,4,5) AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1_2_3_4_5
+            FROM bernie_data_commons.ccj_dnc 
+            WHERE unique_id_flag = 1 AND person_id IS NOT NULL GROUP BY 1) ccj
+            LEFT JOIN 
+            (select person_id::varchar, 1 as holdout from haystaq.set_no_current where set_no=3) ho
+            using(person_id) where person_id is not null) ccj
+    using(person_id)
+-- THIRD PARTY IDS
+   LEFT JOIN
+    (select person_id::varchar(10)
+           ,thirdp_survey_date
+           ,coalesce(thirdp_first_choice_bernie,0) as thirdp_first_choice_bernie
+           ,coalesce(thirdp_first_choice_trump,0) as thirdp_first_choice_trump
+           ,coalesce(thirdp_first_choice_biden,0) as thirdp_first_choice_biden
+           ,coalesce(thirdp_first_choice_warren,0) as thirdp_first_choice_warren
+           ,coalesce(thirdp_first_choice_buttigieg,0) as thirdp_first_choice_buttigieg
+           ,coalesce(thirdp_first_choice_biden_warren_buttigieg,0) as thirdp_first_choice_biden_warren_buttigieg
+           ,coalesce(thirdp_first_choice_any,0) as thirdp_first_choice_any
+           ,coalesce(thirdp_support_1_id,0) as thirdp_support_1_id
+           ,coalesce(thirdp_support_2_id,0) as thirdp_support_2_id
+           ,coalesce(thirdp_support_1_2_id,0) as thirdp_support_1_2_id
+           ,coalesce(thirdp_support_3_id,0) as thirdp_support_3_id
+           ,coalesce(thirdp_support_4_id,0) as thirdp_support_4_id
+           ,coalesce(thirdp_support_5_id,0) as thirdp_support_5_id
+           ,coalesce(thirdp_support_1_2_3_4_5_id,0) as thirdp_support_1_2_3_4_5_id
+           ,case 
+           when validtime = 1 THEN 1
+           WHEN holdout = 1 THEN 1
+           ELSE 0 END AS thirdp_holdout_id
+     from 
+    (select 
+     person_id::varchar(10)
+          ,COUNT(distinct case when
+                 datediff(d, '2020-01-17', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state = 'MN' or
+                 datediff(d, '2020-01-22', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state IN ('TN','AR','MO','AL','KY','GA','MS') or
+                 datediff(d, '2019-12-01', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') then person_id END) as validtime
+          ,max(TO_DATE(survey_date, 'YYYY-MM-DD')) AS thirdp_survey_date
+          ,COUNT(distinct case when first_choice = 'Bernie Sanders' then person_id end) as thirdp_first_choice_bernie
+          ,COUNT(distinct case when first_choice = 'Donald Trump' then person_id end) as thirdp_first_choice_trump
+          ,COUNT(distinct case when first_choice = 'Joe Biden' then person_id end) as thirdp_first_choice_biden
+          ,COUNT(distinct case when first_choice = 'Elizabeth Warren' then person_id end) as thirdp_first_choice_warren
+          ,COUNT(distinct case when first_choice = 'Pete Buttigieg' then person_id end) as thirdp_first_choice_buttigieg
+          ,COUNT(distinct case when first_choice IN ('Pete Buttigieg','Elizabeth Warren','Joe Biden') then person_id end) as thirdp_first_choice_biden_warren_buttigieg
+          ,COUNT(distinct case when first_choice IS NOT NULL then person_id end) as thirdp_first_choice_any
+          ,COUNT(distinct case when support_int = 1 then person_id end) as thirdp_support_1_id
+          ,COUNT(distinct case when support_int = 2 then person_id end) as thirdp_support_2_id
+          ,COUNT(distinct case when support_int IN (1,2) then person_id end) as thirdp_support_1_2_id
+          ,COUNT(distinct case when support_int = 3 then person_id end) as thirdp_support_3_id
+          ,COUNT(distinct case when support_int = 4 then person_id end) as thirdp_support_4_id
+          ,COUNT(distinct case when support_int = 5 then person_id end) as thirdp_support_5_id
+          ,COUNT(distinct case when support_int IN (1,2,3,4,5) then person_id end) as thirdp_support_1_2_3_4_5_id
+    FROM bernie_data_commons.third_party_ids group by 1) third
+   LEFT JOIN
+    (select person_id::varchar, 1 as holdout from haystaq.set_no_current where set_no=3) ho 
+    using(person_id) where person_id is not null) thirdp
+    using(person_id)
+    where ccj_id_1_2_3_4_5 is not null and thirdp_first_choice_any is not null and thirdp_support_1_2_3_4_5_id is not null
+);
+commit;
+
+-- Households of Activists, Donors, and Field / Third Party IDs
+begin;
+DROP TABLE IF EXISTS bernie_nmarchio2.base_household;
+CREATE TABLE bernie_nmarchio2.base_household
+distkey(voting_address_id) 
+sortkey(voting_address_id) as
+(select voting_address_id::varchar,
+        coalesce(activist_household_flag, 0) as activist_household_flag,
+        coalesce(rsvps_household_flag, 0) as rsvps_household_flag,
+        coalesce(attended_household_flag, 0) as attended_household_flag,
+	    coalesce(donor_0_household_flag,0) as donor_0_household_flag,
+	    coalesce(donor_1plus_household_flag,0) as donor_1plus_household_flag,
+        coalesce(ccj_id_1_hh,0) as ccj_id_1_hh,
+        coalesce(ccj_id_2_hh,0) as ccj_id_2_hh,
+        coalesce(ccj_id_3_hh,0) as ccj_id_3_hh,
+        coalesce(ccj_id_4_hh,0) as ccj_id_4_hh,
+        coalesce(ccj_id_5_hh,0) as ccj_id_5_hh,
+        coalesce(ccj_id_1_2_3_4_5_hh,0) as ccj_id_1_2_3_4_5_hh,
+        coalesce(thirdp_first_choice_bernie_hh,0) as thirdp_first_choice_bernie_hh,
+        coalesce(thirdp_first_choice_trump_hh,0) as thirdp_first_choice_trump_hh,
+        coalesce(thirdp_first_choice_biden_warren_buttigieg_hh,0) as thirdp_first_choice_biden_warren_buttigieg_hh,
+        coalesce(thirdp_first_choice_any_hh,0) as thirdp_first_choice_any_hh,
+        coalesce(thirdp_support_1_id_hh,0) as thirdp_support_1_id_hh,
+        coalesce(thirdp_support_2_id_hh,0) as thirdp_support_2_id_hh,
+        coalesce(thirdp_support_3_id_hh,0) as thirdp_support_3_id_hh,
+        coalesce(thirdp_support_4_id_hh,0) as thirdp_support_4_id_hh,
+        coalesce(thirdp_support_5_id_hh,0) as thirdp_support_5_id_hh,
+        coalesce(thirdp_support_1_2_3_4_5_id_hh,0) as thirdp_support_1_2_3_4_5_id_hh
+from 
+(select voting_address_id::varchar,
+        count(distinct CASE WHEN activist_flag = 1 then voting_address_id end) as activist_household_flag,
+        count(distinct CASE WHEN rsvps >= 2 then voting_address_id end) as rsvps_household_flag,
+        count(distinct CASE WHEN attended > 0 then voting_address_id end) as attended_household_flag
+from bernie_nmarchio2.base_activists group by 1)
+full join 
+(select voting_address_id::varchar, 
+        count(distinct CASE WHEN n_donations = 0 then voting_address_id end) as donor_0_household_flag,
+        count(distinct CASE WHEN n_donations > 0 then voting_address_id end) as donor_1plus_household_flag
+	from phoenix_analytics.person inner join bernie_jshuman.donor_basetable using(person_id) group by 1)
+using(voting_address_id)
+full join
+(select voting_address_id::varchar, 
+        count(distinct CASE WHEN ccj_id_1 = 1 then voting_address_id end) as ccj_id_1_hh,
+        count(distinct CASE WHEN ccj_id_2 = 1 then voting_address_id end) as ccj_id_2_hh,
+        count(distinct CASE WHEN ccj_id_3 = 1 then voting_address_id end) as ccj_id_3_hh,
+        count(distinct CASE WHEN ccj_id_4 = 1 then voting_address_id end) as ccj_id_4_hh,
+        count(distinct CASE WHEN ccj_id_5 = 1 then voting_address_id end) as ccj_id_5_hh,
+        count(distinct CASE WHEN ccj_id_1_2_3_4_5 = 1 then voting_address_id end) as ccj_id_1_2_3_4_5_hh,
+        count(distinct CASE WHEN thirdp_first_choice_bernie = 1 then voting_address_id end) as thirdp_first_choice_bernie_hh,
+        count(distinct CASE WHEN thirdp_first_choice_trump = 1 then voting_address_id end) as thirdp_first_choice_trump_hh,
+        count(distinct CASE WHEN thirdp_first_choice_biden_warren_buttigieg = 1 then voting_address_id end) as thirdp_first_choice_biden_warren_buttigieg_hh,
+        count(distinct CASE WHEN thirdp_first_choice_any = 1 then voting_address_id end) as thirdp_first_choice_any_hh,
+        count(distinct CASE WHEN thirdp_support_1_id = 1 then voting_address_id end) as thirdp_support_1_id_hh,
+        count(distinct CASE WHEN thirdp_support_2_id = 1 then voting_address_id end) as thirdp_support_2_id_hh,
+        count(distinct CASE WHEN thirdp_support_3_id = 1 then voting_address_id end) as thirdp_support_3_id_hh,
+        count(distinct CASE WHEN thirdp_support_4_id = 1 then voting_address_id end) as thirdp_support_4_id_hh,
+        count(distinct CASE WHEN thirdp_support_5_id = 1 then voting_address_id end) as thirdp_support_5_id_hh,
+        count(distinct CASE WHEN thirdp_support_1_2_3_4_5_id = 1 then voting_address_id end) as thirdp_support_1_2_3_4_5_id_hh
+from phoenix_analytics.person inner join bernie_nmarchio2.base_validation using(person_id) group by 1)
+using(voting_address_id) where voting_address_id is not null);
 commit;
 
 -- Base Universe Main Table
 begin;
-
 set wlm_query_slot_count to 8;
-
-DROP TABLE IF EXISTS bernie_nmarchio2.base_universe;
-CREATE TABLE bernie_nmarchio2.base_universe
+DROP TABLE IF EXISTS bernie_data_commons.base_universe;
+CREATE TABLE bernie_data_commons.base_universe
 distkey(person_id) 
 sortkey(person_id) AS
+(SELECT *
+	    --,NTILE(100) OVER (PARTITION BY state_code ORDER BY support_tier_juiced_rank ASC) AS gotv_tiers_100
+	    FROM
   (SELECT p.person_id::varchar,
   	      xwalk.actionkit_id, 
   	      xwalk.jsonid,
@@ -324,81 +507,135 @@ sortkey(person_id) AS
           volmodel.bernie_action_100,
 
           -- Third Party IDs
-          thirdp.thirdp_survey_date,
-          thirdp.thirdp_first_choice_bernie,
-          thirdp.thirdp_first_choice_trump,
-          thirdp.thirdp_first_choice_biden,
-          thirdp.thirdp_first_choice_warren,
-          thirdp.thirdp_first_choice_buttigieg,
-          thirdp.thirdp_first_choice_biden_warren_buttigieg,
-          thirdp.thirdp_first_choice_any,
-          thirdp.thirdp_support_1_id,
-          thirdp.thirdp_support_2_id,
-          thirdp.thirdp_support_1_2_id,
-          thirdp.thirdp_support_3_id,
-          thirdp.thirdp_support_4_id,
-          thirdp.thirdp_support_5_id,
-          thirdp.thirdp_support_1_2_3_4_5_id,
-          thirdp.thirdp_holdout_id,
+          bvalidate.thirdp_survey_date,
+          bvalidate.thirdp_first_choice_bernie,
+          bvalidate.thirdp_first_choice_trump,
+          bvalidate.thirdp_first_choice_biden,
+          bvalidate.thirdp_first_choice_warren,
+          bvalidate.thirdp_first_choice_buttigieg,
+          bvalidate.thirdp_first_choice_biden_warren_buttigieg,
+          bvalidate.thirdp_first_choice_any,
+          bvalidate.thirdp_support_1_id,
+          bvalidate.thirdp_support_2_id,
+          bvalidate.thirdp_support_1_2_id,
+          bvalidate.thirdp_support_3_id,
+          bvalidate.thirdp_support_4_id,
+          bvalidate.thirdp_support_5_id,
+          bvalidate.thirdp_support_1_2_3_4_5_id,
+          bvalidate.thirdp_holdout_id,
+
+          -- Third Party IDs Household
+          case when bhousehold.thirdp_first_choice_bernie_hh = 1 and bvalidate.thirdp_first_choice_bernie <> 1 then 1 else 0 end as thirdp_first_choice_bernie_hh,
+          case when bhousehold.thirdp_first_choice_trump_hh = 1 and bvalidate.thirdp_first_choice_trump <> 1 then 1 else 0 end as thirdp_first_choice_trump_hh,
+          case when bhousehold.thirdp_first_choice_biden_warren_buttigieg_hh = 1 and bvalidate.thirdp_first_choice_biden_warren_buttigieg <> 1 then 1 else 0 end as thirdp_first_choice_biden_warren_buttigieg_hh,
+          case when bhousehold.thirdp_first_choice_any_hh = 1 and bvalidate.thirdp_first_choice_any <> 1 then 1 else 0 end as thirdp_first_choice_any_hh,
+          case when bhousehold.thirdp_support_1_id_hh = 1 and bvalidate.thirdp_support_1_id <> 1 then 1 else 0 end as thirdp_support_1_id_hh,
+          case when bhousehold.thirdp_support_2_id_hh = 1 and bvalidate.thirdp_support_2_id <> 1 then 1 else 0 end as thirdp_support_2_id_hh,
+          case when bhousehold.thirdp_support_3_id_hh = 1 and bvalidate.thirdp_support_3_id <> 1 then 1 else 0 end as thirdp_support_3_id_hh,
+          case when bhousehold.thirdp_support_4_id_hh = 1 and bvalidate.thirdp_support_4_id <> 1 then 1 else 0 end as thirdp_support_4_id_hh,
+          case when bhousehold.thirdp_support_5_id_hh = 1 and bvalidate.thirdp_support_5_id <> 1 then 1 else 0 end as thirdp_support_5_id_hh,
+          case when bhousehold.thirdp_support_1_2_3_4_5_id_hh = 1 and bvalidate.thirdp_support_1_2_3_4_5_id <> 1 then 1 else 0 end as thirdp_support_1_2_3_4_5_id_hh,
 
           -- Field IDs
-          ccj.ccj_contactdate,
-          ccj.ccj_contact_made,
-          ccj.ccj_negative_result,
-          ccj.ccj_id_1,
-          ccj.ccj_id_1_2,
-          ccj.ccj_id_2,
-          ccj.ccj_id_3,
-          ccj.ccj_id_4,
-          ccj.ccj_id_5,
-          ccj.ccj_id_1_2_3_4_5,
-          ccj.ccj_holdout_id,
-          
-          -- Donor / Activism Flags
-          coalesce(active_base.mvp_myc ,0) as mvp_myc ,
-          coalesce(active_base.activist_myc ,0) as activist_myc ,
-          coalesce(active_base.canvass_myc ,0) as canvass_myc ,
-          coalesce(active_base.volunteer_myc ,0) as volunteer_myc ,
-          coalesce(active_base.constituencies_myc ,0) as constituencies_myc ,
-          coalesce(active_base.volunteer_shifts_myc ,0) as volunteer_shifts_myc ,
-          coalesce(active_base.student_myc ,0) as student_myc ,
-          coalesce(active_base.teacher_myc ,0) as teacher_myc ,
-          coalesce(active_base.labor_myc,0) as labor_myc,
-          coalesce(active_base.bernapp,0) as bernapp,
-          coalesce(active_base.sticker_id ,0) as sticker_id ,
-          coalesce(active_base.commit2caucus_id ,0) as commit2caucus_id ,
-          coalesce(active_base.union_id ,0) as union_id ,
-          coalesce(active_base.student_id ,0) as student_id ,
-          coalesce(active_base.volunteer_yes_id,0) as volunteer_yes_id,
-          coalesce(active_base.slack_vol,0) as slack_vol,
-          coalesce(active_base.akmob_attended_canvass ,0) as akmob_attended_canvass ,
-          coalesce(active_base.akmob_attended_phonebank ,0) as akmob_attended_phonebank ,
-          coalesce(active_base.akmob_attended_small_event ,0) as akmob_attended_small_event ,
-          coalesce(active_base.akmob_attended_friend_to_friend ,0) as akmob_attended_friend_to_friend ,
-          coalesce(active_base.akmob_attended_training ,0) as akmob_attended_training ,
-          coalesce(active_base.akmob_attended_barnstorm ,0) as akmob_attended_barnstorm ,
-          coalesce(active_base.akmob_attended_rally_town_hall ,0) as akmob_attended_rally_town_hall ,
-          coalesce(active_base.akmob_attended_solidarity_action,0) as akmob_attended_solidarity_action,
-          coalesce(active_base.activist_flag,0) as activist_flag,
+          bvalidate.ccj_contactdate,
+          bvalidate.ccj_contact_made,
+          bvalidate.ccj_negative_result,
+          bvalidate.ccj_id_1,
+          bvalidate.ccj_id_1_2,
+          bvalidate.ccj_id_2,
+          bvalidate.ccj_id_3,
+          bvalidate.ccj_id_4,
+          bvalidate.ccj_id_5,
+          bvalidate.ccj_id_1_2_3_4_5,
+          bvalidate.ccj_holdout_id,
 
-          coalesce(donor_base.donor_id,0) as donor_id,
-          coalesce(p_household.donor_household,0) as donor_household,
-          coalesce(p_household.event_household,0) as event_household,
-          coalesce(p_household.volunteer_household,0) as volunteer_household,
-          CASE WHEN p_household.id1_household = 1 AND ccj.ccj_id_1 <> 1 THEN 1 ELSE 0 END AS id1_household ,
+		  -- Field IDs Household
+          case when bhousehold.ccj_id_1_hh = 1 and bvalidate.ccj_id_1 <> 1 then 1 else 0 end as ccj_id_1_hh,
+          case when bhousehold.ccj_id_2_hh = 1 and bvalidate.ccj_id_2 <> 1 then 1 else 0 end as ccj_id_2_hh,
+          case when bhousehold.ccj_id_3_hh = 1 and bvalidate.ccj_id_3 <> 1 then 1 else 0 end as ccj_id_3_hh,
+          case when bhousehold.ccj_id_4_hh = 1 and bvalidate.ccj_id_4 <> 1 then 1 else 0 end as ccj_id_4_hh,
+          case when bhousehold.ccj_id_5_hh = 1 and bvalidate.ccj_id_5 <> 1 then 1 else 0 end as ccj_id_5_hh,
+          case when bhousehold.ccj_id_1_2_3_4_5_hh = 1 and bvalidate.ccj_id_1_2_3_4_5 <> 1 then 1 else 0 end as ccj_id_1_2_3_4_5_hh,
+
+          -- Disaggregated Activism Flags
+
+          -- MyCampaign flags
+          coalesce(bactive.mvp_myc ,0) as mvp_myc ,
+          coalesce(bactive.activist_myc ,0) as activist_myc ,
+          coalesce(bactive.canvass_myc ,0) as canvass_myc ,
+          coalesce(bactive.volunteer_myc ,0) as volunteer_myc ,
+          coalesce(bactive.constituencies_myc ,0) as constituencies_myc ,
+          coalesce(bactive.volunteer_shifts_myc ,0) as volunteer_shifts_myc ,
+          coalesce(bactive.student_myc ,0) as student_myc ,
+          coalesce(bactive.teacher_myc ,0) as teacher_myc ,
+          coalesce(bactive.labor_myc,0) as labor_myc,
+          -- Bern App flags
+          coalesce(bactive.bernapp,0) as bernapp,
+          -- Survey response flags
+          coalesce(bactive.sticker_id ,0) as sticker_id ,
+          coalesce(bactive.commit2caucus_id ,0) as commit2caucus_id ,
+          coalesce(bactive.union_id ,0) as union_id ,
+          coalesce(bactive.student_id ,0) as student_id ,
+          coalesce(bactive.volunteer_yes_id,0) as volunteer_yes_id,
+          coalesce(bactive.slack_vol,0) as slack_vol,
+          -- AK Mobilize Activist Flags (signups and confirmed attendence)
+          coalesce(bactive.rsvps,0) as rsvps,
+          coalesce(bactive.akmob_rsvps_canvass ,0) as akmob_rsvps_canvass ,
+          coalesce(bactive.akmob_rsvps_phonebank ,0) as akmob_rsvps_phonebank ,
+          coalesce(bactive.akmob_rsvps_small_event ,0) as akmob_rsvps_small_event ,
+          coalesce(bactive.akmob_rsvps_friend_to_friend ,0) as akmob_rsvps_friend_to_friend ,
+          coalesce(bactive.akmob_rsvps_training ,0) as akmob_rsvps_training ,
+          coalesce(bactive.akmob_rsvps_barnstorm ,0) as akmob_rsvps_barnstorm ,
+          coalesce(bactive.akmob_rsvps_rally_town_hall ,0) as akmob_rsvps_rally_town_hall ,
+          coalesce(bactive.akmob_rsvps_solidarity_action ,0) as akmob_rsvps_solidarity_action ,
+          coalesce(bactive.attended,0) as attended,
+          coalesce(bactive.akmob_attended_canvass ,0) as akmob_attended_canvass ,
+          coalesce(bactive.akmob_attended_phonebank ,0) as akmob_attended_phonebank ,
+          coalesce(bactive.akmob_attended_small_event ,0) as akmob_attended_small_event ,
+          coalesce(bactive.akmob_attended_friend_to_friend ,0) as akmob_attended_friend_to_friend ,
+          coalesce(bactive.akmob_attended_training ,0) as akmob_attended_training ,
+          coalesce(bactive.akmob_attended_barnstorm ,0) as akmob_attended_barnstorm ,
+          coalesce(bactive.akmob_attended_rally_town_hall ,0) as akmob_attended_rally_town_hall ,
+          coalesce(bactive.akmob_attended_solidarity_action,0) as akmob_attended_solidarity_action,
+          coalesce(bactive.activist_flag,0) as activist_flag,
+          -- Activism in Household
+          coalesce(bhousehold.activist_household_flag,0) as activist_household_flag,
+          coalesce(bhousehold.rsvps_household_flag,0) as rsvps_household_flag,
+          coalesce(bhousehold.attended_household_flag,0) as attended_household_flag,
+          -- Donor Flags
+          coalesce(bdonor.event_signup_0_flag,0) as event_signup_0_flag,
+          coalesce(bdonor.event_signup_1_flag,0) as event_signup_1_flag,
+          coalesce(bdonor.event_signup_1plus_flag,0) as event_signup_1plus_flag,
+          coalesce(bdonor.donor_0_flag,0) as donor_0_flag,
+          coalesce(bdonor.donor_1plus_flag,0) as donor_1plus_flag,
+          -- Donor in Household
+          coalesce(bhousehold.donor_0_household_flag,0) as donor_0_household_flag,
+          coalesce(bhousehold.donor_1plus_household_flag,0) as donor_1plus_household_flag,
 
           -- Electorate definition
           CASE WHEN voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
                     OR voterinfo.party_8way = '1 - Democratic' 
                     OR voterinfo.civis_2020_partisanship >= .66
+
+                    OR rsvps = 1
+                    OR attended = 1
                     OR activist_flag = 1
-                    OR donor_household = 1
-                    OR event_household = 1
-                    OR volunteer_household = 1
-                    OR id1_household = 1
-                    OR ccj.ccj_id_1_2 = 1
-                    OR thirdp.thirdp_support_1_2_id = 1
-                    OR thirdp.thirdp_first_choice_bernie = 1 
+                    OR activist_household_flag = 1
+                    OR rsvps_household_flag = 1
+                    OR attended_household_flag = 1
+
+                    OR donor_1plus_flag = 1 
+                    OR donor_0_household_flag = 1
+                    OR donor_1plus_household_flag = 1
+
+                    OR bvalidate.ccj_id_1_2 = 1
+                    OR bvalidate.thirdp_support_1_2_id = 1
+                    OR bvalidate.thirdp_first_choice_bernie = 1 
+
+                    OR ccj_id_1_hh = 1
+                    OR thirdp_support_1_id_hh = 1
+                    OR thirdp_first_choice_bernie_hh = 1
+                    
                     OR bdcas.donut_segment = '1_core_bernie'
                     OR bdcas.current_support_raw_100 >= 90
                     OR bdcas.field_id_1_score_100 >= 90
@@ -409,27 +646,26 @@ sortkey(person_id) AS
           -- Vote readiness bucket
           CASE
               WHEN     electorate_2way = '2 - Non-target' 
-                       THEN '6 - Non-target'
+                  THEN '6 - Non-target'
               WHEN     voterinfo.registered_in_state_3way = '1 - Registered in current state' 
                    AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
                    AND voterinfo.vote_history_6way IN ('1 - Dem Primary voter (2004-2018)','2 - General voter (2018)','3 - Registered since 2018')
-                       THEN '1 - Vote-ready'
+                  THEN '1 - Vote-ready'
               WHEN     voterinfo.registered_in_state_3way = '1 - Registered in current state' 
                    AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
                    AND voterinfo.vote_history_6way IN ('4 - Voted in any General (1998-2016)','5 - No vote but eligible (2008-2018)','6 - Other')
-                       THEN '2 - Vote-ready lapsed'
+                  THEN '2 - Vote-ready lapsed'
               WHEN     voterinfo.registered_in_state_3way = '1 - Registered in current state' 
                    AND voterinfo.dem_primary_eligible_2way = '2 - Must Register as Dem'
-                       THEN '3 - Register as Dem'
+                  THEN '3 - Register as Dem'
               WHEN     voterinfo.registered_in_state_3way = '2 - Registered in different state'
-                       THEN '4 - Register in current state'
+                  THEN '4 - Register in current state'
               WHEN     voterinfo.registered_in_state_3way = '3 - Absentee voter' 
                    AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
-                       THEN '5 - Absentee voter'
+                  THEN '5 - Absentee voter'
               ELSE '6 - Non-target' END AS vote_ready_6way,
 
            -- Support thresholds   
-
            case 
               when electorate_2way = '2 - Non-target' THEN '5 - Non-target' 
               when (bdcas.biden_support_100 <= 80 or spokemodel.spoke_persuasion_1minus_100 <= 50) and (bdcas.current_support_raw_100 >= 90 or bdcas.sanders_strong_support_score_100 >= 80) and (bdcas.field_id_1_score_100 >= 80 or bdcas.field_id_composite_score_100 >= 80) and  (spokemodel.spoke_support_1box_100 >= 75 and spokemodel.spoke_persuasion_1plus_100 >= 75) and (volmodel.attendee_100 >= 80 or volmodel.kickoff_party_rally_barnstorm_attendee_100 >= 80 or volmodel.canvasser_phonebank_attendee_100 >= 80 or volmodel.bernie_action_100  >= 80) then '1 - Support Tier 1'
@@ -552,29 +788,38 @@ sortkey(person_id) AS
 
         ,CASE 
         WHEN score_thresholds = '5 - Non-target' then '4 - Non-target' 
-        WHEN activist_flag = 1 or donor_id = 1 then '0 - Donors and Activists'
-        WHEN score_thresholds = '1 - Support Tier 1' then '1 - GOTV Tier 1'
-        WHEN score_thresholds = '2 - Support Tier 2' then '2 - GOTV Tier 2'
-        WHEN score_thresholds = '3 - Support Tier 3' then '3 - GOTV Tier 3'
-        ELSE '4 - Non-target' END AS gotv_segment_validation
+        WHEN activist_flag = 1
+          OR activist_household_flag = 1
+          OR donor_1plus_flag = 1 
+          OR donor_1plus_household_flag = 1 then '0 - Donors and Activists'
+        WHEN score_thresholds = '1 - Support Tier 1' then '1 - Support Tier 1'
+        WHEN score_thresholds = '2 - Support Tier 2' then '2 - Support Tier 2'
+        WHEN score_thresholds = '3 - Support Tier 3' then '3 - Support Tier 3'
+        ELSE '4 - Non-target' END AS support_tier_validation
 
         ,CASE 
-        WHEN score_thresholds = '5 - Non-target' or ccj.ccj_id_5 = 1 or thirdp.thirdp_support_5_id = 1 or thirdp.thirdp_first_choice_biden_warren_buttigieg = 1 then '4 - Non-target' 
-        WHEN activist_flag = 1 or donor_id = 1 or ccj.ccj_id_1 = 1 or thirdp.thirdp_first_choice_bernie = 1 or thirdp.thirdp_support_1_id = 1 or donor_household = 1 or event_household = 1 or volunteer_household = 1 or id1_household = 1 then '0 - Donors and Activists'
-        WHEN score_thresholds = '1 - Support Tier 1' then '1 - GOTV Tier 1'
-        WHEN score_thresholds = '2 - Support Tier 2' then '2 - GOTV Tier 2'
-        WHEN score_thresholds = '3 - Support Tier 3' or ccj.ccj_id_2 = 1 or thirdp.thirdp_support_2_id = 1 then '3 - GOTV Tier 3'
-        ELSE '4 - Non-target' END AS gotv_segment_juiced
+        WHEN score_thresholds = '5 - Non-target' 
+          or bvalidate.ccj_id_5 = 1 
+          or bvalidate.thirdp_support_5_id = 1 
+          or bvalidate.thirdp_first_choice_biden_warren_buttigieg = 1 then '4 - Non-target' 
+        WHEN bvalidate.ccj_id_1 = 1 
+          or bvalidate.thirdp_first_choice_bernie = 1 
+          or bvalidate.thirdp_support_1_id = 1 
+          or support_tier_validation = '0 - Donors and Activists' then '0 - Donors, Activists, Support 1 IDs'
+        WHEN score_thresholds = '1 - Support Tier 1' then '1 - Support Tier 1'
+        WHEN score_thresholds = '2 - Support Tier 2' then '2 - Support Tier 2'
+        WHEN score_thresholds = '3 - Support Tier 3' or bvalidate.ccj_id_2 = 1 or bvalidate.thirdp_support_2_id = 1 then '3 - Support Tier 3'
+        ELSE '4 - Non-target' END AS support_tier_juiced
 
-        --,round(1.0*sum((case when electorate_2way  = '1 - Target universe' then p.person_id end)) OVER (partition BY p.state_code ORDER BY gotv_segment_juiced, bdcas.field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS electorate_share_gotv_segment_juiced_rank
-        --,row_number() OVER (PARTITION BY p.state_code ORDER BY gotv_segment_juiced ASC, bdcas.field_id_1_score DESC) as gotv_segment_juiced_rank
-
+        --,round(1.0*sum((case when electorate_2way  = '1 - Target universe' then p.person_id end)) OVER (partition BY p.state_code ORDER BY support_tier_juiced ASC, bdcas.field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
+        --,row_number() OVER (PARTITION BY p.state_code ORDER BY support_tier_juiced ASC, bdcas.field_id_1_score DESC) as support_tier_juiced_rank
+        
      FROM 
 
  -- PERSON
       (SELECT person_id::varchar,
               state_code,
-              voting_address_id,
+              voting_address_id::varchar,
               county_fips,
               county_name,
               dnc_precinct_id,
@@ -585,9 +830,7 @@ sortkey(person_id) AS
       WHERE is_deceased = FALSE
         AND reg_record_merged = FALSE
         AND reg_on_current_file = TRUE
-        AND reg_voter_flag = TRUE 
-        -- AND state_code IN ('AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA')
-      ) p
+        AND reg_voter_flag = TRUE) p
 
 -- CROSSWALK
     LEFT JOIN
@@ -619,170 +862,57 @@ sortkey(person_id) AS
       FROM bernie_data_commons.all_scores_ntile) bdcas
      using(person_id)
 
--- FIELD IDS
+-- FIELD AND THIRD PARTY IDS
    LEFT JOIN 
-    (select person_id::varchar
-            ,ccj_contactdate
-            ,coalesce(ccj_contact_made,0) as ccj_contact_made
-            ,coalesce(ccj_negative_result,0) as ccj_negative_result
-            ,coalesce(ccj_id_1,0) as ccj_id_1
-            ,coalesce(ccj_id_1_2,0) as ccj_id_1_2
-            ,coalesce(ccj_id_2,0) as ccj_id_2
-            ,coalesce(ccj_id_3,0) as ccj_id_3
-            ,coalesce(ccj_id_4,0) as ccj_id_4
-            ,coalesce(ccj_id_5,0) as ccj_id_5
-            ,coalesce(ccj_id_1_2_3_4_5,0) as ccj_id_1_2_3_4_5
-            ,case 
-            WHEN validtime = 1 then 1
-            WHEN holdout = 1 THEN 1
-            ELSE 0 END AS ccj_holdout_id
-    FROM 
-    (SELECT person_id::varchar 
-    
-            ,COUNT(distinct case when
-                   datediff(d, '2020-01-17', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state = 'MN' or
-                   datediff(d, '2020-01-22', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('TN','AR','MO','AL','KY','GA','MS') or
-                   datediff(d, '2019-12-01', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') THEN person_id END) as validtime
-            ,max(TO_DATE(contactdate, 'YYYY-MM-DD')) AS ccj_contactdate
-            ,COUNT(distinct CASE WHEN resultcode IN ('Canvassed', 'Do Not Contact', 'Refused', 'Call Back', 'Language Barrier', 'Hostile', 'Come Back', 'Cultivation', 'Refused Contact', 'Spanish', 'Other', 'Not Interested') THEN person_id END) AS ccj_contact_made 
-            ,COUNT(distinct CASE WHEN resultcode IN ('Do Not Contact','Hostile','Refused','Refused Contact') OR (support_int = 4 OR support_int = 5) THEN person_id END) AS ccj_negative_result 
-            ,COUNT(DISTINCT CASE WHEN support_int = 1 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1 
-            ,COUNT(DISTINCT CASE WHEN support_int IN (1,2) AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1_2 
-            ,COUNT(DISTINCT CASE WHEN support_int = 2 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_2 
-            ,COUNT(DISTINCT CASE WHEN support_int = 3 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_3 
-            ,COUNT(DISTINCT CASE WHEN support_int = 4 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_4 
-            ,COUNT(DISTINCT CASE WHEN support_int = 5 AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_5 
-            ,COUNT(DISTINCT CASE WHEN support_int IN (1,2,3,4,5) AND unique_id_flag=TRUE THEN person_id END) AS ccj_id_1_2_3_4_5
-            FROM bernie_data_commons.ccj_dnc 
-            WHERE unique_id_flag = 1 AND person_id IS NOT NULL GROUP BY 1) ccj
-            LEFT JOIN 
-            (select person_id::varchar, 1 as holdout from haystaq.set_no_current where set_no=3) ho
-            using(person_id) where person_id is not null) ccj
-   using(person_id)
-
--- THIRD PARTY IDS
-   LEFT JOIN
-    (select person_id::varchar(10)
-           ,thirdp_survey_date
-           ,coalesce(thirdp_first_choice_bernie,0) as thirdp_first_choice_bernie
-           ,coalesce(thirdp_first_choice_trump,0) as thirdp_first_choice_trump
-           ,coalesce(thirdp_first_choice_biden,0) as thirdp_first_choice_biden
-           ,coalesce(thirdp_first_choice_warren,0) as thirdp_first_choice_warren
-           ,coalesce(thirdp_first_choice_buttigieg,0) as thirdp_first_choice_buttigieg
-           ,coalesce(thirdp_first_choice_biden_warren_buttigieg,0) as thirdp_first_choice_biden_warren_buttigieg
-           ,coalesce(thirdp_first_choice_any,0) as thirdp_first_choice_any
-           ,coalesce(thirdp_support_1_id,0) as thirdp_support_1_id
-           ,coalesce(thirdp_support_2_id,0) as thirdp_support_2_id
-           ,coalesce(thirdp_support_1_2_id,0) as thirdp_support_1_2_id
-           ,coalesce(thirdp_support_3_id,0) as thirdp_support_3_id
-           ,coalesce(thirdp_support_4_id,0) as thirdp_support_4_id
-           ,coalesce(thirdp_support_5_id,0) as thirdp_support_5_id
-           ,coalesce(thirdp_support_1_2_3_4_5_id,0) as thirdp_support_1_2_3_4_5_id
-           ,case 
-           when validtime = 1 THEN 1
-           WHEN holdout = 1 THEN 1
-           ELSE 0 END AS thirdp_holdout_id
-     from 
-    (select 
-     person_id::varchar(10)
-          ,COUNT(distinct case when
-               datediff(d, '2020-01-17', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state = 'MN' or
-               datediff(d, '2020-01-22', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state IN ('TN','AR','MO','AL','KY','GA','MS') or
-               datediff(d, '2019-12-01', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') then person_id END) as validtime
-          ,max(TO_DATE(survey_date, 'YYYY-MM-DD')) AS thirdp_survey_date
-          ,COUNT(distinct case when first_choice = 'Bernie Sanders' then person_id end) as thirdp_first_choice_bernie
-          ,COUNT(distinct case when first_choice = 'Donald Trump' then person_id end) as thirdp_first_choice_trump
-          ,COUNT(distinct case when first_choice = 'Joe Biden' then person_id end) as thirdp_first_choice_biden
-          ,COUNT(distinct case when first_choice = 'Elizabeth Warren' then person_id end) as thirdp_first_choice_warren
-          ,COUNT(distinct case when first_choice = 'Pete Buttigieg' then person_id end) as thirdp_first_choice_buttigieg
-          ,COUNT(distinct case when first_choice IN ('Pete Buttigieg','Elizabeth Warren','Joe Biden') then person_id end) as thirdp_first_choice_biden_warren_buttigieg
-          ,COUNT(distinct case when first_choice IS NOT NULL then person_id end) as thirdp_first_choice_any
-          ,COUNT(distinct case when support_int = 1 then person_id end) as thirdp_support_1_id
-          ,COUNT(distinct case when support_int = 2 then person_id end) as thirdp_support_2_id
-          ,COUNT(distinct case when support_int IN (1,2) then person_id end) as thirdp_support_1_2_id
-          ,COUNT(distinct case when support_int = 3 then person_id end) as thirdp_support_3_id
-          ,COUNT(distinct case when support_int = 4 then person_id end) as thirdp_support_4_id
-          ,COUNT(distinct case when support_int = 5 then person_id end) as thirdp_support_5_id
-          ,COUNT(distinct case when support_int IN (1,2,3,4,5) then person_id end) as thirdp_support_1_2_3_4_5_id
-    FROM bernie_data_commons.third_party_ids group by 1) third
-   LEFT JOIN
-    (select person_id::varchar, 1 as holdout from haystaq.set_no_current where set_no=3) ho 
-    using(person_id) where person_id is not null) thirdp
+   (SELECT * FROM bernie_nmarchio2.base_validation) bvalidate
     using(person_id)
 
 -- SPOKE AND VOL MODELS
    LEFT JOIN
     (SELECT person_id::varchar,
-           spoke_support_1box,
-           spoke_persuasion_1plus,
-           spoke_persuasion_1minus,
-           spoke_support_1box_100,
-           spoke_persuasion_1plus_100,
-           spoke_persuasion_1minus_100 
+            spoke_support_1box,
+            spoke_persuasion_1plus,
+            spoke_persuasion_1minus,
+            spoke_support_1box_100,
+            spoke_persuasion_1plus_100,
+            spoke_persuasion_1minus_100 
     FROM scores.spoke_output_20191221) spokemodel
     using(person_id)
    LEFT JOIN
     (SELECT person_id,
-           attendee,
-           kickoff_party_rally_barnstorm_attendee,
-           canvasser_phonebank_attendee,
-           bernie_action,
-           attendee_100,
-           kickoff_party_rally_barnstorm_attendee_100,
-           canvasser_phonebank_attendee_100,
-           bernie_action_100
+            attendee,
+            kickoff_party_rally_barnstorm_attendee,
+            canvasser_phonebank_attendee,
+            bernie_action,
+            attendee_100,
+            kickoff_party_rally_barnstorm_attendee_100,
+            canvasser_phonebank_attendee_100,
+            bernie_action_100
     FROM scores.actionpop_output_20191220) volmodel
     using(person_id)
 
 -- DONOR INFO
     left join
-   (select distinct person_id, 1 as donor_id from bernie_jshuman.donor_basetable where n_donations > 0) donor_base
+   (select distinct person_id, 
+                    count(distinct case when n_event_signups = 0 or n_event_signups is null then person_id end) as event_signup_0_flag,
+                    count(distinct case when n_event_signups = 1 then person_id end) as event_signup_1_flag,
+                    count(distinct case when n_event_signups > 1 then person_id end) as event_signup_1plus_flag,
+                    count(distinct case when n_donations = 0 then person_id end) as donor_0_flag,
+                    count(distinct case when n_donations > 0 then person_id end) as donor_1plus_flag
+   	from bernie_jshuman.donor_basetable where person_id is not null group by 1) bdonor
    using(person_id)
 
 -- VOLUNTEER INFO
     left join
-   (SELECT * FROM bernie_nmarchio2.activist_base) active_base
+   (SELECT * FROM bernie_nmarchio2.base_activists) bactive
    using(person_id)
 
 -- HOUSEHOLD LEVEL INFO
-    LEFT JOIN 
-    (SELECT 
-        voting_address_id ,
-        max(CASE WHEN ccj.person_id IS NOT NULL THEN 1 ELSE 0 END) AS id1_household ,
-        max(CASE WHEN donors.user_id IS NOT NULL THEN 1 ELSE 0 END) AS donor_household ,
-        max(CASE WHEN events.person_id IS NOT NULL AND (events.events_attended >= 1 OR events.events_rsvpd >= 1) THEN 1 ELSE 0 END) AS event_household ,
-        max(CASE WHEN events.person_id IS NOT NULL AND events.volunteer >= 1 THEN 1 ELSE 0 END) AS volunteer_household
-    FROM
-        (SELECT person_id, voting_address_id FROM phoenix_analytics.person WHERE is_deceased = FALSE AND reg_voter_flag = TRUE) p
-    JOIN bernie_data_commons.master_xwalk_dnc xw ON xw.person_id = p.person_id
-    LEFT JOIN bernie_data_commons.ccj_dnc ccj ON ccj.person_id = p.person_id AND ccj.unique_id_flag = 1 AND ccj.support_int = 1
-    LEFT JOIN
-        (SELECT co.user_id AS user_id
-        FROM ak_bernie.core_order co
-        LEFT JOIN ak_bernie.core_transaction ct ON co.id = ct.order_id
-        WHERE ct.success = 1 
-                AND coalesce(ct.created_at, co.created_at, NULL) >= date('2019-02-18') 
-                AND ct.type IN ('sale','credit') 
-                AND ct.status IN ('completed','') 
-                AND ct.amount > 0 
-                AND co.status = 'completed'
-        GROUP BY 1) donors ON donors.user_id = xw.actionkit_id
-    LEFT JOIN
-        (SELECT xw.person_id ,
-                xw.actionkit_id ,
-                xw.st_myc_van_id ,
-                xw.jsonid_encoded ,
-                pasr.state,
-                count(CASE WHEN status_name IN ('Completed', 'Walk in') THEN pasr.event_id END) AS events_attended ,
-                count(pasr.event_id) AS events_rsvpd ,
-                COUNT(DISTINCT CASE WHEN pasr.role <> 'Attendee' THEN pasr.myc_van_id END) AS volunteer
-        FROM ptg.ptg_all_shifts_regioned pasr
-        JOIN bernie_data_commons.master_xwalk_st_myc xw ON xw.myc_van_id = pasr.myc_van_id AND xw.state_code = pasr.state
-        WHERE status_rank = 1 AND event_date::date < (CURRENT_DATE)::date
-        GROUP BY 1,2,3,4,5) events ON events.person_id = xw.person_id GROUP BY 1) p_household 
-        ON p_household.voting_address_id = p.voting_address_id
+	left join
+   (select * from bernie_nmarchio2.base_household) bhousehold
+   on p.voting_address_id = bhousehold.voting_address_id
 
--- CONSTITUENCIES
+-- NATIONAL CONSTITUENCY TABLE
 LEFT JOIN 
   (SELECT person_id::varchar,
           flag_muslim,
@@ -827,8 +957,7 @@ LEFT JOIN
       LEFT JOIN bernie_data_commons.rainbow_analytics_frame rainbo using(person_id)) voterinfo 
      using(person_id)
     
-  );
+  )
+);
 
 commit;
-
-
