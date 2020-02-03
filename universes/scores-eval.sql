@@ -76,7 +76,10 @@ state_code,
       --when rolling_electorate_share_simple <= .95 then '95%'
  else 'Above 100%' end as rolling_share,
 count(*) as number_of_voters,
-sum(activist_flag) as activists,
+sum(case when activist_flag = 1
+          OR activist_household_flag = 1
+          OR donor_1plus_flag = 1 
+          OR donor_1plus_household_flag = 1 end) as activists,
 sum(ccj_id_1) as ccj1,
 sum(ccj_id_2) as ccj2,
 sum(ccj_id_3) as ccj3,
