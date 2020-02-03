@@ -1,6 +1,4 @@
 
-
-
 -- ActionKit / Mobilize Recoded Events (recodes all events to standardized categories related to activism and campaign engagement)
 begin;
 set wlm_query_slot_count to 2;
@@ -47,7 +45,7 @@ sortkey(ak_event_id, mobilize_event_id) as
                   lower(event_type::varchar(256)) AS event_type_mob,
                   lower(title::varchar(256)) AS event_title_mob
                   FROM mobilize.events_comprehensive) mob 
-          ON mob.mobilize_id = xwalk.mobilize_id AND xwalk.rownum = 1) WHERE rownum = 1 and (ak_event_id is not null and mobilize_id is not null) and event_recode is not null);
+          ON mob.mobilize_id = xwalk.mobilize_id AND xwalk.rownum = 1) WHERE rownum = 1 and (ak_event_id is not null or mobilize_id is not null) and event_recode is not null);
 commit;
 
 --  Activism Sidetable (all individuals in Bern app, volunteers / attendees / RSVPs in ActionKit and Mobilize, shift volunteers and supporters in MyCampaign, and activism-related Survey Responses)
@@ -75,7 +73,7 @@ sortkey(person_id) as
         coalesce(surveys.student_id ,0) as student_id ,
         coalesce(surveys.volunteer_yes_id,0) as volunteer_yes_id,
         coalesce(slack.slack_vol,0) as slack_vol,
-        coalesce(akmob.rsvps,0) as rsvps,
+        coalesce(akmob.akmob_rsvps,0) as akmob_rsvps,
         coalesce(akmob.akmob_rsvps_canvass ,0) as akmob_rsvps_canvass ,
         coalesce(akmob.akmob_rsvps_phonebank ,0) as akmob_rsvps_phonebank ,
         coalesce(akmob.akmob_rsvps_small_event ,0) as akmob_rsvps_small_event ,
@@ -84,7 +82,7 @@ sortkey(person_id) as
         coalesce(akmob.akmob_rsvps_barnstorm ,0) as akmob_rsvps_barnstorm ,
         coalesce(akmob.akmob_rsvps_rally_town_hall ,0) as akmob_rsvps_rally_town_hall ,
         coalesce(akmob.akmob_rsvps_solidarity_action ,0) as akmob_rsvps_solidarity_action ,
-        coalesce(akmob.attended,0) as attended,
+        coalesce(akmob.akmob_attended,0) as akmob_attended,
         coalesce(akmob.akmob_attended_canvass ,0) as akmob_attended_canvass ,
         coalesce(akmob.akmob_attended_phonebank ,0) as akmob_attended_phonebank ,
         coalesce(akmob.akmob_attended_small_event ,0) as akmob_attended_small_event ,
@@ -93,9 +91,14 @@ sortkey(person_id) as
         coalesce(akmob.akmob_attended_barnstorm ,0) as akmob_attended_barnstorm ,
         coalesce(akmob.akmob_attended_rally_town_hall ,0) as akmob_attended_rally_town_hall ,
         coalesce(akmob.akmob_attended_solidarity_action,0) as akmob_attended_solidarity_action,
+        coalesce(bdonor.event_signup_0_flag,0) as event_signup_0_flag,
+        coalesce(bdonor.event_signup_1_flag,0) as event_signup_1_flag,
+        coalesce(bdonor.event_signup_1plus_flag,0) as event_signup_1plus_flag,
+        coalesce(bdonor.donor_0_flag,0) as donor_0_flag,
+        coalesce(bdonor.donor_1plus_flag,0) as donor_1plus_flag,        
         case 
-        when rsvps >= 2 -- non-binary count
-          or attended > 0 -- non-binary count
+        when akmob_rsvps >= 2 -- non-binary count
+          or akmob_attended > 0 -- non-binary count
           or mvp_myc = 1
           or activist_myc = 1
           or canvass_myc = 1
@@ -184,9 +187,20 @@ sortkey(person_id) as
     using(person_id) 
     
     left join
+    -- Donors
+       (select distinct person_id, 
+                        count(distinct case when n_event_signups = 0 or n_event_signups is null then person_id end) as event_signup_0_flag,
+                        count(distinct case when n_event_signups = 1 then person_id end) as event_signup_1_flag,
+                        count(distinct case when n_event_signups > 1 then person_id end) as event_signup_1plus_flag,
+                        count(distinct case when n_donations = 0 then person_id end) as donor_0_flag,
+                        count(distinct case when n_donations > 0 then person_id end) as donor_1plus_flag
+   	from bernie_jshuman.donor_basetable where person_id is not null group by 1) bdonor
+    using(person_id)
+
+    left join
     -- ActionKit / Mobilize
     (SELECT person_id::varchar,
-            count(person_id) as rsvps,
+            count(person_id) as akmob_rsvps,
             count(CASE WHEN event_recode = 'canvass' THEN person_id END) AS akmob_rsvps_canvass ,
             count(CASE WHEN event_recode = 'phonebank' THEN person_id END) AS akmob_rsvps_phonebank ,
             count(CASE WHEN event_recode = 'small-event' THEN person_id END) AS akmob_rsvps_small_event ,
@@ -195,7 +209,7 @@ sortkey(person_id) as
             count(CASE WHEN event_recode = 'barnstorm' THEN person_id END) AS akmob_rsvps_barnstorm ,
             count(CASE WHEN event_recode = 'rally-town-hall' THEN person_id END) AS akmob_rsvps_rally_town_hall ,
             count(CASE WHEN event_recode = 'solidarity-action' THEN person_id END) AS akmob_rsvps_solidarity_action ,
-            count(case when attended = 't' then person_id end) as attended,
+            count(case when attended = 't' then person_id end) as akmob_attended,
             count(CASE WHEN event_recode = 'canvass' and attended = 't' THEN person_id END) AS akmob_attended_canvass ,
             count(CASE WHEN event_recode = 'phonebank' and attended = 't' THEN person_id END) AS akmob_attended_phonebank ,
             count(CASE WHEN event_recode = 'small-event' and attended = 't' THEN person_id END) AS akmob_attended_small_event ,
@@ -340,7 +354,7 @@ sortkey(person_id) as
     (select person_id::varchar, 1 as holdout from haystaq.set_no_current where set_no=3) ho 
     using(person_id) where person_id is not null) thirdp
     using(person_id)
-    where ccj_id_1_2_3_4_5 is not null and thirdp_first_choice_any is not null and thirdp_support_1_2_3_4_5_id is not null
+    where ccj_id_1_2_3_4_5 is not null or thirdp_first_choice_any is not null or thirdp_support_1_2_3_4_5_id is not null
 );
 commit;
 
@@ -352,8 +366,8 @@ distkey(voting_address_id)
 sortkey(voting_address_id) as
 (select voting_address_id::varchar,
         coalesce(activist_household_flag, 0) as activist_household_flag,
-        coalesce(rsvps_household_flag, 0) as rsvps_household_flag,
-        coalesce(attended_household_flag, 0) as attended_household_flag,
+        coalesce(akmob_rsvps_household_flag, 0) as akmob_rsvps_household_flag,
+        coalesce(akmob_attended_household_flag, 0) as akmob_attended_household_flag,
 	    coalesce(donor_0_household_flag,0) as donor_0_household_flag,
 	    coalesce(donor_1plus_household_flag,0) as donor_1plus_household_flag,
         coalesce(ccj_id_1_hh,0) as ccj_id_1_hh,
@@ -375,8 +389,8 @@ sortkey(voting_address_id) as
 from 
 (select voting_address_id::varchar,
         count(distinct CASE WHEN activist_flag = 1 then voting_address_id end) as activist_household_flag,
-        count(distinct CASE WHEN rsvps >= 2 then voting_address_id end) as rsvps_household_flag,
-        count(distinct CASE WHEN attended > 0 then voting_address_id end) as attended_household_flag
+        count(distinct CASE WHEN akmob_rsvps >= 2 then voting_address_id end) as akmob_rsvps_household_flag,
+        count(distinct CASE WHEN akmob_attended > 0 then voting_address_id end) as akmob_attended_household_flag
 from bernie_nmarchio2.base_activists group by 1)
 full join 
 (select voting_address_id::varchar, 
@@ -408,7 +422,7 @@ commit;
 
 -- Base Universe Main Table
 begin;
-set wlm_query_slot_count to 8;
+set wlm_query_slot_count to 6;
 DROP TABLE IF EXISTS bernie_data_commons.base_universe;
 CREATE TABLE bernie_data_commons.base_universe
 distkey(person_id) 
@@ -418,7 +432,7 @@ sortkey(person_id) AS
 	    FROM
   (SELECT p.person_id::varchar,
   	      xwalk.actionkit_id, 
-  	      xwalk.jsonid,
+  	      xwalk.jsonid_encoded,
   	      p.voting_address_id,
 
   	      -- Geographic codes
@@ -481,12 +495,14 @@ sortkey(person_id) AS
           round((bdcas.current_support_raw * bdcas.turnout_current),4) AS bernie_net_votes_current,
  
           -- Message targeting
+          /*
           voterinfo.civis_2018_one_pct_persuasion,
           voterinfo.civis_2018_marijuana_persuasion,
           voterinfo.civis_2018_college_persuasion,
           voterinfo.civis_2018_welcome_persuasion,
           voterinfo.civis_2018_sexual_assault_persuasion,
           voterinfo.civis_2018_economic_persuasion,
+          */
 
           -- Spoke model
           spokemodel.spoke_support_1box,
@@ -579,7 +595,8 @@ sortkey(person_id) AS
           coalesce(bactive.volunteer_yes_id,0) as volunteer_yes_id,
           coalesce(bactive.slack_vol,0) as slack_vol,
           -- AK Mobilize Activist Flags (signups and confirmed attendence)
-          coalesce(bactive.rsvps,0) as rsvps,
+          coalesce(bactive.akmob_rsvps,0) as akmob_rsvps,
+          /*
           coalesce(bactive.akmob_rsvps_canvass ,0) as akmob_rsvps_canvass ,
           coalesce(bactive.akmob_rsvps_phonebank ,0) as akmob_rsvps_phonebank ,
           coalesce(bactive.akmob_rsvps_small_event ,0) as akmob_rsvps_small_event ,
@@ -588,7 +605,9 @@ sortkey(person_id) AS
           coalesce(bactive.akmob_rsvps_barnstorm ,0) as akmob_rsvps_barnstorm ,
           coalesce(bactive.akmob_rsvps_rally_town_hall ,0) as akmob_rsvps_rally_town_hall ,
           coalesce(bactive.akmob_rsvps_solidarity_action ,0) as akmob_rsvps_solidarity_action ,
-          coalesce(bactive.attended,0) as attended,
+          */
+          coalesce(bactive.akmob_attended,0) as akmob_attended,
+          /*
           coalesce(bactive.akmob_attended_canvass ,0) as akmob_attended_canvass ,
           coalesce(bactive.akmob_attended_phonebank ,0) as akmob_attended_phonebank ,
           coalesce(bactive.akmob_attended_small_event ,0) as akmob_attended_small_event ,
@@ -597,17 +616,18 @@ sortkey(person_id) AS
           coalesce(bactive.akmob_attended_barnstorm ,0) as akmob_attended_barnstorm ,
           coalesce(bactive.akmob_attended_rally_town_hall ,0) as akmob_attended_rally_town_hall ,
           coalesce(bactive.akmob_attended_solidarity_action,0) as akmob_attended_solidarity_action,
+          */
           coalesce(bactive.activist_flag,0) as activist_flag,
           -- Activism in Household
           coalesce(bhousehold.activist_household_flag,0) as activist_household_flag,
-          coalesce(bhousehold.rsvps_household_flag,0) as rsvps_household_flag,
-          coalesce(bhousehold.attended_household_flag,0) as attended_household_flag,
+          coalesce(bhousehold.akmob_rsvps_household_flag,0) as akmob_rsvps_household_flag,
+          coalesce(bhousehold.akmob_attended_household_flag,0) as akmob_attended_household_flag,
           -- Donor Flags
-          coalesce(bdonor.event_signup_0_flag,0) as event_signup_0_flag,
-          coalesce(bdonor.event_signup_1_flag,0) as event_signup_1_flag,
-          coalesce(bdonor.event_signup_1plus_flag,0) as event_signup_1plus_flag,
-          coalesce(bdonor.donor_0_flag,0) as donor_0_flag,
-          coalesce(bdonor.donor_1plus_flag,0) as donor_1plus_flag,
+          coalesce(bactive.event_signup_0_flag,0) as event_signup_0_flag,
+          coalesce(bactive.event_signup_1_flag,0) as event_signup_1_flag,
+          coalesce(bactive.event_signup_1plus_flag,0) as event_signup_1plus_flag,
+          coalesce(bactive.donor_0_flag,0) as donor_0_flag,
+          coalesce(bactive.donor_1plus_flag,0) as donor_1plus_flag,
           -- Donor in Household
           coalesce(bhousehold.donor_0_household_flag,0) as donor_0_household_flag,
           coalesce(bhousehold.donor_1plus_household_flag,0) as donor_1plus_household_flag,
@@ -617,12 +637,12 @@ sortkey(person_id) AS
                     OR voterinfo.party_8way = '1 - Democratic' 
                     OR voterinfo.civis_2020_partisanship >= .66
 
-                    OR rsvps = 1
-                    OR attended = 1
+                    OR akmob_rsvps = 1
+                    OR akmob_attended = 1
                     OR activist_flag = 1
                     OR activist_household_flag = 1
-                    OR rsvps_household_flag = 1
-                    OR attended_household_flag = 1
+                    OR akmob_rsvps_household_flag = 1
+                    OR akmob_attended_household_flag = 1
 
                     OR donor_1plus_flag = 1 
                     OR donor_0_household_flag = 1
@@ -663,17 +683,10 @@ sortkey(person_id) AS
               WHEN     voterinfo.registered_in_state_3way = '3 - Absentee voter' 
                    AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
                   THEN '5 - Absentee voter'
-              ELSE '6 - Non-target' END AS vote_ready_6way,
-
-           -- Support thresholds   
-           case 
-              when electorate_2way = '2 - Non-target' THEN '5 - Non-target' 
-              when (bdcas.biden_support_100 <= 80 or spokemodel.spoke_persuasion_1minus_100 <= 50) and (bdcas.current_support_raw_100 >= 90 or bdcas.sanders_strong_support_score_100 >= 80) and (bdcas.field_id_1_score_100 >= 80 or bdcas.field_id_composite_score_100 >= 80) and  (spokemodel.spoke_support_1box_100 >= 75 and spokemodel.spoke_persuasion_1plus_100 >= 75) and (volmodel.attendee_100 >= 80 or volmodel.kickoff_party_rally_barnstorm_attendee_100 >= 80 or volmodel.canvasser_phonebank_attendee_100 >= 80 or volmodel.bernie_action_100  >= 80) then '1 - Support Tier 1'
-              when (bdcas.biden_support_100 <= 80 or spokemodel.spoke_persuasion_1minus_100 <= 50) and (bdcas.current_support_raw_100 >= 80 or bdcas.sanders_strong_support_score_100 >= 80 or bdcas.field_id_1_score_100 >= 80 or bdcas.field_id_composite_score_100 >= 80) and  (spokemodel.spoke_support_1box_100 >= 75 or spokemodel.spoke_persuasion_1plus_100 >= 75) and (volmodel.attendee_100 >= 80 or volmodel.kickoff_party_rally_barnstorm_attendee_100 >= 80 or volmodel.canvasser_phonebank_attendee_100 >= 80 or volmodel.bernie_action_100  >= 80) then '2 - Support Tier 2'
-              when (bdcas.biden_support_100 <= 90 or spokemodel.spoke_persuasion_1minus_100 <= 60) and (bdcas.current_support_raw_100 >= 80 or bdcas.sanders_strong_support_score_100 >= 80 or bdcas.field_id_1_score_100 >= 80 or bdcas.field_id_composite_score_100 >= 80 or spokemodel.spoke_support_1box_100 >= 80 or spokemodel.spoke_persuasion_1plus_100 >= 80 or volmodel.attendee_100 >= 80 or volmodel.kickoff_party_rally_barnstorm_attendee_100 >= 80 or volmodel.canvasser_phonebank_attendee_100 >= 80 or volmodel.bernie_action_100  >= 80) then '3 - Support Tier 3'
-           else '4 - Support Tier 4' end as score_thresholds
+              ELSE '6 - Non-target' END AS vote_ready_6way
 
           -- Turnout hardcode
+          /*
           ,CASE
                WHEN p.state_code = 'AK' THEN 9670
                WHEN p.state_code = 'AL' THEN 585289
@@ -729,6 +742,8 @@ sortkey(person_id) AS
                WHEN p.state_code = 'WY' THEN 9736
                ELSE NULL
            END AS pturnout_2008 
+           */
+           
 
            ,CASE
                WHEN p.state_code = 'AK' THEN 10625
@@ -786,33 +801,77 @@ sortkey(person_id) AS
                ELSE NULL
            END AS pturnout_2016
 
-        ,CASE 
-        WHEN score_thresholds = '5 - Non-target' then '4 - Non-target' 
+           
+        ,case 
+        WHEN electorate_2way = '2 - Non-target' then '3 - Non-target' 
         WHEN activist_flag = 1
           OR activist_household_flag = 1
           OR donor_1plus_flag = 1 
           OR donor_1plus_household_flag = 1 then '0 - Donors and Activists'
-        WHEN score_thresholds = '1 - Support Tier 1' then '1 - Support Tier 1'
-        WHEN score_thresholds = '2 - Support Tier 2' then '2 - Support Tier 2'
-        WHEN score_thresholds = '3 - Support Tier 3' then '3 - Support Tier 3'
-        ELSE '4 - Non-target' END AS support_tier_validation
+        when bdcas.field_id_1_score_100 >= 70 
+        or bdcas.field_id_composite_score_100 >= 70 
+        or bdcas.current_support_raw_100 >= 70
+        or bdcas.biden_support_100 <= 90
+        or bdcas.sanders_strong_support_score_100 >= 70
+        or spokemodel.spoke_persuasion_1minus_100 <= 90
+        or spokemodel.spoke_support_1box_100 >= 80 
+        or spokemodel.spoke_persuasion_1plus_100 >= 80 
+        or volmodel.attendee_100 >= 80 
+        or volmodel.kickoff_party_rally_barnstorm_attendee_100 >= 80 
+        or volmodel.canvasser_phonebank_attendee_100 >= 80 
+        or volmodel.bernie_action_100  >= 80 then '1 - Inside Support Guardrail'
+        else '2 - Outside Support Guardrail' end as support_guardrail_extra
 
-        ,CASE 
-        WHEN score_thresholds = '5 - Non-target' 
-          or bvalidate.ccj_id_5 = 1 
-          or bvalidate.thirdp_support_5_id = 1 
-          or bvalidate.thirdp_first_choice_biden_warren_buttigieg = 1 then '4 - Non-target' 
-        WHEN bvalidate.ccj_id_1 = 1 
-          or bvalidate.thirdp_first_choice_bernie = 1 
-          or bvalidate.thirdp_support_1_id = 1 
-          or support_tier_validation = '0 - Donors and Activists' then '0 - Donors, Activists, Support 1 IDs'
-        WHEN score_thresholds = '1 - Support Tier 1' then '1 - Support Tier 1'
-        WHEN score_thresholds = '2 - Support Tier 2' then '2 - Support Tier 2'
-        WHEN score_thresholds = '3 - Support Tier 3' or bvalidate.ccj_id_2 = 1 or bvalidate.thirdp_support_2_id = 1 then '3 - Support Tier 3'
-        ELSE '4 - Non-target' END AS support_tier_juiced
+        ,case 
+        WHEN electorate_2way = '2 - Non-target' then '3 - Non-target' 
+        WHEN activist_flag = 1
+          OR activist_household_flag = 1
+          OR donor_1plus_flag = 1 
+          OR donor_1plus_household_flag = 1 then '0 - Donors and Activists'
+        when bdcas.field_id_1_score_100 >= 70 
+        or bdcas.field_id_composite_score_100 >= 70 
+        or bdcas.current_support_raw_100 >= 70
+        or bdcas.sanders_strong_support_score_100 >= 70 then '1 - Inside Support Guardrail'
+        else '2 - Outside Support Guardrail' end as support_guardrail
 
-        --,round(1.0*sum((case when electorate_2way  = '1 - Target universe' then p.person_id end)) OVER (partition BY p.state_code ORDER BY support_tier_juiced ASC, bdcas.field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
-        --,row_number() OVER (PARTITION BY p.state_code ORDER BY support_tier_juiced ASC, bdcas.field_id_1_score DESC) as support_tier_juiced_rank
+
+           /*
+           -- Support thresholds   
+           case 
+              when electorate_2way = '2 - Non-target' THEN '5 - Non-target' 
+              when (bdcas.biden_support_100 <= 80 or spokemodel.spoke_persuasion_1minus_100 <= 50) and (bdcas.current_support_raw_100 >= 90 or bdcas.sanders_strong_support_score_100 >= 80) and (bdcas.field_id_1_score_100 >= 80 or bdcas.field_id_composite_score_100 >= 80) and  (spokemodel.spoke_support_1box_100 >= 75 and spokemodel.spoke_persuasion_1plus_100 >= 75) and (volmodel.attendee_100 >= 80 or volmodel.kickoff_party_rally_barnstorm_attendee_100 >= 80 or volmodel.canvasser_phonebank_attendee_100 >= 80 or volmodel.bernie_action_100  >= 80) then '1 - Support Tier 1'
+              when (bdcas.biden_support_100 <= 80 or spokemodel.spoke_persuasion_1minus_100 <= 50) and (bdcas.current_support_raw_100 >= 80 or bdcas.sanders_strong_support_score_100 >= 80 or bdcas.field_id_1_score_100 >= 80 or bdcas.field_id_composite_score_100 >= 80) and  (spokemodel.spoke_support_1box_100 >= 75 or spokemodel.spoke_persuasion_1plus_100 >= 75) and (volmodel.attendee_100 >= 80 or volmodel.kickoff_party_rally_barnstorm_attendee_100 >= 80 or volmodel.canvasser_phonebank_attendee_100 >= 80 or volmodel.bernie_action_100  >= 80) then '2 - Support Tier 2'
+              when (bdcas.biden_support_100 <= 90 or spokemodel.spoke_persuasion_1minus_100 <= 60) and (bdcas.current_support_raw_100 >= 80 or bdcas.sanders_strong_support_score_100 >= 80 or bdcas.field_id_1_score_100 >= 80 or bdcas.field_id_composite_score_100 >= 80 or spokemodel.spoke_support_1box_100 >= 80 or spokemodel.spoke_persuasion_1plus_100 >= 80 or volmodel.attendee_100 >= 80 or volmodel.kickoff_party_rally_barnstorm_attendee_100 >= 80 or volmodel.canvasser_phonebank_attendee_100 >= 80 or volmodel.bernie_action_100  >= 80) then '3 - Support Tier 3'
+           else '4 - Support Tier 4' end as score_thresholds
+
+           ,CASE 
+           WHEN score_thresholds = '5 - Non-target' then '4 - Non-target' 
+           WHEN activist_flag = 1
+             OR activist_household_flag = 1
+             OR donor_1plus_flag = 1 
+             OR donor_1plus_household_flag = 1 then '0 - Donors and Activists'
+           WHEN score_thresholds = '1 - Support Tier 1' then '1 - Support Tier 1'
+           WHEN score_thresholds = '2 - Support Tier 2' then '2 - Support Tier 2'
+           WHEN score_thresholds = '3 - Support Tier 3' then '3 - Support Tier 3'
+           ELSE '4 - Non-target' END AS support_tier_validation
+
+           ,CASE 
+           WHEN score_thresholds = '5 - Non-target' 
+             or bvalidate.ccj_id_5 = 1 
+             or bvalidate.thirdp_support_5_id = 1 
+             or bvalidate.thirdp_first_choice_biden_warren_buttigieg = 1 then '4 - Non-target' 
+           WHEN bvalidate.ccj_id_1 = 1 
+             or bvalidate.thirdp_first_choice_bernie = 1 
+             or bvalidate.thirdp_support_1_id = 1 
+             or support_tier_validation = '0 - Donors and Activists' then '0 - Donors, Activists, Support 1 IDs'
+           WHEN score_thresholds = '1 - Support Tier 1' then '1 - Support Tier 1'
+           WHEN score_thresholds = '2 - Support Tier 2' then '2 - Support Tier 2'
+           WHEN score_thresholds = '3 - Support Tier 3' or bvalidate.ccj_id_2 = 1 or bvalidate.thirdp_support_2_id = 1 then '3 - Support Tier 3'
+           ELSE '4 - Non-target' END AS support_tier_juiced
+           */
+
+           --,round(1.0*sum((case when electorate_2way  = '1 - Target universe' then p.person_id end)) OVER (partition BY p.state_code ORDER BY support_tier_juiced ASC, bdcas.field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
+           --,row_number() OVER (PARTITION BY p.state_code ORDER BY support_tier_juiced ASC, bdcas.field_id_1_score DESC) as support_tier_juiced_rank
         
      FROM 
 
@@ -830,11 +889,16 @@ sortkey(person_id) AS
       WHERE is_deceased = FALSE
         AND reg_record_merged = FALSE
         AND reg_on_current_file = TRUE
-        AND reg_voter_flag = TRUE) p
+        AND reg_voter_flag = TRUE
+        AND state_code in ('IA','NH','SC','NV','AL','AR','CA','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA')
+        ) p
 
 -- CROSSWALK
     LEFT JOIN
-    (SELECT * FROM (SELECT person_id, actionkit_id, jsonid, row_number() OVER (PARTITION BY person_id ORDER BY actionkit_id NULLS LAST) AS rn FROM bernie_data_commons.master_xwalk_dnc) WHERE rn = 1) xwalk
+    (SELECT * FROM (SELECT person_id, actionkit_id, jsonid_encoded, row_number() OVER (PARTITION BY person_id ORDER BY actionkit_id NULLS LAST) AS rn 
+    	FROM bernie_data_commons.master_xwalk_dnc) 
+    WHERE rn = 1
+    ) xwalk
     using(person_id)
 
 -- SUPPORT SCORES
@@ -891,23 +955,12 @@ sortkey(person_id) AS
     FROM scores.actionpop_output_20191220) volmodel
     using(person_id)
 
--- DONOR INFO
-    left join
-   (select distinct person_id, 
-                    count(distinct case when n_event_signups = 0 or n_event_signups is null then person_id end) as event_signup_0_flag,
-                    count(distinct case when n_event_signups = 1 then person_id end) as event_signup_1_flag,
-                    count(distinct case when n_event_signups > 1 then person_id end) as event_signup_1plus_flag,
-                    count(distinct case when n_donations = 0 then person_id end) as donor_0_flag,
-                    count(distinct case when n_donations > 0 then person_id end) as donor_1plus_flag
-   	from bernie_jshuman.donor_basetable where person_id is not null group by 1) bdonor
-   using(person_id)
-
--- VOLUNTEER INFO
+-- DONOR/VOLUNTEER INFO
     left join
    (SELECT * FROM bernie_nmarchio2.base_activists) bactive
    using(person_id)
 
--- HOUSEHOLD LEVEL INFO
+-- DONOR/VOLUNTEER HOUSEHOLD LEVEL INFO
 	left join
    (select * from bernie_nmarchio2.base_household) bhousehold
    on p.voting_address_id = bhousehold.voting_address_id
@@ -925,7 +978,7 @@ LEFT JOIN
 -- VOTER INFO
    LEFT JOIN
      (SELECT 
-     	p.person_id::varchar,
+     	rainbo.person_id::varchar,
      	rainbo.vote_history_6way,
      	rainbo.early_vote_history_3way,
      	rainbo.registered_in_state_3way,
@@ -943,21 +996,25 @@ LEFT JOIN
         rainbo.child_in_hh_2way,
         rainbo.marital_2way,
         rainbo.religion_9way,
-        as20.civis_2020_partisanship::FLOAT8,
-        as18.civis_2018_economic_persuasion::FLOAT8,
-        as18.civis_2018_one_pct_persuasion::FLOAT8,
-        as18.civis_2018_marijuana_persuasion::FLOAT8,
-        as18.civis_2018_college_persuasion::FLOAT8,
-        as18.civis_2018_welcome_persuasion::FLOAT8,
-        as18.civis_2018_sexual_assault_persuasion::FLOAT8         
+        as20.civis_2020_partisanship::FLOAT8--,
+        --as18.civis_2018_economic_persuasion::FLOAT8,
+        --as18.civis_2018_one_pct_persuasion::FLOAT8,
+        --as18.civis_2018_marijuana_persuasion::FLOAT8,
+        --as18.civis_2018_college_persuasion::FLOAT8,
+        --as18.civis_2018_welcome_persuasion::FLOAT8,
+        --as18.civis_2018_sexual_assault_persuasion::FLOAT8         
 
-      FROM phoenix_analytics.person p
+      --FROM phoenix_analytics.person p
+      FROM bernie_data_commons.rainbow_analytics_frame rainbo
       LEFT JOIN phoenix_scores.all_scores_2020 as20 using(person_id)
-      LEFT JOIN phoenix_scores.all_scores_2018 as18 using(person_id)
-      LEFT JOIN bernie_data_commons.rainbow_analytics_frame rainbo using(person_id)) voterinfo 
+      --LEFT JOIN phoenix_scores.all_scores_2018 as18 using(person_id)
+      --using(person_id)
+      ) voterinfo 
      using(person_id)
     
   )
 );
 
 commit;
+
+
