@@ -1,3 +1,5 @@
+
+--table to create rankings
 set wlm_query_slot_count to 4;
 DROP TABLE IF EXISTS bernie_nmarchio2.base_universe_qc;
 CREATE TABLE bernie_nmarchio2.base_universe_qc
@@ -48,7 +50,7 @@ NTILE(100) OVER (PARTITION BY state_code ORDER BY gotv_validation_rank_simple AS
 
 from bernie_data_commons.base_universe where state_code in ('AL','AR','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA') ));
 
-
+--score eval query
 select *,
 1.0*ccj1/ccj1all as ccj1rate,
 1.0*ccj12/ccj1all as ccj12rate
@@ -79,7 +81,7 @@ count(*) as number_of_voters,
 sum(case when activist_flag = 1
           OR activist_household_flag = 1
           OR donor_1plus_flag = 1 
-          OR donor_1plus_household_flag = 1 end) as activists,
+          OR donor_1plus_household_flag = 1 then 1 end) as activists,
 sum(ccj_id_1) as ccj1,
 sum(ccj_id_2) as ccj2,
 sum(ccj_id_3) as ccj3,
