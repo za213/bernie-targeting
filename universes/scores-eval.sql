@@ -14,7 +14,7 @@ NTILE(20) OVER (PARTITION BY state_code||electorate_2way ORDER BY gotv_validatio
 
         ,round(1.0*count(*) OVER (partition BY state_code||electorate_2way ORDER BY support_guardrail_extra ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share_extra
         ,row_number() OVER (PARTITION BY state_code||electorate_2way ORDER BY support_guardrail_extra ASC, field_id_1_score DESC) as gotv_validation_rank_extra
-from bernie_data_commons.base_universe where state_code in ('AL','AR','CO','ME','MA','MN','NC','OK','TN','TX','UT','VT','VA') ));
+from bernie_data_commons.base_universe ));
 
 
 -- Scores Eval
