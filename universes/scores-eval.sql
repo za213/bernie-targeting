@@ -49,7 +49,7 @@ count(*) as number_of_voters,
 sum(case when activist_flag = 1
           OR activist_household_flag = 1
           OR donor_1plus_flag = 1 
-          OR donor_1plus_household_flag = 1 then 1 end) as activists,
+          OR donor_1plus_flag_household_flag = 1 then 1 end) as activists,
 sum(ccj_id_1) as ccj1,
 sum(ccj_id_2) as ccj2,
 sum(ccj_id_3) as ccj3,
