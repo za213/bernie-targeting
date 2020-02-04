@@ -272,37 +272,75 @@ sortkey(person_id) as
             count(CASE WHEN event_recode = 'barnstorm' and attended = 't' THEN person_id END) AS akmob_attended_barnstorm ,
             count(CASE WHEN event_recode = 'rally-town-hall' and attended = 't' THEN person_id END) AS akmob_attended_rally_town_hall ,
             count(CASE WHEN event_recode = 'solidarity-action' and attended = 't' THEN person_id END) AS akmob_attended_solidarity_action 
-           from (
-    (select distinct person_id, event_recode, attended from -- mobilize_id, mobilize_event_id,
-      (SELECT DISTINCT user_id::varchar(256) AS mobilize_id ,
-                       event_id::varchar(256) AS mobilize_event_id ,
-                       attended
-       FROM mobilize.participations_comprehensive)
-    LEFT JOIN
-      (SELECT mobilize_id::varchar,
-              person_id FROM (SELECT DISTINCT user_id AS mobilize_id, user__email_address::varchar(256) AS email FROM mobilize.participations_comprehensive WHERE mobilize_id IS NOT NULL AND email IS NOT NULL)
-       LEFT JOIN
-       (SELECT * FROM (SELECT person_id, email, ROW_NUMBER() OVER(PARTITION BY email ORDER BY person_id NULLS LAST) AS dupe FROM bernie_data_commons.master_xwalk) WHERE dupe = 1 AND person_id IS NOT NULL) using(email)) 
-      using(mobilize_id) 
-      LEFT JOIN 
-      (select * from bernie_nmarchio2.base_akmobevents where mobilize_event_id is not null)
-      using(mobilize_event_id))
-    union all
-    (select distinct person_id, event_recode, attended from -- actionkit_id, ak_event_id,
-      (SELECT DISTINCT user_id::varchar(256) AS actionkit_id ,
-                       event_id::varchar(256) AS ak_event_id ,
-                       attended
-       FROM ak_bernie.events_eventsignup)
-    LEFT JOIN
-      (SELECT DISTINCT person_id::varchar,
-                       actionkit_id::varchar
-       FROM bernie_data_commons.master_xwalk_ak WHERE person_id IS NOT NULL) 
-      using(actionkit_id)
-    LEFT JOIN 
-      (select * from bernie_nmarchio2.base_akmobevents where ak_event_id is not null)
-      using(ak_event_id))
-    ) where person_id is not null and event_recode is not null group by 1) akmob
-    using(person_id) where any_activist_donor_flag > 0); -- change
+            from (
+              (
+                select distinct person_id, event_recode, attended 
+                from -- mobilize_id, mobilize_event_id,
+                (
+                  SELECT DISTINCT user_id::varchar(256) AS mobilize_id ,
+                  event_id::varchar(256) AS mobilize_event_id ,
+                  attended
+                  FROM mobilize.participations_comprehensive
+                )
+                LEFT JOIN (
+                  SELECT mobilize_id::varchar,
+                  person_id 
+                  FROM (
+                    SELECT DISTINCT user_id AS mobilize_id
+                    , user__email_address::varchar(256) AS email 
+                    FROM mobilize.participations_comprehensive 
+                    WHERE mobilize_id IS NOT NULL AND email IS NOT NULL
+                  )
+                  LEFT JOIN (
+                    SELECT * 
+                    FROM (
+                      SELECT person_id
+                      , email
+                      , ROW_NUMBER() OVER(PARTITION BY email ORDER BY person_id NULLS LAST) AS dupe 
+                      FROM bernie_data_commons.master_xwalk
+                    ) 
+                    WHERE dupe = 1 
+                    AND person_id IS NOT NULL
+                  ) using(email)
+                ) using(mobilize_id) 
+                LEFT JOIN (
+                  select * 
+                  from bernie_nmarchio2.base_akmobevents 
+                  where mobilize_event_id is not null
+                ) using(mobilize_event_id)
+              )
+    
+              union all
+
+              (
+                select distinct person_id
+                , event_recode
+                , attended 
+                from -- actionkit_id, ak_event_id,
+                (
+                  SELECT DISTINCT user_id::varchar(256) AS actionkit_id ,
+                  event_id::varchar(256) AS ak_event_id ,
+                  attended
+                  FROM ak_bernie.events_eventsignup
+                )
+                LEFT JOIN (
+                  SELECT DISTINCT person_id::varchar,
+                  actionkit_id::varchar
+                  FROM bernie_data_commons.master_xwalk_ak 
+                  WHERE person_id IS NOT NULL
+                ) using(actionkit_id)
+                LEFT JOIN (
+                  select * 
+                  from bernie_nmarchio2.base_akmobevents 
+                  where ak_event_id is not null
+                ) using(ak_event_id))
+            ) 
+            where person_id is not null 
+            and event_recode is not null 
+            group by 1
+      ) akmob using(person_id) 
+      where any_activist_donor_flag > 0
+      ); -- change
 commit;
 
 --  Activism Sidetable Unmatched: supplemental to the above covering only unmatched persons without person_id primary keys
