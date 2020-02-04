@@ -1,6 +1,7 @@
 
 -- Owner: Nico Marchio 
--- Entered Production: 
+-- Co-Owner: Ariane Schang
+-- Entered Production: 2020-02-03
 -- Last Update: 2020-02-03
 -- Purpose: Builds data tables to inform voter targeting, list cutting, and voter contact
 
@@ -179,10 +180,10 @@ sortkey(person_id) as
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Teacher%' THEN mx.person_id END) AS teacher_myc ,
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Labor%' THEN mx.person_id END) AS labor_myc
      FROM phoenix_demssanders20_vansync_derived.activist_myc ac
-     LEFT JOIN phoenix_demssanders20_vansync.activist_codes ac_lookup ON ac_lookup.activist_code_id = ac.activist_code_id
+     LEFT JOIN phoenix_demssanders20_vansync.activist_codes ac_lookup ON ac_lookup.activist_code_id = ac.activist_code_id and ac_lookup.state_code = ac.state_code
      LEFT JOIN bernie_data_commons.master_xwalk_st_myc mx ON mx.myc_van_id = ac.myc_van_id AND mx.state_code = ac.state_code
      WHERE ac.committee_id = 73296 and mx.person_id is not null
-     GROUP BY 1) where coalesce(mvp_myc ,activist_myc ,canvass_myc ,volunteer_myc ,constituencies_myc ,volunteer_shifts_myc ,student_myc ,teacher_myc ,labor_myc) <> 0) myc
+     GROUP BY 1)) myc
     using(person_id) 
     
     left join
@@ -215,8 +216,7 @@ sortkey(person_id) as
             FROM contacts.surveyresponses sr 
             INNER JOIN bernie_data_commons.ccj_dnc ccj using(contactcontact_id) 
             LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid) 
-            WHERE person_id is not null group by 1) 
-            where coalesce(sticker_id,commit2caucus_id,union_id,student_id,volunteer_yes_id) <> 0) surveys
+            WHERE person_id is not null group by 1)) surveys
     using(person_id) 
     
     left join
@@ -273,6 +273,7 @@ sortkey(person_id) as
             count(CASE WHEN event_recode = 'rally-town-hall' and attended = 't' THEN person_id END) AS akmob_attended_rally_town_hall ,
             count(CASE WHEN event_recode = 'solidarity-action' and attended = 't' THEN person_id END) AS akmob_attended_solidarity_action 
            from (
+     /* -- comment off the Mobilize data since it pulls in only 75 IDs -- we have to add Mobilize to a person match pipeline to add them to the xwalk
     (select distinct person_id, event_recode, attended from -- mobilize_id, mobilize_event_id,
       (SELECT DISTINCT user_id::varchar(256) AS mobilize_id ,
                        event_id::varchar(256) AS mobilize_event_id ,
@@ -285,9 +286,9 @@ sortkey(person_id) as
        (SELECT * FROM (SELECT person_id, email, ROW_NUMBER() OVER(PARTITION BY email ORDER BY person_id NULLS LAST) AS dupe FROM bernie_data_commons.master_xwalk) WHERE dupe = 1 AND person_id IS NOT NULL) using(email)) 
       using(mobilize_id) 
       LEFT JOIN 
-      (select * from bernie_nmarchio2.base_akmobevents where mobilize_event_id is not null)
-      using(mobilize_event_id))
+      (select * from bernie_nmarchio2.base_akmobevents where mobilize_event_id is not null) using(mobilize_event_id)) mob
     union all
+    */
     (select distinct person_id, event_recode, attended from -- actionkit_id, ak_event_id,
       (SELECT DISTINCT user_id::varchar(256) AS actionkit_id ,
                        event_id::varchar(256) AS ak_event_id ,
@@ -299,9 +300,8 @@ sortkey(person_id) as
        FROM bernie_data_commons.master_xwalk_ak WHERE person_id IS NOT NULL) 
       using(actionkit_id)
     LEFT JOIN 
-      (select * from bernie_nmarchio2.base_akmobevents where ak_event_id is not null)
-      using(ak_event_id))
-    ) where person_id is not null and event_recode is not null group by 1) akmob
+      (select * from bernie_nmarchio2.base_akmobevents where ak_event_id is not null) using(ak_event_id))
+               ) where person_id is not null and event_recode is not null group by 1) akmob
     using(person_id) where any_activist_donor_flag > 0); -- change
 commit;
 
@@ -347,6 +347,7 @@ sortkey(jsonid_encoded) as
         NULL as flag_student_age,
         NULL as flag_union,
         NULL as flag_veteran,
+        case when xwalk.student_hash is not null then 1 else 0 end as student_hash_flag,
         NULL as donut_segment,
         NULL as current_support_raw,
         NULL as current_support_raw_100,
@@ -525,7 +526,8 @@ sortkey(jsonid_encoded) as
             actionkit_id,
             bern_canvasser_id,
             jsonid_encoded,
-            email
+            email,
+            student_hash
       FROM bernie_data_commons.master_xwalk) xwalk
     left join
 
@@ -565,9 +567,9 @@ sortkey(jsonid_encoded) as
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Teacher%' THEN ac.myc_van_id END) AS teacher_myc ,
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Labor%' THEN ac.myc_van_id END) AS labor_myc
      FROM phoenix_demssanders20_vansync_derived.activist_myc ac
-     LEFT JOIN phoenix_demssanders20_vansync.activist_codes ac_lookup ON ac_lookup.activist_code_id = ac.activist_code_id
+     LEFT JOIN phoenix_demssanders20_vansync.activist_codes ac_lookup ON ac_lookup.activist_code_id = ac.activist_code_id and ac_lookup.state_code = ac.state_code
      WHERE ac.committee_id = 73296 and ac.myc_van_id is not null
-     GROUP BY 1,2) where coalesce(mvp_myc ,activist_myc ,canvass_myc ,volunteer_myc ,constituencies_myc ,volunteer_shifts_myc ,student_myc ,teacher_myc ,labor_myc) <> 0) myc
+     GROUP BY 1,2) ) myc
     ON xwalk.myc_van_id = myc.myc_van_id AND xwalk.state_code = myc.state_code
     
     left join
@@ -590,16 +592,15 @@ sortkey(jsonid_encoded) as
         ELSE 0 END AS all_flags_surveys
      from 
     (SELECT jsonid_encoded,
-            count(distinct CASE WHEN surveyresponseid IN (40) THEN person_id END) AS sticker_id ,
-            count(distinct CASE WHEN surveyresponseid IN (99) THEN person_id END) AS commit2caucus_id ,
-            count(distinct CASE WHEN surveyresponseid IN (10) THEN person_id END) AS union_id ,
-            count(distinct CASE WHEN surveyresponseid IN (9,103,104) THEN person_id END) AS student_id ,
-            count(distinct CASE WHEN surveyresponseid IN (32) THEN person_id END) AS volunteer_yes_id 
+            count(distinct CASE WHEN surveyresponseid IN (40) THEN jsonid_encoded END) AS sticker_id ,
+            count(distinct CASE WHEN surveyresponseid IN (99) THEN jsonid_encoded END) AS commit2caucus_id ,
+            count(distinct CASE WHEN surveyresponseid IN (10) THEN jsonid_encoded END) AS union_id ,
+            count(distinct CASE WHEN surveyresponseid IN (9,103,104) THEN jsonid_encoded END) AS student_id ,
+            count(distinct CASE WHEN surveyresponseid IN (32) THEN jsonid_encoded END) AS volunteer_yes_id 
             FROM contacts.surveyresponses sr 
             INNER JOIN bernie_data_commons.contactcontacts_joined ccj using(contactcontact_id) 
             LEFT JOIN contacts.surveyresponsetext srt using(surveyresponseid) 
-            WHERE jsonid_encoded is not null and person_id is null group by 1) 
-            where coalesce(sticker_id,commit2caucus_id,union_id,student_id,volunteer_yes_id) <> 0) surveys
+            WHERE jsonid_encoded is not null and person_id is null group by 1) ) surveys
     using(jsonid_encoded) 
 
     left join
@@ -626,12 +627,12 @@ sortkey(jsonid_encoded) as
                else 0 end as all_donor_flags 
                FROM
     (select distinct user_id as actionkit_id, 
-                     count(distinct case when n_event_signups = 0 or n_event_signups is null then person_id end) as event_signup_0_flag,
-                     count(distinct case when n_event_signups = 1 then person_id end) as event_signup_1_flag,
-                     count(distinct case when n_event_signups > 1 then person_id end) as event_signup_1plus_flag,
-                     count(distinct case when n_donations = 0 then person_id end) as donor_0_flag,
-                     count(distinct case when n_donations > 0 then person_id end) as donor_1plus_flag
-   	from bernie_jshuman.donor_basetable where user_id is not null and person_id is null group by 1)) bdonor
+                     count(distinct case when n_event_signups = 0 or n_event_signups is null then actionkit_id end) as event_signup_0_flag,
+                     count(distinct case when n_event_signups = 1 then actionkit_id end) as event_signup_1_flag,
+                     count(distinct case when n_event_signups > 1 then actionkit_id end) as event_signup_1plus_flag,
+                     count(distinct case when n_donations = 0 then actionkit_id end) as donor_0_flag,
+                     count(distinct case when n_donations > 0 then actionkit_id end) as donor_1plus_flag
+   	from bernie_jshuman.donor_basetable where user_id is not null and actionkit_id is null group by 1)) bdonor
     using(actionkit_id)
 
     left join
@@ -919,6 +920,7 @@ sortkey(person_id) AS
           nct.flag_student_age,
           nct.flag_union,
           nct.flag_veteran,
+          case when xwalk.student_hash is not null then 1 else 0 end as student_hash_flag, 
 
           -- Support scores
           bdcas.donut_segment,
@@ -1357,6 +1359,7 @@ sortkey(person_id) AS
                 bern_canvasser_id,
                 actionkit_id, 
                 jsonid_encoded, 
+                student_hash,
                 row_number() OVER (PARTITION BY person_id ORDER BY actionkit_id NULLS LAST) AS rn 
     	FROM bernie_data_commons.master_xwalk_dnc) 
     WHERE rn = 1
@@ -1535,4 +1538,3 @@ LEFT JOIN
      using(person_id)
 );
 commit;
-
