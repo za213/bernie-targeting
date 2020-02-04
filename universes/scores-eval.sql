@@ -20,7 +20,7 @@ from bernie_data_commons.base_universe where state_code in ('AL','AR','CO','ME',
 -- Scores Eval
 select 
 state_code,
-ccj_contact_group,
+ccj_holdout_group,
 gotv_tiers_20,
 coalesce(number_of_voters,0) as number_of_voters,
 sum(coalesce(number_of_voters,0)) over (partition BY state_code||gotv_tiers_20) as number_of_voters_in_ventile,
@@ -39,11 +39,7 @@ coalesce(ccj12,0) as ccj12
 from
 (select
 state_code,
-case 
- when ccj_holdout_id = 1 then 'Holdout' 
-when ccj_holdout_id = 0 then 'Training'
-when ccj_holdout_id is null then 'Uncontacted'
-end as ccj_contact_group,
+ccj_holdout_group,
 gotv_tiers_20,
 count(*) as number_of_voters,
 sum(case when activist_flag = 1
