@@ -1066,7 +1066,7 @@ sortkey(person_id) AS
               ELSE '2 - Non-target' END AS electorate_2way,
 
           -- Vote readiness bucket
-          CASE WHEN electorate_2way = '2 - Non-target' THEN '6 - Non-target'
+          CASE WHEN electorate_2way = '2 - Non-target' THEN '5 - Non-target'
                WHEN voterinfo.registered_in_state_3way = '1 - Registered in current state' 
                 AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
                 AND voterinfo.vote_history_6way IN ('1 - Dem Primary voter (2004-2018)','2 - General voter (2018)','3 - Registered since 2018') 
@@ -1075,15 +1075,14 @@ sortkey(person_id) AS
                 AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
                 AND voterinfo.vote_history_6way IN ('4 - Voted in any General (1998-2016)','5 - No vote but eligible (2008-2018)','6 - Other') 
                     THEN '2 - Vote-ready lapsed'
-               WHEN voterinfo.registered_in_state_3way = '1 - Registered in current state' 
-                AND voterinfo.dem_primary_eligible_2way = '2 - Must Register as Dem' 
-                    THEN '3 - Register as Dem'
-               WHEN voterinfo.registered_in_state_3way = '2 - Registered in different state' 
-                    THEN '4 - Register in current state'
+               WHEN (voterinfo.registered_in_state_3way = '1 - Registered in current state' 
+                AND voterinfo.dem_primary_eligible_2way = '2 - Must Register as Dem')
+                OR  voterinfo.registered_in_state_3way = '2 - Registered in different state'
+                    THEN '3 - Register as Dem in current state'
                WHEN voterinfo.registered_in_state_3way = '3 - Absentee voter' 
                 AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
-                    THEN '5 - Absentee voter'
-               ELSE '6 - Non-target' END AS vote_ready_6way
+                    THEN '4 - Absentee voter'
+               ELSE '5 - Non-target' END AS vote_ready_6way
 
           -- Turnout hardcode
           ,CASE
