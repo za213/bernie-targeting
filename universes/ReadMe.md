@@ -5,18 +5,9 @@
 * The `base_universe` table is designed to serve as a single source of truth for voter contact-related data and to streamline the list cutting process. Users can use the table directly or use query templates that incorporate list cutting best practice or modified templates that enable users to add custom rank-order criteria.
 
 #### How does the default rank order work?
-* The default rank ordering criteria is based on a column called `support_guardrail`: Tier 1: Verified supporters, activists, and donors, second tier "remaining voters who have not yet been contacted but predict support based on voter characteristics and third party data. The field `support_guardrail` sets support thresholds to bucket individuals different support segments and deprioritize people who are less reliable GOTV targets. 
-`support_guardrail` : ```'0 - Donors, Activists, Supporters', '1 - Inside Support Guardrail','2 - Outside Support Guardrail', '3 - Non-target'```
+* The default rank ordering criteria is based on a column called `support_guardrail` based on support thresholds to prioritize voters who are the best GOTV targets. There are currently four tiers: the top verified supporters, activists, and donors, voters who have not yet been contacted but have high predicted support into the next tier, and the last two tiers have voters with lower support levels and non-targets (people ineligible to vote). The categories are as follows: '0 - Donors, Activists, Supporters', '1 - Inside Support Guardrail','2 - Outside Support Guardrail', '3 - Non-target'.
 
-* In order to validate the tiers for a particilar state use the `support_guardrail_validation` column which removes CCJ Field IDs from the top tier in order to enable validation. 
-      ```
-      {
-      '0 - Donors and Activists'
-      '1 - Inside Support Guardrail'
-      '2 - Outside Support Guardrail'
-      '3 - Non-target'
-      }
-      ```
+* In order to validate the tiers for a particilar state use the `support_guardrail_validation` column which removes CCJ Field IDs from the top tier in order to enable validation. The categories are as follows: '0 - Donors and Activists', '1 - Inside Support Guardrail','2 - Outside Support Guardrail', '3 - Non-target'.
 
 #### Which voters does the `bernie_data_commons.base_universe` table cover?
 * The full table contains the full Phoenix voter file using the standard exclusion criteria (`WHERE is_deceased = 'f' AND reg_record_merged = 'f' AND reg_on_current_file = 't' AND reg_voter_flag = 't'`). 
