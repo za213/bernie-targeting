@@ -531,7 +531,7 @@ sortkey(jsonid_encoded) as
         END AS any_activist_donor_flag,
 
         '1 - Target universe'  as electorate_2way,
-        '2 - Must Register as Dem' as vote_ready_6way,
+        '2 - Must Register as Dem' as vote_ready_5way,
         --NULL as pturnout_2016,
         '0 - Unmatched supporters' as support_guardrail_extra,
         '0 - Unmatched supporters' as support_guardrail
