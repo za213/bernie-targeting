@@ -7,10 +7,10 @@
 
 #### Which voters does the `bernie_data_commons.base_universe` table cover?
 * The full table contains the full Phoenix voter file using the standard exclusion criteria (`WHERE is_deceased = 'f' AND reg_record_merged = 'f' AND reg_on_current_file = 't' AND reg_voter_flag = 't'`). 
-* There are a couple filters available for restricting the voter contact criteria based on the voter targeting considerations.
-    * `dem_primary_eligible_2way` labels people as '1 - Dem Primary Eligible' who are currently eligible to vote in in a Democratic primary based on their party affiliation and if their registration state is open, closed, or mixed.
+* There are a couple filters available for restricting the voter list criteria.
+    * `dem_primary_eligible_2way` labels people as '1 - Dem Primary Eligible' who are currently eligible to vote in a Democratic primary based on their party affiliation and whether their registration state is open, closed, or mixed.
     * `electorate_2way` labels all eligible Democratic primary voters in `dem_primary_eligible_2way`, all verified supporters, donors and activists, and voters with high support scores as part of the '1 - Target universe'.
-    * The last potentially useful fields is `vote_ready_5way` which attempts to segment voters between voters who are '1 - Vote-ready', '2 - Vote-ready lapsed', '3 - Register as Dem in current state',  '4 - Absentee voter', '5 - Non-target'.
+    * `vote_ready_5way` segments voters between voters who are '1 - Vote-ready', '2 - Vote-ready lapsed', '3 - Register as Dem in current state',  '4 - Absentee voter', '5 - Non-target'. This field can be useful if you are trying to deploy different messaging or voter contact methods based on the voters past vote history or whether they need to take a registration action or may need an absentee ballot.
     
 #### Which features are included?
 * **Scores** Predictive scores and percentiles including the best performing support models from the `bernie_data_commons.all_scores_ntiles` table and other useful scores including Spoke persuasion and event recruitment models. Note, higher percentiles represent higher scores. For example, the top 10% covers percentiles greater than or equal to 90. The table also includes Civis persuasion scores for expected increase (or decrease) in support from issue-based messaging.
