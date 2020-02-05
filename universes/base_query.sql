@@ -1528,4 +1528,12 @@ LEFT JOIN
 );
 commit;
 
+-- Drop staging tables and run grants
+drop table if exists bernie_nmarchio2.base_akmobevents;
+drop table if exists bernie_nmarchio2.base_activists;
+drop table if exists bernie_nmarchio2.base_household;
+drop table if exists bernie_nmarchio2.base_validation;
+drop table if exists bernie_nmarchio2.base_universe;
 
+grant select on bernie_nmarchio2.base_universe to group bernie_data;
+grant select on bernie_nmarchio2.base_activists_unmatched to group bernie_data;
