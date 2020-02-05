@@ -1082,7 +1082,7 @@ sortkey(person_id) AS
                WHEN voterinfo.registered_in_state_3way = '3 - Absentee voter' 
                 AND voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
                     THEN '4 - Absentee voter'
-               ELSE '5 - Non-target' END AS vote_ready_6way
+               ELSE '5 - Non-target' END AS vote_ready_5way
 
           -- Turnout hardcode
           ,CASE
