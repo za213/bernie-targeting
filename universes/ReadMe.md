@@ -2,8 +2,23 @@
 ## Voter Contact Universe Table
 
 #### What is the purpose of the `bernie_data_commons.base_universe` table?
-* The `base_universe` table is designed to serve as a single source of truth for voter contact-related information and to streamline the list cutting process. Query templates are available to users who are looking for a recommended list cutting best practice or users can build their own custom criteria using a custom query template. 
-* The high-level summary of how the default rank ordering criteria works is that it forces all verified supporters, activists, and donors to the top of the list and then rank orders the remaining voters who have not yet been contacted using support models which predict support based on voter characteristics and third party data. The field `support_guardrail` sets support thresholds to bucket individuals different support segments and deprioritize people who are less reliable GOTV targets.
+* The `base_universe` table is designed to serve as a single source of truth for voter contact-related data and to streamline the list cutting process. Users can use the table directly or use query templates that incorporate list cutting best practice or modified templates that enable users to add custom rank-order criteria.
+
+#### How does the default rank order work?
+* The default rank ordering criteria is based on a column called `support_guardrail`: Tier 1: Verified supporters, activists, and donors, second tier "remaining voters who have not yet been contacted but predict support based on voter characteristics and third party data. The field `support_guardrail` sets support thresholds to bucket individuals different support segments and deprioritize people who are less reliable GOTV targets. 
+      ```
+      '0 - Donors, Activists, Supporters'
+      '1 - Inside Support Guardrail'
+      '2 - Outside Support Guardrail'
+      '3 - Non-target'
+      ```
+* In order to validate the tiers for a particilar state use the `support_guardrail_validation` column which removes CCJ Field IDs from the top tier in order to enable validation. 
+      ```
+      '0 - Donors and Activists'
+      '1 - Inside Support Guardrail'
+      '2 - Outside Support Guardrail'
+      '3 - Non-target'
+      ```
 
 #### Which voters does the `bernie_data_commons.base_universe` table cover?
 * The full table contains the full Phoenix voter file using the standard exclusion criteria (`WHERE is_deceased = 'f' AND reg_record_merged = 'f' AND reg_on_current_file = 't' AND reg_voter_flag = 't'`). 
@@ -19,8 +34,6 @@
 * **Activists and Donors** Volunteer and events data from MyCampaign, ActionKit, Mobilize, Survey Responses, Bern App, the volunteer Slack, and all donors. People living in households where an occupant reported a Field ID, attended or signed up for a campaign related event, or donated to the campaign. Activists and Donors are automatically added to the top tier of the GOTV rank order.
 * **Geo Codes** Geographic information including state codes, county FIPS, precints, latitudes and longitudes.
 
-#### How do you cut lists? 
-    
 
 
 
