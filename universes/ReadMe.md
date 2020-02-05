@@ -12,7 +12,7 @@
     * `electorate_2way` labels all eligible Democratic primary voters in `dem_primary_eligible_2way`, all verified supporters, donors and activists, and voters with high support scores as part of the '1 - Target universe'.
     * The last potentially useful fields is `vote_ready_5way` which attempts to segment voters between voters who are '1 - Vote-ready', '2 - Vote-ready lapsed', '3 - Register as Dem in current state',  '4 - Absentee voter', '5 - Non-target'.
     
-##### Some of the features include:
+#### Which features are included?
 * **Scores** Predictive scores and percentiles including the best performing support models from the `bernie_data_commons.all_scores_ntiles` table and other useful scores including Spoke persuasion and event recruitment models. Note, higher percentiles represent higher scores. For example, the top 10% covers percentiles greater than or equal to 90. The table also includes Civis persuasion scores for expected increase (or decrease) in support from issue-based messaging.
 * **Voter Information** Features pulled in from the `bernie_data_commons.rainbow_analytics_frame` and the `bernie_data_commons.national_constituency_table` including party, partisanship, vote history, registered in state, primary eligibility with state of registration, race / ethnicity, spanish language preference, age buckets, ideology, education, income, gender, urbanicity, child in household, marital status, religion and student flag.
 * **Support IDs** All Field IDs and Third Party IDs (that are legal for voter contact). These IDs are used both for pre-launch validation to vet the quality of the list and also funneled into the list for GOTV re-targeting purposes.
