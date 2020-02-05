@@ -6,7 +6,7 @@
 
 #### How does the default rank order work?
 * The default rank ordering criteria is based on a column called `support_guardrail`: Tier 1: Verified supporters, activists, and donors, second tier "remaining voters who have not yet been contacted but predict support based on voter characteristics and third party data. The field `support_guardrail` sets support thresholds to bucket individuals different support segments and deprioritize people who are less reliable GOTV targets. 
-     | `support_guardrail` |
+     | support_guardrail |
      |-------------------------------------|
      | '0 - Donors, Activists, Supporters' |
      | '1 - Inside Support Guardrail' |
