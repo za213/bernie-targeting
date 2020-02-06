@@ -23,7 +23,7 @@ sortkey(person_id) as
          ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, field_id_1_score DESC) as gotv_rank
 from bernie_data_commons.base_universe 
 where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
-and state_code = 'UT')
+and state_code = 'UT'
 and support_guardrail IN ('0 - Donors, Activists, Supporters','1 - Inside Support Guardrail'));
 
 /* 
