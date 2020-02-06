@@ -32,6 +32,7 @@
 * Average holdout flag rates by state.
 * Refresh schedule
 * Process for feature requests
+* data dictionary
 
 
 
