@@ -2,7 +2,6 @@
 The below is an example of how to compare the various lists created in the last query template examples.
 */
 
-
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_early_voters;
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_likely_dems;
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_millennials;
