@@ -1,5 +1,3 @@
-
-
 set query_group to 'importers';
 set wlm_query_slot_count to 1;
 
