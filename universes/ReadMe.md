@@ -10,7 +10,7 @@
 
 ### Are all voters in the table?
 * The full table contains the full Phoenix voter file using the standard exclusion criteria (`WHERE is_deceased = 'f' AND reg_record_merged = 'f' AND reg_on_current_file = 't' AND reg_voter_flag = 't'`). 
-* There are a couple filters available for restricting the voter list criteria.
+* There are a couple filters available for restricting the size of the GOTV universe
     * `electorate_2way` labels all eligible Democratic primary voters in `dem_primary_eligible_2way`, all verified supporters, donors and activists, and voters with high support scores as part of the `'1 - Target universe'`. This field is the broadest possible GOTV universe criteria and generally the recommended approach since it ensures that activists and donors who may not be Dem Primary Eligible are automatically included.
     * `dem_primary_eligible_2way` labels people as `'1 - Dem Primary Eligible'` who are currently eligible to vote in a Democratic primary based on their party affiliation and whether their registration state is open, closed, or mixed.
     * `vote_ready_5way` segments voters between voters who are `'1 - Vote-ready', '2 - Vote-ready lapsed', '3 - Register as Dem in current state',  '4 - Absentee voter', '5 - Non-target'`. This field can be useful if you are trying to deploy different messaging or voter contact methods based on the voters past vote history or whether they need to take a registration action or may need an absentee ballot.
