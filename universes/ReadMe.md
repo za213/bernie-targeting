@@ -24,9 +24,10 @@
 
 
 ##### Appendix / will add
+* Google Sheet Crosstab report
+* Process for in field validation and tracking versions of cut lists.
 * How to add in unmatched voters. 
 * Special targeting criteria for phones, mail, and doors
-* Process for in field validation and tracking versions of cut lists.
 * Fix mobilize issue
 * Average holdout flag rates by state.
 
