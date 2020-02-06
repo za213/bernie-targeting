@@ -1,6 +1,9 @@
 /*
-The below is an example of how to compare the various lists created in the last query template examples.
-See this Google Sheet for the Output: https://docs.google.com/spreadsheets/d/15DofB9NSfflGj0GoHNd_XT8OdDGU0SXNnvIQs8N0TRc/edit#gid=0
+The below is an example of how to compare the various lists created in the UT example query templates. What the following query
+does is that it builds a table that combines the various lists but for the support_guardrail_validation column which
+excludes the CCJ IDs which enables us to validate. To see the final output of the last query which creates the 
+bernie_nmarchio2.ut_gotv_list_validation table, please see this Google Sheet: 
+https://docs.google.com/spreadsheets/d/15DofB9NSfflGj0GoHNd_XT8OdDGU0SXNnvIQs8N0TRc/edit#gid=0
 */
 
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_early_voters;
