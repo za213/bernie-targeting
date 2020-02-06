@@ -1,24 +1,14 @@
 
+/* 
+First lets look at a common list pull for Utah. Let's say the goal is to create a rank ordered list of 
+Democratic primary voters. The below query partitions on the state code and dem primary eligibility status
+which is a flag that designates if the voter is eligible based on whether their state is open, closed, or mixed
+and their party affiliation. What the below query does is that it orders people by the support guardrail tiers 
+and then orders each tier by the field_1_score. The final gotv_tiers_20 column creates a ventile of support that automatically
+prioritizes people based on the tier order and support who are Primary eligible. 
+*/ 
 
--- Eligible Dem Primary Voters and high support targets
-set query_group to 'importers';
-set wlm_query_slot_count to 1;
--- Broadest universe
-CREATE TABLE gotv_universes.ut_gotv_electorate
-distkey(person_id) 
-sortkey(person_id) as
-(SELECT *
-        ,NTILE(20) OVER (PARTITION BY state_code||electorate_2way ORDER BY gotv_rank ASC) AS gotv_tiers_20
- from
- (select  person_id
-         ,state_code
-         ,electorate_2way
-         ,support_guardrail
-         ,round(1.0*count(*) OVER (partition BY state_code||electorate_2way ORDER BY support_guardrail ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
-         ,row_number() OVER (PARTITION BY state_code||electorate_2way  ORDER BY support_guardrail ASC, field_id_1_score DESC) as gotv_rank
-from bernie_data_commons.base_universe where electorate_2way  = '1 - Target universe' and state_code = 'UT'));
-
--- Only eligible Dem Primary Voters
+-- Only eligible Dem Primary Voters 
 CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible
 distkey(person_id) 
 sortkey(person_id) as
@@ -31,22 +21,99 @@ sortkey(person_id) as
          ,support_guardrail
          ,round(1.0*count(*) OVER (partition BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
          ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, field_id_1_score DESC) as gotv_rank
-from bernie_data_commons.base_universe where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' and state_code = 'UT'));
+from bernie_data_commons.base_universe 
+where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
+and state_code = 'UT')
+and support_guardrail IN ('0 - Donors, Activists, Supporters','1 - Inside Support Guardrail'));
 
--- Only highly active voters with history voting in primaries who are Dem Primary eligible
-CREATE TABLE gotv_universes.ut_gotv_vote_ready
+
+/* 
+Another option is that since Utah is an open primary it might make sense to restrict to only Democrats even 
+though anyone can participate. As a result this query might be a better fit since it limits the GOTV universe
+to Primary Eligible people who have a high Dem partisanship score or who are registered as Democrats
+*/ 
+
+-- Only eligible Dem Primary Voters and Democrats
+CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible_early_voters
 distkey(person_id) 
 sortkey(person_id) as
 (SELECT *
-        ,NTILE(20) OVER (PARTITION BY state_code||vote_ready_5way ORDER BY gotv_rank ASC) AS gotv_tiers_20
+        ,NTILE(20) OVER (PARTITION BY state_code||dem_primary_eligible_2way ORDER BY gotv_rank ASC) AS gotv_tiers_20
  from
  (select  person_id
          ,state_code
-         ,vote_ready_5way
+         ,dem_primary_eligible_2way
          ,support_guardrail
-         ,round(1.0*count(*) OVER (partition BY state_code||vote_ready_5way ORDER BY support_guardrail ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
-         ,row_number() OVER (PARTITION BY state_code||vote_ready_5way  ORDER BY support_guardrail ASC, field_id_1_score DESC) as gotv_rank
-from bernie_data_commons.base_universe where vote_ready_5way =  '1 - Vote-ready' and state_code = 'UT'));
+         ,round(1.0*count(*) OVER (partition BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
+         ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, field_id_1_score DESC) as gotv_rank
+from bernie_data_commons.base_universe 
+where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
+and state_code = 'UT' 
+and (civis_2020_partisanship >= .66 or party_8way = '1 - Democratic')
+and support_guardrail IN ('0 - Donors, Activists, Supporters','1 - Inside Support Guardrail') );
+
+
+/* 
+For more selective targeting we can also add in the flag for early vote history. In 2020 a new rule gives UT all Democrats
+are sent a vote by mail ballot. To prioritize people who have a history of voting by mail we can order by the early_vote_history_3way 
+column in addition to the usual support_guardrail and field_id_1_score.
+*/ 
+
+
+-- Only eligible Dem Primary Voters and Democrats that prioritizes early voters within each support guardrail bucket
+CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible_early_voters
+distkey(person_id) 
+sortkey(person_id) as
+(SELECT *
+        ,NTILE(20) OVER (PARTITION BY state_code||dem_primary_eligible_2way ORDER BY gotv_rank ASC) AS gotv_tiers_20
+ from
+ (select  person_id
+         ,state_code
+         ,dem_primary_eligible_2way
+         ,early_vote_history_3way
+         ,support_guardrail
+         ,round(1.0*count(*) OVER (partition BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, early_vote_history_3way ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
+         ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, early_vote_history_3way ASC, field_id_1_score DESC) as gotv_rank
+from bernie_data_commons.base_universe 
+where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
+and state_code = 'UT' 
+and (civis_2020_partisanship >= .66 or party_8way = '1 - Democratic')
+and support_guardrail IN ('0 - Donors, Activists, Supporters','1 - Inside Support Guardrail') );
+
+
+/* 
+Sometimes when we are facing more limited volunteer capacity it may make sense to create lists of people who are highly active voters. One way to
+do this is with the vote_ready_5way flag which limits to people who have registered since 2018, voted in the 2018 midterm, or who have ever voted 
+in a Democratic primary.
+*/ 
+
+
+-- Only highly active voters with history voting in primaries who are Dem Primary eligible
+CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible_early_voters
+distkey(person_id) 
+sortkey(person_id) as
+(SELECT *
+        ,NTILE(20) OVER (PARTITION BY state_code||dem_primary_eligible_2way ORDER BY gotv_rank ASC) AS gotv_tiers_20
+ from
+ (select  person_id
+         ,state_code
+         ,dem_primary_eligible_2way
+         ,early_vote_history_3way
+         ,support_guardrail
+         ,round(1.0*count(*) OVER (partition BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, early_vote_history_3way ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
+         ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, early_vote_history_3way ASC, field_id_1_score DESC) as gotv_rank
+from bernie_data_commons.base_universe 
+where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
+and state_code = 'UT' 
+and (civis_2020_partisanship >= .66 or party_8way = '1 - Democratic')
+and support_guardrail IN ('0 - Donors, Activists, Supporters','1 - Inside Support Guardrail') 
+and vote_ready_5way =  '1 - Vote-ready'));
+
+
+/* 
+Lastly sometimes it may make sense to add in custom targeting criteria. This process is simple and all it involves is writing a simple case when
+using the standard numbering order logic. In this case we add millennials to the very top bucket so that we can ensure they are targeted first.
+*/ 
 
 -- Custom tiers that insert millenials at top of rank order with activists, donors, and verified supporters
 CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible_millennials
@@ -76,5 +143,8 @@ sortkey(person_id) as
         else '2 - Outside Support Guardrail' end as custom_tiers
          ,round(1.0*count(*) OVER (partition BY state_code||dem_primary_eligible_2way  ORDER BY custom_tiers ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
          ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY custom_tiers ASC, field_id_1_score DESC) as gotv_rank
-from bernie_data_commons.base_universe where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' and state_code = 'UT'));
-
+from bernie_data_commons.base_universe 
+where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
+and state_code = 'UT' 
+and (civis_2020_partisanship >= .66 or party_8way = '1 - Democratic')
+and support_guardrail IN ('0 - Donors, Activists, Supporters','1 - Inside Support Guardrail'));
