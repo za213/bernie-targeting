@@ -11,7 +11,6 @@
 
 -- Field / Third Party IDs Side Table: all 1-5 support IDs collected to date -- note, the HARDCODED values which are subject to change as holdout universes shift
 begin;
-set wlm_query_slot_count to 3;
 DROP TABLE IF EXISTS bernie_nmarchio2.base_validation;
 CREATE TABLE bernie_nmarchio2.base_validation
 distkey(person_id) 
@@ -126,7 +125,6 @@ commit;
 
 -- ActionKit / Mobilize Events: recodes all events to standardized categories related to activism and campaign engagement
 begin;
-set wlm_query_slot_count to 2;
 DROP TABLE IF EXISTS bernie_nmarchio2.base_akmobevents;
 CREATE TABLE bernie_nmarchio2.base_akmobevents
 distkey(ak_event_id) 
@@ -180,7 +178,6 @@ commit;
 
 --  Activism Sidetable: all individuals in Bern app, volunteers / attendees / RSVPs in ActionKit and Mobilize, shift volunteers and supporters in MyCampaign, and activism-related Survey Responses
 begin;
-set wlm_query_slot_count to 2;
 DROP TABLE IF EXISTS bernie_nmarchio2.base_activists;
 CREATE TABLE bernie_nmarchio2.base_activists
 distkey(person_id) 
@@ -420,7 +417,6 @@ commit;
 
 --  Activism Sidetable Unmatched: supplemental to the above covering only unmatched persons without person_id primary keys
 begin;
-set wlm_query_slot_count to 4;
 DROP TABLE IF EXISTS bernie_nmarchio2.base_activists_unmatched;
 CREATE TABLE bernie_nmarchio2.base_activists_unmatched
 distkey(jsonid_encoded) 
@@ -1584,5 +1580,5 @@ drop table if exists bernie_nmarchio2.base_household;
 drop table if exists bernie_nmarchio2.base_validation;
 drop table if exists bernie_nmarchio2.base_universe;
 
-grant select on bernie_nmarchio2.base_universe to group bernie_data;
-grant select on bernie_nmarchio2.base_activists_unmatched to group bernie_data;
+grant select on bernie_data_commons.base_universe to group bernie_data;
+grant select on bernie_data_commons.base_activists_unmatched to group bernie_data;
