@@ -95,7 +95,7 @@ sortkey(person_id) as
  (select  person_id
          ,state_code
          ,dem_primary_eligible_2way
-         ,early_vote_history_3way
+         ,vote_ready_5way
          ,support_guardrail
          ,round(1.0*count(*) OVER (partition BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, early_vote_history_3way ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
          ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail ASC, early_vote_history_3way ASC, field_id_1_score DESC) as gotv_rank
@@ -122,6 +122,7 @@ sortkey(person_id) as
  (select  person_id
          ,state_code
          ,dem_primary_eligible_2way
+         ,support_guardrail
          ,case 
         WHEN electorate_2way = '2 - Non-target' then '3 - Non-target' 
         WHEN activist_flag = 1
