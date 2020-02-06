@@ -22,6 +22,11 @@
 * **Activists and Donors** Volunteer and events data from MyCampaign, ActionKit, Mobilize, Survey Responses, Bern App, the volunteer Slack, and all donors. People living in households where an occupant reported a Field ID, attended or signed up for a campaign related event, or donated to the campaign. Activists and Donors are automatically added to the top tier of the GOTV rank order.
 * **Geocodes** Geographic information including state codes, county FIPS, precints, latitudes and longitudes.
 
+### Will the table undergo updates? 
+* **Request features** To request features please file a GitHub issue, tag nmarchio, and DM Nico Marchio about the request.
+* **Refresh cadence** The `bernie_data_commons.base_universe` and upstream tables such as the `bernie_data_commons.rainbow_analytics_frame` will be refreshed periodically to ensure that the GOTV universe captures the latest support scores and new voters appearing in Phoenix.
+
+
 
 ##### Appendix / will add
 * Google Sheet Crosstab report
@@ -30,8 +35,6 @@
 * Special targeting criteria for phones, mail, and doors
 * Fix mobilize issue
 * Average holdout flag rates by state.
-* Refresh schedule
-* Process for feature requests
 * data dictionary
 
 
