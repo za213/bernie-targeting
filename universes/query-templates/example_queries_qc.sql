@@ -216,12 +216,9 @@ commit;
 
 
 
-
 begin;
 
-CREATE TABLE bernie_nmarchio2.ut_gotv_list_validation
-distkey(person_id) 
-sortkey(person_id) as
+CREATE TABLE bernie_nmarchio2.ut_gotv_list_validation as
 (select 
 state_code,
 ccj_holdout_group,
@@ -231,14 +228,13 @@ coalesce(number_of_voters,0) as number_of_voters,
 sum(coalesce(number_of_voters,0)) over (partition BY state_code||list_version||gotv_tiers_20) as number_of_voters_in_ventile,
 coalesce(activists,0) as activists,
 sum(coalesce(activists,0)) over (partition BY state_code||list_version||gotv_tiers_20) as activists_in_ventile,
-round(coalesce(1.0*ccj1/ccj1all,0),4) as ccj1rate,
-coalesce(activists,0) as activists,
+round(coalesce(1.0*ccj1/ccjall,0),4) as ccj1rate,
 coalesce(ccj1,0) as ccj1,
 coalesce(ccj2,0) as ccj2,
 coalesce(ccj3,0) as ccj3,
 coalesce(ccj4,0) as ccj4,
 coalesce(ccj5,0) as ccj5,
-coalesce(ccj1all,0) as ccj1all
+coalesce(ccjall,0) as ccjall
 from
 ((select state_code
         ,gotv_tiers_20
@@ -249,12 +245,12 @@ from
                   OR activist_household_flag = 1
                   OR donor_1plus_flag = 1 
                   OR donor_1plus_household_flag = 1 then 1 end) as activists
-        ,sum(ccj_id_1)
-        ,sum(ccj_id_2)
-        ,sum(ccj_id_3)
-        ,sum(ccj_id_4)
-        ,sum(ccj_id_5)
-        ,sum(ccj_id_1_2_3_4_5) from bernie_nmarchio2.ut_gotv_dem_primary_eligible_vanilla group by 1,2,3,4)
+        ,sum(ccj_id_1) as ccj1
+        ,sum(ccj_id_2) as ccj2
+        ,sum(ccj_id_3) as ccj3
+        ,sum(ccj_id_4) as ccj4
+        ,sum(ccj_id_5) as ccj5
+        ,sum(ccj_id_1_2_3_4_5) as ccjall from bernie_nmarchio2.ut_gotv_dem_primary_eligible_vanilla group by 1,2,3,4)
 union all 
 (select state_code
         ,gotv_tiers_20
@@ -265,12 +261,12 @@ union all
                   OR activist_household_flag = 1
                   OR donor_1plus_flag = 1 
                   OR donor_1plus_household_flag = 1 then 1 end) as activists
-        ,sum(ccj_id_1)
-        ,sum(ccj_id_2)
-        ,sum(ccj_id_3)
-        ,sum(ccj_id_4)
-        ,sum(ccj_id_5)
-        ,sum(ccj_id_1_2_3_4_5) from bernie_nmarchio2.ut_gotv_dem_primary_eligible_likely_dems group by 1,2,3,4)
+        ,sum(ccj_id_1) as ccj1
+        ,sum(ccj_id_2) as ccj2
+        ,sum(ccj_id_3) as ccj3
+        ,sum(ccj_id_4) as ccj4
+        ,sum(ccj_id_5) as ccj5
+        ,sum(ccj_id_1_2_3_4_5) as ccjall from bernie_nmarchio2.ut_gotv_dem_primary_eligible_likely_dems group by 1,2,3,4)
 union all
 (select state_code
         ,gotv_tiers_20
@@ -281,12 +277,12 @@ union all
                   OR activist_household_flag = 1
                   OR donor_1plus_flag = 1 
                   OR donor_1plus_household_flag = 1 then 1 end) as activists
-        ,sum(ccj_id_1)
-        ,sum(ccj_id_2)
-        ,sum(ccj_id_3)
-        ,sum(ccj_id_4)
-        ,sum(ccj_id_5)
-        ,sum(ccj_id_1_2_3_4_5) from bernie_nmarchio2.ut_gotv_dem_primary_eligible_early_voters group by 1,2,3,4)
+        ,sum(ccj_id_1) as ccj1
+        ,sum(ccj_id_2) as ccj2
+        ,sum(ccj_id_3) as ccj3
+        ,sum(ccj_id_4) as ccj4
+        ,sum(ccj_id_5) as ccj5
+        ,sum(ccj_id_1_2_3_4_5) as ccjall from bernie_nmarchio2.ut_gotv_dem_primary_eligible_early_voters group by 1,2,3,4)
 union all
 (select state_code
         ,gotv_tiers_20
@@ -297,13 +293,15 @@ union all
                   OR activist_household_flag = 1
                   OR donor_1plus_flag = 1 
                   OR donor_1plus_household_flag = 1 then 1 end) as activists
-        ,sum(ccj_id_1)
-        ,sum(ccj_id_2)
-        ,sum(ccj_id_3)
-        ,sum(ccj_id_4)
-        ,sum(ccj_id_5)
-        ,sum(ccj_id_1_2_3_4_5) from bernie_nmarchio2.ut_gotv_dem_primary_eligible_vote_ready group by 1,2,3,4)));
+        ,sum(ccj_id_1) as ccj1
+        ,sum(ccj_id_2) as ccj2
+        ,sum(ccj_id_3) as ccj3
+        ,sum(ccj_id_4) as ccj4
+        ,sum(ccj_id_5) as ccj5
+        ,sum(ccj_id_1_2_3_4_5) as ccjall from bernie_nmarchio2.ut_gotv_dem_primary_eligible_vote_ready group by 1,2,3,4)));
 commit;
+
+
 
 
 
