@@ -2,6 +2,7 @@
 The below is an example of how to compare the various lists created in the last query template examples.
 */
 
+
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_early_voters;
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_likely_dems;
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_millennials;
@@ -238,7 +239,7 @@ coalesce(ccjall,0) as ccjall
 from
 ((select state_code
         ,gotv_tiers_20
-        ,'vanilla' as list_version
+        ,'1 - Vanilla' as list_version
         ,ccj_holdout_group
         ,count(*) as number_of_voters
         ,sum(case when activist_flag = 1
@@ -254,7 +255,7 @@ from
 union all 
 (select state_code
         ,gotv_tiers_20
-        ,'likely dems only' as list_version
+        ,'2 - Likely Dems' as list_version
         ,ccj_holdout_group
         ,count(*) as number_of_voters
         ,sum(case when activist_flag = 1
@@ -270,7 +271,7 @@ union all
 union all
 (select state_code
         ,gotv_tiers_20
-        ,'early voters' as list_version
+        ,'3 - Early voters' as list_version
         ,ccj_holdout_group
         ,count(*) as number_of_voters
         ,sum(case when activist_flag = 1
@@ -286,7 +287,7 @@ union all
 union all
 (select state_code
         ,gotv_tiers_20
-        ,'custom millennials' as list_version
+        ,'4 - Custom millennials' as list_version
         ,ccj_holdout_group
         ,count(*) as number_of_voters
         ,sum(case when activist_flag = 1
@@ -300,8 +301,5 @@ union all
         ,sum(ccj_id_5) as ccj5
         ,sum(ccj_id_1_2_3_4_5) as ccjall from bernie_nmarchio2.ut_gotv_dem_primary_eligible_vote_ready group by 1,2,3,4)));
 commit;
-
-
-
 
 
