@@ -109,16 +109,13 @@ count(*) as number_of_voters,
 sum(case when activist_flag = 1
           OR activist_household_flag = 1
           OR donor_1plus_flag = 1 
-          OR donor_1plus_flag_household_flag = 1 then 1 end) as activists,
+          OR donor_1plus_household_flag = 1 then 1 end) as activists,
 sum(ccj_id_1) as ccj1,
 sum(ccj_id_2) as ccj2,
 sum(ccj_id_3) as ccj3,
 sum(ccj_id_4) as ccj4,
 sum(ccj_id_5) as ccj5,
 sum(ccj_id_1_2_3_4_5) as ccj1all,
-sum(ccj_id_1_2) as ccj12,
-avg(field_id_1_score_100) as field1score,
-avg(current_support_raw_100) as supportscore
+sum(ccj_id_1_2) as ccj12
 from 
 bernie_nmarchio2.base_universe_qc  group by 1,2,3) order by 1,2,3
-
