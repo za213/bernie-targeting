@@ -1,23 +1,87 @@
--- Standard Recipe
-set wlm_query_slot_count to 3;
+-- Validation Table
+set query_group to 'importers';
+set wlm_query_slot_count to 1;
 DROP TABLE IF EXISTS bernie_nmarchio2.base_universe_qc;
 CREATE TABLE bernie_nmarchio2.base_universe_qc
 distkey(person_id) 
 sortkey(person_id) as
-(SELECT *, 
-NTILE(20) OVER (PARTITION BY state_code||electorate_2way ORDER BY gotv_validation_rank ASC) AS gotv_tiers_20,
-NTILE(20) OVER (PARTITION BY state_code||electorate_2way ORDER BY gotv_validation_rank_extra ASC) AS gotv_tiers_extra_20 
+(SELECT *
+        ,NTILE(20) OVER (PARTITION BY state_code||dem_primary_eligible_2way ORDER BY gotv_validation_rank ASC) AS gotv_tiers_20
  from
- (select *
-        ,round(1.0*count(*) OVER (partition BY state_code||electorate_2way ORDER BY support_guardrail ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
-        ,row_number() OVER (PARTITION BY state_code||electorate_2way ORDER BY support_guardrail ASC, field_id_1_score DESC) as gotv_validation_rank
+ (select  person_id
+         ,state_code
+         ,county_fips
+         ,county_name
+         ,voting_address_latitude
+         ,voting_address_longitude
+         ,party_8way
+         ,party_3way
+         ,civis_2020_partisanship
+         ,vote_history_6way
+         ,early_vote_history_3way
+         ,registered_in_state_3way
+         ,dem_primary_eligible_2way
+         ,race_5way
+         ,spanish_language_2way
+         ,age_5way
+         ,ideology_5way
+         ,education_2way
+         ,income_5way
+         ,gender_2way
+         ,urban_3way
+         ,child_in_hh_2way
+         ,marital_2way
+         ,religion_9way
+         ,electorate_2way
+         ,vote_ready_5way
+         ,thirdp_support_1_id
+         ,thirdp_support_2_id
+         ,thirdp_support_1_2_id
+         ,thirdp_support_3_id
+         ,thirdp_support_4_id
+         ,thirdp_support_5_id
+         ,thirdp_support_1_2_3_4_5_id
+         ,thirdp_holdout_group
+         ,thirdp_first_choice_bernie_hh
+         ,thirdp_first_choice_trump_hh
+         ,thirdp_first_choice_biden_warren_buttigieg_hh
+         ,thirdp_first_choice_any_hh
+         ,thirdp_support_1_id_hh
+         ,thirdp_support_2_id_hh
+         ,thirdp_support_3_id_hh
+         ,thirdp_support_4_id_hh
+         ,thirdp_support_5_id_hh
+         ,thirdp_support_1_2_3_4_5_id_hh
+         ,ccj_contactdate
+         ,ccj_contacted_last_30_days
+         ,ccj_contact_made
+         ,ccj_negative_result
+         ,ccj_id_1
+         ,ccj_id_1_2
+         ,ccj_id_2
+         ,ccj_id_3
+         ,ccj_id_4
+         ,ccj_id_5
+         ,ccj_id_1_2_3_4_5
+         ,ccj_holdout_group
+         ,ccj_id_1_hh
+         ,ccj_id_2_hh
+         ,ccj_id_3_hh
+         ,ccj_id_4_hh
+         ,ccj_id_5_hh
+         ,ccj_id_1_2_3_4_5_hh
+         ,activist_flag
+         ,activist_household_flag
+         ,donor_1plus_flag
+         ,donor_1plus_household_flag
+         ,pturnout_2008
+         ,pturnout_2016
+         ,support_guardrail_validation
+         ,round(1.0*count(*) OVER (partition BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail_validation ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
+         ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY support_guardrail_validation ASC, field_id_1_score DESC) as gotv_validation_rank
+from bernie_data_commons.base_universe where dem_primary_eligible_2way  = '1 - Dem Primary Eligible'));
 
-        ,round(1.0*count(*) OVER (partition BY state_code||electorate_2way ORDER BY support_guardrail_extra ASC, field_id_1_score DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share_extra
-        ,row_number() OVER (PARTITION BY state_code||electorate_2way ORDER BY support_guardrail_extra ASC, field_id_1_score DESC) as gotv_validation_rank_extra
-from bernie_data_commons.base_universe ));
-
-
--- Scores Eval
+-- Scores Eval Query
 select 
 state_code,
 ccj_holdout_group,
@@ -56,4 +120,5 @@ sum(ccj_id_1_2) as ccj12,
 avg(field_id_1_score_100) as field1score,
 avg(current_support_raw_100) as supportscore
 from 
-bernie_nmarchio2.base_universe_qc where electorate_2way = '1 - Target universe'  group by 1,2,3) order by 1,2,3
+bernie_nmarchio2.base_universe_qc  group by 1,2,3) order by 1,2,3
+
