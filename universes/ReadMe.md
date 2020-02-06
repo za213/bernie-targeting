@@ -20,7 +20,7 @@
 * **Voter Information** Features pulled in from the `bernie_data_commons.rainbow_analytics_frame` and the `bernie_data_commons.national_constituency_table` including party, partisanship, vote history, registered in state, primary eligibility with state of registration, race / ethnicity, spanish language preference, age buckets, ideology, education, income, gender, urbanicity, child in household, marital status, religion and student flag.
 * **Support IDs** All Field IDs and Third Party IDs (that are legal for voter contact). These IDs are used both for pre-launch validation to vet the quality of the list and also funneled into the list for GOTV re-targeting purposes.
 * **Activists and Donors** Volunteer and events data from MyCampaign, ActionKit, Mobilize, Survey Responses, Bern App, the volunteer Slack, and all donors. People living in households where an occupant reported a Field ID, attended or signed up for a campaign related event, or donated to the campaign. Activists and Donors are automatically added to the top tier of the GOTV rank order.
-* **Geo Codes** Geographic information including state codes, county FIPS, precints, latitudes and longitudes.
+* **Geocodes** Geographic information including state codes, county FIPS, precints, latitudes and longitudes.
 
 
 ##### Appendix / will add
