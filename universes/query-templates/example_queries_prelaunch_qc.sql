@@ -1,5 +1,6 @@
 /*
 The below is an example of how to compare the various lists created in the last query template examples.
+See this Google Sheet for the Output: https://docs.google.com/spreadsheets/d/15DofB9NSfflGj0GoHNd_XT8OdDGU0SXNnvIQs8N0TRc/edit#gid=0
 */
 
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_early_voters;
