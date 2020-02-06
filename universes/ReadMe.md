@@ -22,6 +22,12 @@
 * **Activists and Donors** Volunteer and events data from MyCampaign, ActionKit, Mobilize, Survey Responses, Bern App, the volunteer Slack, and all donors. People living in households where an occupant reported a Field ID, attended or signed up for a campaign related event, or donated to the campaign. Activists and Donors are automatically added to the top tier of the GOTV rank order.
 * **Geo Codes** Geographic information including state codes, county FIPS, precints, latitudes and longitudes.
 
+* How to add in unmatched voters. 
+* Special targeting criteria for phones, mail, and doors
+* Process for in field validation and tracking versions of cut lists.
+* Fix mobilize issue
+* Average holdout flag rates by state.
+
 
 
 
