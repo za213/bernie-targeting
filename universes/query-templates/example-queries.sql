@@ -10,7 +10,6 @@ and then orders each tier by the field_1_score. The final gotv_tiers_20 column c
 prioritizes people based on the tier order and support who are Primary eligible. 
 */ 
 
-
 begin;
 
 -- Only eligible Dem Primary Voters 
