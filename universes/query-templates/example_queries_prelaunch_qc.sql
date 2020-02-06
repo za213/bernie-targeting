@@ -7,6 +7,7 @@ drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_likely_dems;
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_millennials;
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_vanilla;
 drop table if exists bernie_nmarchio2.ut_gotv_dem_primary_eligible_vote_ready;
+drop table if exists bernie_nmarchio2.ut_gotv_list_validation;
 
 begin;
 
@@ -300,5 +301,3 @@ union all
         ,sum(ccj_id_5) as ccj5
         ,sum(ccj_id_1_2_3_4_5) as ccjall from bernie_nmarchio2.ut_gotv_dem_primary_eligible_vote_ready group by 1,2,3,4)));
 commit;
-
-
