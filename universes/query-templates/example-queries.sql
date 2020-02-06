@@ -5,7 +5,7 @@ Democratic primary voters. The below query partitions on the state code and dem 
 which is a flag that designates if the voter is eligible based on whether their state is open, closed, or mixed
 and their party affiliation. What the below query does is that it orders people by the support guardrail tiers 
 and then orders each tier by the field_1_score. The final gotv_tiers_20 column creates a ventile of support that automatically
-prioritizes people based on the tier order and support who are Primary eligible. 
+prioritizes people based on the tier order and likelihood of reporting a Support 1 ID. 
 */ 
 
 -- Only eligible Dem Primary Voters 
@@ -29,7 +29,7 @@ and support_guardrail IN ('0 - Donors, Activists, Supporters','1 - Inside Suppor
 /* 
 Another option is that since Utah is an open primary it might make sense to restrict to only Democrats even 
 though anyone can participate. As a result this query might be a better fit since it limits the GOTV universe
-to Primary Eligible people who have a high Dem partisanship score or who are registered as Democrats
+to Primary Eligible people who have a high Dem partisanship score or who are registered as Democrats.
 */ 
 
 -- Only eligible Dem Primary Voters who are likely Democrats
@@ -80,8 +80,8 @@ and support_guardrail IN ('0 - Donors, Activists, Supporters','1 - Inside Suppor
 
 
 /* 
-Sometimes when we are facing more limited volunteer capacity it may make sense to create lists of people who are highly active voters. One way to
-do this is with the vote_ready_5way flag which limits to people who have registered since 2018, voted in the 2018 midterm, or who have ever voted 
+Sometimes when we are facing more limited volunteer capacity it may make sense to limit the list to voters who are highly active. 
+One way to do this is with the vote_ready_5way flag which limits to people who have registered since 2018, voted in the 2018 midterm, or who have ever voted 
 in a Democratic primary.
 */ 
 
@@ -110,6 +110,7 @@ and vote_ready_5way =  '1 - Vote-ready'));
 /* 
 Lastly sometimes it may make sense to add in custom targeting criteria. This process is simple and all it involves is writing a simple case when
 using the standard numbering order logic. In this case we add millennials to the very top bucket so that we can ensure they are targeted first.
+Its also possible to add another segment below the top tier and above the generic high support guardrail.
 */ 
 
 -- Custom tiers that insert millenials at top of rank order with activists, donors, and verified supporters
