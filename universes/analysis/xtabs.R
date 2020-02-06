@@ -1,4 +1,5 @@
 
+
 library(civis)
 library(tidyverse)
 library(ggplot2)
@@ -51,7 +52,7 @@ union all
 union all
 (select state_code, gotv_tiers_20,'dem_primary_eligible_2way' as demo , dem_primary_eligible_2way as subgroup, count(*) from list_xtab group by 1,2,3,4)
 union all
-(select state_code, gotv_tiers_20,'vote_ready_5way' as demo , vote_ready_6way as subgroup, count(*) from list_xtab group by 1,2,3,4)
+(select state_code, gotv_tiers_20,'vote_ready_5way' as demo , vote_ready_5way as subgroup, count(*) from list_xtab group by 1,2,3,4)
 ) order by  demo, subgroup;"
 
 df <- civis::read_civis(sql(demo_query), database = 'Bernie 2020') 
