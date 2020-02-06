@@ -9,7 +9,7 @@ prioritizes people based on the tier order and support who are Primary eligible.
 */ 
 
 -- Only eligible Dem Primary Voters 
-CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible
+CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible_vanilla
 distkey(person_id) 
 sortkey(person_id) as
 (SELECT *
@@ -26,15 +26,14 @@ where dem_primary_eligible_2way  = '1 - Dem Primary Eligible'
 and state_code = 'UT')
 and support_guardrail IN ('0 - Donors, Activists, Supporters','1 - Inside Support Guardrail'));
 
-
 /* 
 Another option is that since Utah is an open primary it might make sense to restrict to only Democrats even 
 though anyone can participate. As a result this query might be a better fit since it limits the GOTV universe
 to Primary Eligible people who have a high Dem partisanship score or who are registered as Democrats
 */ 
 
--- Only eligible Dem Primary Voters and Democrats
-CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible_early_voters
+-- Only eligible Dem Primary Voters who are likely Democrats
+CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible_likely_dems
 distkey(person_id) 
 sortkey(person_id) as
 (SELECT *
@@ -59,8 +58,7 @@ are sent a vote by mail ballot. To prioritize people who have a history of votin
 column in addition to the usual support_guardrail and field_id_1_score.
 */ 
 
-
--- Only eligible Dem Primary Voters and Democrats that prioritizes early voters within each support guardrail bucket
+-- Only eligible Dem Primary Voters who are Democrats and prioritizing early voters first
 CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible_early_voters
 distkey(person_id) 
 sortkey(person_id) as
@@ -87,9 +85,8 @@ do this is with the vote_ready_5way flag which limits to people who have registe
 in a Democratic primary.
 */ 
 
-
--- Only highly active voters with history voting in primaries who are Dem Primary eligible
-CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible_early_voters
+-- Only eligible Dem Primary Voters who are Democrats and limiting to more active voters
+CREATE TABLE gotv_universes.ut_gotv_dem_primary_eligible_vote_ready
 distkey(person_id) 
 sortkey(person_id) as
 (SELECT *
