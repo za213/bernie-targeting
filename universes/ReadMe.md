@@ -26,7 +26,8 @@
 * **Request features** To request features please file a GitHub issue, tag nmarchio, and DM Nico Marchio about the request.
 * **Refresh cadence** The `bernie_data_commons.base_universe` and upstream tables such as the `bernie_data_commons.rainbow_analytics_frame` will be refreshed periodically to ensure that the GOTV universe captures the latest support scores and new voters appearing in Phoenix.
 
-
+### Platform Links and Other Resources:
+* https://platform.civisanalytics.com/spa/#/projects/132576
 
 ##### Appendix / will add
 * Google Sheet Crosstab report
