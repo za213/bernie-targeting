@@ -162,6 +162,6 @@ from bernie_data_commons.base_universe
 where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
 and state_code = 'UT' 
 and (civis_2020_partisanship >= .66 or party_8way = '1 - Democratic')
-and support_guardrail IN ('0 - Donors, Activists, Supporters','1 - Inside Support Guardrail')));
+and custom_tiers IN ('0 - Donors, Activists, Supporters, Millennials','1 - Inside Support Guardrail')));
 
 commit;
