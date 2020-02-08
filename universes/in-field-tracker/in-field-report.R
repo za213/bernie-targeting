@@ -1,3 +1,4 @@
+
 library(civis)
 library(tidyverse)
 
@@ -81,9 +82,9 @@ CREATE TABLE gotv_universes.in_field_validation distkey(person_id) sortkey(perso
              ,coalesce(ccj.ccj_id_4,0) as ccj_id_4
              ,coalesce(ccj.ccj_id_5,0) as ccj_id_5
              ,coalesce(ccj.ccj_id_1_2_3_4_5,0) as ccj_id_1_2_3_4_5
-             ,case when ccj.ccj_contactdate is null then 'Uncontacted'
+             ,case when ccj.ccj_contactdate is null then '3 - Uncontacted'
                    when datediff(d, TO_DATE(lists.pass_date, 'YYYY-MM-DD'), TO_DATE(ccj.ccj_contactdate, 'YYYY-MM-DD')) >= 0 
-                   then 'Contacted after pass date' else 'Contacted before pass date' end as collected_after_list_pass
+                   then '1 - Contacted after pass date' else '2 - Contacted before pass date' end as collected_after_list_pass
              ,base.state_code
              ,base.activist_flag
              ,base.activist_household_flag
