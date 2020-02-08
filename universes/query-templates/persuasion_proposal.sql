@@ -11,7 +11,8 @@ sortkey(person_id) as
          ,support_guardrail
          ,case when 
   			--(age_5way != '1 - 18-34' and race_5way = '2 - Black')
-  				or spoke_persuasion_1plus_100 > 70 
+  				--or 
+                                spoke_persuasion_1plus_100 > 70 
   				or sanders_very_excited_score_100 > 80
   				or  ((biden_support_100 > 40 or warren_support_100 > 40) AND buttigieg_support_100 < 80) 
   				then 1 else 0 end as persuasion_target
