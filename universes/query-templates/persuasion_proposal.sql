@@ -41,6 +41,8 @@ sortkey(person_id) as
   				and persuasion_target = 1 then '4 - Low Turnout Persuasion Targets'
   		WHEN spoke_persuasion_1plus_100 > 50 then  '5 - Low Persuasion Targets'
   		ELSE '6 - Non-target' end as custom_tiers
+                
+    -- REMOVE 5s and 1s from non-target so that we can see validation across tiers. 
   		,CASE WHEN electorate_2way = '2 - Non-target' 
   				or activist_flag = 1
   				or donor_1plus_flag = 1 
