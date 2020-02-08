@@ -10,10 +10,10 @@ sortkey(person_id) as
          ,dem_primary_eligible_2way
          ,support_guardrail
          ,case when 
-  			(age_5way != '1 - 18-34' and race_5way = '2 - Black')
+  			--(age_5way != '1 - 18-34' and race_5way = '2 - Black')
   				or spoke_persuasion_1plus_100 > 70 
   				or sanders_very_excited_score_100 > 80
-  				or  ((biden_support_100 > 80 or warren_support_100 > 80) AND buttigieg_support_100 < 90) 
+  				or  ((biden_support_100 > 40 or warren_support_100 > 40) AND buttigieg_support_100 < 80) 
   				then 1 else 0 end as persuasion_target
 
   -- remove non-electorate, anyone who is a 1, or anyone who is a 5, or anyone who is a strong supporter already 
@@ -30,14 +30,14 @@ sortkey(person_id) as
   				or field_id_composite_score_100 > 90
   				or sanders_strong_support_score_100 > 90
   				then '6 - Non-target' 
- 		WHEN  turnout_current_100 > 80 
+ 		WHEN  turnout_current_100 > 80 or vote_ready_5way = '1 - Vote-ready' 
   			AND persuasion_target = 1
   			then '1 - Highest Turnout Persuasion Targets'
- 		WHEN  turnout_current_100 > 60 
+ 		WHEN  turnout_current_100 > 60 or vote_ready_5way = '1 - Vote-ready' 
   			AND persuasion_target = 1 then '2 - High Turnout Persuasion Targets'
- 		WHEN  turnout_current_100 > 50 
+ 		WHEN  turnout_current_100 > 50 or vote_ready_5way = '1 - Vote-ready'
   			AND persuasion_target = 1 then '3 - Lower Turnout Persuasion Targets'
-  		WHEN  turnout_current_100 > 20 
+  		WHEN  turnout_current_100 > 20 or vote_ready_5way IN ('1 - Vote-ready', '2 - Vote-ready lapsed')
   				and persuasion_target = 1 then '4 - Low Turnout Persuasion Targets'
   		WHEN spoke_persuasion_1plus_100 > 50 then  '5 - Low Persuasion Targets'
   		ELSE '6 - Non-target' end as custom_tiers
@@ -50,14 +50,14 @@ sortkey(person_id) as
   				or field_id_composite_score_100 > 90
   				or sanders_strong_support_score_100 > 90
   				then '6 - Non-target' 
- 		WHEN  turnout_current_100 > 80 
+ 		WHEN  turnout_current_100 > 80 or vote_ready_5way = '1 - Vote-ready' 
   			AND persuasion_target = 1
   			then '1 - Highest Turnout Persuasion Targets'
- 		WHEN  turnout_current_100 > 60 
+ 		WHEN  turnout_current_100 > 60 or vote_ready_5way = '1 - Vote-ready' 
   			AND persuasion_target = 1 then '2 - High Turnout Persuasion Targets'
- 		WHEN  turnout_current_100 > 50 
+ 		WHEN  turnout_current_100 > 50 or vote_ready_5way = '1 - Vote-ready'
   			AND persuasion_target = 1 then '3 - Lower Turnout Persuasion Targets'
-  		WHEN  turnout_current_100 > 20 
+  		WHEN  turnout_current_100 > 20 or vote_ready_5way IN ('1 - Vote-ready', '2 - Vote-ready lapsed')
   				and persuasion_target = 1 then '4 - Low Turnout Persuasion Targets'
   		WHEN spoke_persuasion_1plus_100 > 50 then  '5 - Low Persuasion Targets'
   		ELSE '6 - Non-target' end as custom_tiers_validation
