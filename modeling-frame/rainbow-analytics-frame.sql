@@ -2,15 +2,16 @@
 set query_group to 'importers';
 set wlm_query_slot_count to 3;
 
-/*
+
 truncate bernie_data_commons.rainbow_analytics_frame; 
 insert into bernie_data_commons.rainbow_analytics_frame
-*/
+/*
 drop table if exists bernie_data_commons.rainbow_analytics_frame; 
 create table bernie_data_commons.rainbow_analytics_frame
 distkey(person_id)
 sortkey(person_id)
 as 
+*/
 (select
 p.person_id
 ,p.voting_address_id
