@@ -112,7 +112,6 @@ state_code,
 list_source,
 pass_date,
 collected_after_list_pass,
-gotv_tiers_20,
 coalesce(number_of_voters,0) as number_of_voters,
 sum(coalesce(number_of_voters,0)) over (partition BY state_code||list_source||gotv_tiers_20) as number_of_voters_in_ventile,
 coalesce(activists,0) as activists,
@@ -132,7 +131,6 @@ from
   list_source,
   pass_date,
   collected_after_list_pass,
-  gotv_tiers_20,
   count(*) as number_of_voters,
   sum(case when activist_flag = 1
       OR activist_household_flag = 1
@@ -157,7 +155,6 @@ CREATE TABLE gotv_universes.in_field_validation_totals_state as
 (select 
 state_code,
 collected_after_list_pass,
-gotv_tiers_20,
 coalesce(number_of_voters,0) as number_of_voters,
 sum(coalesce(number_of_voters,0)) over (partition BY state_code||gotv_tiers_20) as number_of_voters_in_ventile,
 coalesce(activists,0) as activists,
@@ -175,7 +172,6 @@ from
 (select
   state_code,
   collected_after_list_pass,
-  gotv_tiers_20,
   count(*) as number_of_voters,
   sum(case when activist_flag = 1
       OR activist_household_flag = 1
