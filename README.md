@@ -26,7 +26,7 @@
 ## Modeling Pipelines:
 
 #### Voter Engagement Models:
-* [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/voluntee-dv-recode-v2.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/volunteer-modeling-workflow-20191219.ipynb)
+* [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/dv-recode/volunteer-dv-recode-v2.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/volunteer-modeling-workflow-20191219.ipynb)
 * Scores table: `bernie_nmarchio2.actionpop_output_20191220` 
 * Validation metrics: `bernie_nmarchio2.actionpop_validation_20191220`
 
@@ -45,7 +45,7 @@
 * Note columns with `_100` are cut into percentiles nationally such that when `where score_100 >= 80` would give the top 20% highest scores.
 
 #### Spoke Persuasion Models:
-* [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/spoke-dv-recode.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/spoke-modeling-workflow-20191221.ipynb)
+* [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/dv-recode/spoke-dv-recode.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/spoke-modeling-workflow-20191221.ipynb)
 * Scores table: `bernie_nmarchio2.spoke_output_20191221` 
 * Validation metrics: `bernie_nmarchio2.spoke_validation_20191221`
 
