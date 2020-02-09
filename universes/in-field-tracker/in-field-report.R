@@ -144,7 +144,7 @@ from
   sum(ccj_id_1_2_3_4_5) as ccj_all,
   sum(ccj_contact_made) as ccj_contactmade,
   sum(ccj_negative_result) as ccj_negativeresult
-  from gotv_universes.in_field_validation  group by 1,2,3,4,5) order by 1,2,3,4,5)")
+  from gotv_universes.in_field_validation  group by 1,2,3,4) order by 1,2,3,4)")
 
 query_status <- query_civis(x=sql(aggregation_sql), database = "Bernie 2020")
 
@@ -185,7 +185,7 @@ from
   sum(ccj_id_1_2_3_4_5) as ccj_all,
   sum(ccj_contact_made) as ccj_contactmade,
   sum(ccj_negative_result) as ccj_negativeresult
-  from gotv_universes.in_field_validation  group by 1,2,3) order by 1,2,3)")
+  from gotv_universes.in_field_validation  group by 1,2) order by 1,2)")
 
 query_status <- query_civis(x=sql(state_aggregation_sql), database = "Bernie 2020")
 
