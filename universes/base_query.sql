@@ -1,6 +1,6 @@
 
 -- Owner: Nico Marchio 
--- Entered Production: 
+-- Entered Production: 2020-02-05
 -- Last Update: 2020-02-03
 -- Purpose: Builds data tables to inform voter targeting, list cutting, and voter contact
 
@@ -834,7 +834,9 @@ sortkey(person_id) AS
           -- Vote information
           voterinfo.vote_history_6way,
           voterinfo.early_vote_history_3way,
+          voterinfo.early_voting_3way,
           voterinfo.registered_in_state_3way,
+          voterinfo.absentee_voting_4way,
           voterinfo.dem_primary_eligible_2way,
 
           -- Demographics
@@ -1052,8 +1054,8 @@ sortkey(person_id) AS
                  OR activist_household_flag = 1
                  OR donor_1plus_household_flag = 1
 
-                 OR bvalidate.ccj_id_1_2 = 1
-                 OR bvalidate.thirdp_support_1_2_id = 1
+                 OR bvalidate.ccj_id_1 = 1
+                 OR bvalidate.thirdp_support_1_id = 1
                  OR bvalidate.thirdp_first_choice_bernie = 1 
 
                  OR ccj_id_1_hh = 1
@@ -1201,6 +1203,7 @@ sortkey(person_id) AS
 
         ,case 
         WHEN electorate_2way = '2 - Non-target' then '3 - Non-target' 
+        WHEN bvalidate.ccj_id_4 = 1 or bvalidate.ccj_id_5 = 1 then '3 - Non-target' 
         WHEN activist_flag = 1
           OR activist_household_flag = 1
           OR donor_1plus_flag = 1 
@@ -1208,11 +1211,12 @@ sortkey(person_id) AS
           OR bvalidate.ccj_id_1 = 1
           OR bvalidate.thirdp_support_1_id = 1
           OR bvalidate.thirdp_first_choice_bernie = 1 then '0 - Donors, Activists, Supporters'
-        when bdcas.field_id_1_score_100 >= 70 
+        when (bdcas.field_id_1_score_100 >= 70 
           or bdcas.field_id_composite_score_100 >= 70 
           or bdcas.current_support_raw_100 >= 70
           or bdcas.sanders_strong_support_score_100 >= 70 
-          or student_flag = 1 then '1 - Inside Support Guardrail'
+          or student_flag = 1)
+          and bdcas.field_id_5_score_100 < 90 then '1 - Inside Support Guardrail'
         else '2 - Outside Support Guardrail' end as support_guardrail
  
         ,case 
@@ -1221,13 +1225,16 @@ sortkey(person_id) AS
           OR activist_household_flag = 1
           OR donor_1plus_flag = 1 
           OR donor_1plus_household_flag = 1 then '0 - Donors and Activists'
-        when bdcas.field_id_1_score_100 >= 70 
+        when (bdcas.field_id_1_score_100 >= 70 
           or bdcas.field_id_composite_score_100 >= 70 
           or bdcas.current_support_raw_100 >= 70
           or bdcas.sanders_strong_support_score_100 >= 70 
-          or student_flag = 1 then '1 - Inside Support Guardrail'
+          or student_flag = 1) 
+          and bdcas.field_id_5_score_100 < 90 then '1 - Inside Support Guardrail'
         else '2 - Outside Support Guardrail' end as support_guardrail_validation
 
+
+        /*
         ,case 
         WHEN electorate_2way = '2 - Non-target' then '3 - Non-target' 
         WHEN any_activist_donor_flag = 1
@@ -1252,6 +1259,7 @@ sortkey(person_id) AS
          and spokemodel.spoke_persuasion_1minus_100 <= 80 then '1 - Inside Support Guardrail'
         else '2 - Outside Support Guardrail' end as support_guardrail_extra
 
+     
         ,case 
         WHEN electorate_2way = '2 - Non-target' then '3 - Non-target' 
         WHEN any_activist_donor_flag = 1
@@ -1272,6 +1280,7 @@ sortkey(person_id) AS
          and bdcas.biden_support_100 <= 90 
          and spokemodel.spoke_persuasion_1minus_100 <= 80 then '1 - Inside Support Guardrail'
         else '2 - Outside Support Guardrail' end as support_guardrail_extra_validation
+        */
 
            /*
            -- Support thresholds   
@@ -1508,32 +1517,33 @@ LEFT JOIN
 
 -- VOTER INFO
    LEFT JOIN
-     (SELECT 
-     	rainbo.person_id::varchar,
-     	rainbo.vote_history_6way,
-     	rainbo.early_vote_history_3way,
-     	rainbo.registered_in_state_3way,
-     	rainbo.dem_primary_eligible_2way,
-     	rainbo.party_8way,
-        rainbo.party_3way,
-        rainbo.race_5way,
-        rainbo.spanish_language_2way,
-        rainbo.age_5way,
-        rainbo.ideology_5way,
-        rainbo.education_2way,
-        rainbo.income_5way,
-        rainbo.gender_2way,
-        rainbo.urban_3way,
-        rainbo.child_in_hh_2way,
-        rainbo.marital_2way,
-        rainbo.religion_9way,
-        as20.civis_2020_partisanship::FLOAT8,
-        as18.civis_2018_economic_persuasion::FLOAT8,
-        as18.civis_2018_one_pct_persuasion::FLOAT8,
-        as18.civis_2018_marijuana_persuasion::FLOAT8,
-        as18.civis_2018_college_persuasion::FLOAT8,
-        as18.civis_2018_welcome_persuasion::FLOAT8,
-        as18.civis_2018_sexual_assault_persuasion::FLOAT8         
+     (SELECT rainbo.person_id::varchar,
+             rainbo.vote_history_6way,
+             rainbo.early_vote_history_3way,
+             rainbo.registered_in_state_3way,
+             rainbo.dem_primary_eligible_2way,
+             rainbo.party_8way,
+             rainbo.party_3way,
+             rainbo.race_5way,
+             rainbo.spanish_language_2way,
+             rainbo.age_5way,
+             rainbo.ideology_5way,
+             rainbo.education_2way,
+             rainbo.income_5way,
+             rainbo.gender_2way,
+             rainbo.urban_3way,
+             rainbo.child_in_hh_2way,
+             rainbo.marital_2way,
+             rainbo.religion_9way,
+             rainbo.early_voting_3way,
+             rainbo.absentee_voting_4way,
+             as20.civis_2020_partisanship::FLOAT8,
+             as18.civis_2018_economic_persuasion::FLOAT8,
+             as18.civis_2018_one_pct_persuasion::FLOAT8,
+             as18.civis_2018_marijuana_persuasion::FLOAT8,
+             as18.civis_2018_college_persuasion::FLOAT8,
+             as18.civis_2018_welcome_persuasion::FLOAT8,
+             as18.civis_2018_sexual_assault_persuasion::FLOAT8         
 
       --FROM phoenix_analytics.person p
       from
@@ -1554,7 +1564,9 @@ LEFT JOIN
               urban_3way,
               child_in_hh_2way,
               marital_2way,
-              religion_9way FROM bernie_data_commons.rainbow_analytics_frame) rainbo
+              religion_9way,
+              early_voting_3way,
+              absentee_voting_4way FROM bernie_data_commons.rainbow_analytics_frame) rainbo
       LEFT JOIN 
       (select person_id, 
       	      civis_2020_partisanship from phoenix_scores.all_scores_2020) as20 
@@ -1581,4 +1593,4 @@ drop table if exists bernie_nmarchio2.base_validation;
 drop table if exists bernie_nmarchio2.base_universe;
 
 grant select on bernie_data_commons.base_universe to group bernie_data;
-grant select on bernie_data_commons.base_activists_unmatched to group bernie_data;
+
