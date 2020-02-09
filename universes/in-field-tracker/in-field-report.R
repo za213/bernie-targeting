@@ -150,3 +150,46 @@ from
 
 query_status <- query_civis(x=sql(aggregation_sql), database = "Bernie 2020")
 
+
+
+state_aggregation_sql <- paste0("DROP TABLE if exists gotv_universes.in_field_validation_totals_state;
+CREATE TABLE gotv_universes.in_field_validation_totals_state as 
+(select 
+state_code,
+collected_after_list_pass,
+gotv_tiers_20,
+coalesce(number_of_voters,0) as number_of_voters,
+sum(coalesce(number_of_voters,0)) over (partition BY state_code||gotv_tiers_20) as number_of_voters_in_ventile,
+coalesce(activists,0) as activists,
+sum(coalesce(activists,0)) over (partition BY state_code||gotv_tiers_20) as activists_in_ventile,
+round(coalesce(1.0*ccj_1/nullif(ccj_all,0),0),4) as ccj_1rate,
+coalesce(ccj_1,0) as ccj_1,
+coalesce(ccj_2,0) as ccj_2,
+coalesce(ccj_3,0) as ccj_3,
+coalesce(ccj_4,0) as ccj_4,
+coalesce(ccj_5,0) as ccj_5,
+coalesce(ccj_all,0) as ccj_all,
+coalesce(ccj_contactmade,0) as ccj_contactmade,
+coalesce(ccj_negativeresult,0) as ccj_negativeresult
+from
+(select
+  state_code,
+  collected_after_list_pass,
+  gotv_tiers_20,
+  count(*) as number_of_voters,
+  sum(case when activist_flag = 1
+      OR activist_household_flag = 1
+      OR donor_1plus_flag = 1 
+      OR donor_1plus_household_flag = 1 then 1 end) as activists,
+  sum(ccj_id_1) as ccj_1,
+  sum(ccj_id_2) as ccj_2,
+  sum(ccj_id_3) as ccj_3,
+  sum(ccj_id_4) as ccj_4,
+  sum(ccj_id_5) as ccj_5,
+  sum(ccj_id_1_2_3_4_5) as ccj_all,
+  sum(ccj_contact_made) as ccj_contactmade,
+  sum(ccj_negative_result) as ccj_negativeresult
+  from gotv_universes.in_field_validation  group by 1,2,3) order by 1,2,3)")
+
+query_status <- query_civis(x=sql(state_aggregation_sql), database = "Bernie 2020")
+
