@@ -3,12 +3,13 @@ CREATE TABLE bernie_aschang.persuasion_base_universes
 distkey(person_id) 
 sortkey(person_id) as
 (SELECT *
-        ,NTILE(20) OVER (PARTITION BY state_code||dem_primary_eligible_2way ORDER BY pers_rank ASC) AS pers_tiers_20
+        ,NTILE(10) OVER (PARTITION BY state_code||dem_primary_eligible_2way ORDER BY pers_rank_validation ASC) AS pers_tiers_10
  from
  (select  person_id
          ,state_code
          ,dem_primary_eligible_2way
          ,support_guardrail
+  		, race_5way
          ,case when 
   			(age_5way != '1 - 18-34' and race_5way = '2 - Black')
   				or spoke_persuasion_1plus_100 > 70 
@@ -63,6 +64,8 @@ sortkey(person_id) as
   		ELSE '6 - Non-target' end as custom_tiers_validation
          ,round(1.0*count(*) OVER (partition BY state_code||dem_primary_eligible_2way  ORDER BY custom_tiers ASC, spoke_persuasion_1plus_100 DESC ROWS UNBOUNDED PRECEDING)/pturnout_2016,4) AS rolling_electorate_share
          ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY custom_tiers ASC, spoke_persuasion_1plus_100 DESC) as pers_rank
+         ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY custom_tiers_validation ASC, spoke_persuasion_1plus_100 DESC) as pers_rank_validation
+
 from bernie_data_commons.base_universe 
 where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
 and (civis_2020_partisanship >= .33 or party_8way in ('1 - Democratic', '3 - Independent', '5 - Unaffiliated', '4 - Nonpartisan'))
