@@ -30,6 +30,7 @@ sortkey(person_id) as
   				or field_id_1_score_100 > 90
   				or field_id_composite_score_100 > 90
   				or sanders_strong_support_score_100 > 90
+  				or field_id_5_score_100 > 70
   				then '6 - Non-target' 
  		WHEN  turnout_current_100 > 80 
   			AND persuasion_target = 1
@@ -50,6 +51,7 @@ sortkey(person_id) as
   				or field_id_1_score_100 > 90
   				or field_id_composite_score_100 > 90
   				or sanders_strong_support_score_100 > 90
+    			or field_id_5_score_100 > 70
   				then '6 - Non-target' 
  		WHEN  turnout_current_100 > 80 
   			AND persuasion_target = 1
