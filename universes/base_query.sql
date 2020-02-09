@@ -1,6 +1,6 @@
 
 -- Owner: Nico Marchio 
--- Entered Production: 2020-02-05
+-- Entered Production: 
 -- Last Update: 2020-02-03
 -- Purpose: Builds data tables to inform voter targeting, list cutting, and voter contact
 
@@ -814,6 +814,9 @@ sortkey(person_id) AS
   	      p.voting_address_id,
   	      xwalk.jsonid_encoded,
           xwalk.myc_van_id,
+          xwalk.st_myc_van_id,
+          xwalk.myv_van_id,
+          xwalk.st_myv_van_id,
   	      xwalk.actionkit_id, 
           xwalk.bern_canvasser_id,
           p.state_code,
@@ -1345,6 +1348,9 @@ sortkey(person_id) AS
     (SELECT * FROM 
     	(SELECT person_id, 
                 myc_van_id,
+                st_myc_van_id,
+                myv_van_id,
+                st_myv_van_id,
                 bern_canvasser_id,
                 actionkit_id, 
                 jsonid_encoded, 
@@ -1593,4 +1599,6 @@ drop table if exists bernie_nmarchio2.base_validation;
 drop table if exists bernie_nmarchio2.base_universe;
 
 grant select on bernie_data_commons.base_universe to group bernie_data;
+
+
 
