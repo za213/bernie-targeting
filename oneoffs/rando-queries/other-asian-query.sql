@@ -1,5 +1,8 @@
 select * from
-(select person_id, census_block_group_2010, state_code from phoenix_analytics.person where is_deceased = false
+
+
+
+(select person_id, first_name,last_name,census_block_group_2010, state_code from phoenix_analytics.person where is_deceased = false
 and reg_record_merged = false
 and reg_on_current_file = true 
 and reg_voter_flag = true) p 
