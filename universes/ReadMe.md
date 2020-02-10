@@ -33,14 +33,13 @@
 * [Scores analysis and crosstab code](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes/analysis)
 
 
-##### Appendix / will add
-* Google Sheet Crosstab report
-* Process for in field validation and tracking versions of cut lists.
-* How to add in unmatched voters. 
+### Appendix
+* This table `bernie_nmarchio2.base_activists_unmatched` consolidates all unmatched activists and donors.
+
+### Issues
 * Special targeting criteria for phones, mail, and doors
 * Fix mobilize issue
-* Average holdout flag rates by state.
-* data dictionary
+* Average CCJ rates by flags / Xtab workbook
 
 
 
