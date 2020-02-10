@@ -12,5 +12,5 @@ civis_2020_subeth_other_asian > .78 or
 civis_2020_subeth_hmong > .78 or 
 civis_2020_subeth_indian > .78 or
 civis_2020_cultural_religion_hindu > .78 or 
-civis_2020_cultural_religion_buddhist > .78 or 
-(xc_16001_e_30 > 20 or xb_05007_e_15 > 20)
+civis_2020_cultural_religion_buddhist > .78 --or 
+-- (xc_16001_e_30 > 70 or xb_05007_e_15 > 70)
