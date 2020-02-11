@@ -12,7 +12,7 @@ sortkey(person_id) as
          or slack_vol = 1 
          or akmob_rsvps > 1 
          or akmob_attended > 0 
-         or donor_1plus_flag = 0 
+         or donor_1plus_flag > 0 
          or activist_flag = 1 
          or volunteer_shifts_myc = 1
          or mvp_myc = 1
