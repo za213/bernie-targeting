@@ -2,7 +2,8 @@
 
 ## Platform Links:
 * [Project Folder](https://platform.civisanalytics.com/spa/#/projects/132631)
-  * Workflow to [build modeling and analytics frame](https://platform.civisanalytics.com/spa/#/workflows/10551) then transfer the modeling frame to the Bernie DS cluster. This workflow also re-creates the Base Universe table.
+  * Workflow to [build analytics frame and base universe](https://platform.civisanalytics.com/spa/#/workflows/10551). 
+  * Workflow to [build the modeling frame, DVs, and sync to the DS cluster](https://platform.civisanalytics.com/spa/#/workflows/11935).
 * To request a model, issue a [Jira ticket](https://berniesanders.atlassian.net/jira/software/projects/MOD/boards/12) and tag Nico Marchio and Michael Futch.
 
 ## GOTV Universe:
