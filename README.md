@@ -2,8 +2,8 @@
 
 ## Platform Links:
 * [Project Folder](https://platform.civisanalytics.com/spa/#/projects/132631)
-  * Workflow to [build analytics frame and base universe](https://platform.civisanalytics.com/spa/#/workflows/10551). 
-  * Workflow to [build the modeling frame, DVs, and sync to the DS cluster](https://platform.civisanalytics.com/spa/#/workflows/11935).
+  * Workflow to [build analytics frame and base universe](https://platform.civisanalytics.com/spa/#/workflows/10551). Runs overnight 2 times per week 3AM on Tuesday and early Saturday.
+  * Workflow to [build the modeling frame, DVs, and sync to the DS cluster](https://platform.civisanalytics.com/spa/#/workflows/11935). Runs on an as-needed basis.
 * To request a model, issue a [Jira ticket](https://berniesanders.atlassian.net/jira/software/projects/MOD/boards/12) and tag Nico Marchio and Michael Futch.
 
 ## GOTV Universe:
