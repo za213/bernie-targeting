@@ -1,16 +1,16 @@
 # Organizing Modeling Workflows
 
-## Platform Links:
+## Platform Links
 * [Project Folder](https://platform.civisanalytics.com/spa/#/projects/132631)
   * Workflow to [build analytics frame and base universe](https://platform.civisanalytics.com/spa/#/workflows/10551). Runs overnight 2 times per week 3AM on Tuesday and early Saturday.
   * Workflow to [build the modeling frame, DVs, and sync to the DS cluster](https://platform.civisanalytics.com/spa/#/workflows/11935). Runs on an as-needed basis.
 * To request a model, issue a [Jira ticket](https://berniesanders.atlassian.net/jira/software/projects/MOD/boards/12) and tag Nico Marchio and Michael Futch.
 
-## GOTV and Recruitment Universe:
+## GOTV and Recruitment Universe
 * Visit the [universes](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) folder for info about the `bernie_data_commons.base_universe` table for cutting GOTV lists and volunteer / event recruitment.
 * To enable location based targeting [here is a workflow](https://github.com/Bernie-2020/bernie-targeting/blob/master/analytics/travel-time-targeting_v2.ipynb) that calculates the travel time between each voter within a given commuting radius of a set of points of interest. 
 
-## Data:
+## Data
 ### Modeling Frame:
 * Platform table: `model_inputs.rainbow_modeling_frame` on the Bernie DS Cluster
 * [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) to create modeling frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) of features and descriptions
@@ -26,7 +26,7 @@
 * Platform table: `bernie_data_commons.rainbow_analytics_frame`
 * [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-analytics-frame.sql) to create analytics frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) for list of features
 
-## Model Scores:
+## Model Scores
 
 #### Voter Engagement Models:
 * [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/dv-recode/volunteer-dv-recode-v2.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/volunteer-modeling-workflow-20191219.ipynb)
