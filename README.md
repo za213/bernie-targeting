@@ -6,7 +6,7 @@
   * Workflow to [build the modeling frame, DVs, and sync to the DS cluster](https://platform.civisanalytics.com/spa/#/workflows/11935). Runs on an as-needed basis.
 * To request a model, issue a [Jira ticket](https://berniesanders.atlassian.net/jira/software/projects/MOD/boards/12) and tag Nico Marchio and Michael Futch.
 
-## GOTV and Recruitment Universe
+## Base Universe for Targeting
 * Visit the [universes](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) folder for info about the `bernie_data_commons.base_universe` table for cutting GOTV lists and volunteer / event recruitment.
 * To enable location based targeting [here is a workflow](https://github.com/Bernie-2020/bernie-targeting/blob/master/analytics/travel-time-targeting_v2.ipynb) that calculates the travel time between each voter within a given commuting radius of a set of points of interest. 
 
