@@ -40,10 +40,10 @@ sortkey(person_id) as
          or bernapp_household_flag = 1
          or slack_vol_household_flag = 1
          or donor_1plus_household_flag = 1 then '3 - Tier 3: Households of Activists, Donors, Supporters'
-         when attendee_100 >= 80
-         or kickoff_party_rally_barnstorm_attendee_100 >= 80
-         or canvasser_phonebank_attendee_100 >= 80
-         or bernie_action_100 >= 80 then '4 - Tier 4: Inside Invite Guardrail'
+         when attendee_100 >= 90
+         or kickoff_party_rally_barnstorm_attendee_100 >= 90
+         or canvasser_phonebank_attendee_100 >= 90
+         or bernie_action_100 >= 90 then '4 - Tier 4: Inside Invite Guardrail'
          else '5 - Tier 5: Outside Invite Guardrail' end as event_invite_tiers
          ,row_number() OVER (PARTITION BY state_code  ORDER BY event_invite_tiers ASC, kickoff_party_rally_barnstorm_attendee DESC) as event_invite_rank
 from bernie_data_commons.base_universe 
