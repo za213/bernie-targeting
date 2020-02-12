@@ -10,7 +10,8 @@
 * Visit the [universes](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) folder for info about the `bernie_data_commons.base_universe` table for cutting GOTV lists and volunteer / event recruitment.
 * To enable location based targeting [here is a workflow](https://github.com/Bernie-2020/bernie-targeting/blob/master/analytics/travel-time-targeting_v2.ipynb) that calculates the travel time between each voter within a given commuting radius of a set of points of interest. 
 
-## Modeling Frame:
+## Data:
+### Modeling Frame:
 * Platform table: `model_inputs.rainbow_modeling_frame` on the Bernie DS Cluster
 * [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) to create modeling frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) of features and descriptions
 * Table with three default feature lists for modeling `bernie_nmarchio2.feature_list` and here is the [import script](https://platform.civisanalytics.com/spa/#/imports/53801807) to pull in the lists into Platform
@@ -21,7 +22,7 @@
   * Synthesize party switching behavior from `phoenix_voter_file.registration_scd`
   * Test predictive power of `phoenix_consumer.tsmart_consumer`
 
-## Analytics Frame:
+### Analytics Frame:
 * Platform table: `bernie_data_commons.rainbow_analytics_frame`
 * [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-analytics-frame.sql) to create analytics frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) for list of features
 
