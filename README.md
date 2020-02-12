@@ -6,8 +6,9 @@
   * Workflow to [build the modeling frame, DVs, and sync to the DS cluster](https://platform.civisanalytics.com/spa/#/workflows/11935). Runs on an as-needed basis.
 * To request a model, issue a [Jira ticket](https://berniesanders.atlassian.net/jira/software/projects/MOD/boards/12) and tag Nico Marchio and Michael Futch.
 
-## GOTV Universe:
-* Visit the [universes](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) folder for info about the `bernie_data_commons.base_universe` table for cutting GOTV lists.
+## GOTV and Recruitment Universe:
+* Visit the [universes](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) folder for info about the `bernie_data_commons.base_universe` table for cutting GOTV lists and volunteer / event recruitment.
+* To enable location based targeting [here is a workflow](https://github.com/Bernie-2020/bernie-targeting/blob/master/analytics/travel-time-targeting_v2.ipynb) that calculates the travel time between each voter within a given commuting radius of a set of points of interest. 
 
 ## Modeling Frame:
 * Platform table: `model_inputs.rainbow_modeling_frame` on the Bernie DS Cluster
@@ -56,9 +57,6 @@
 | `spoke_persuasion_1plus` | Probability of moving 1 or more in favor of Bernie |
 | `spoke_persuasion_1minus` | Probability of moving 1 or more against Bernie |
 * Note columns with `_100` are cut into percentiles nationally such that when `where score_100 >= 80` would give the top 20% highest scores.
-
-## Analytics
-* To enable location based targeting [here is a workflow](https://github.com/Bernie-2020/bernie-targeting/blob/master/analytics/travel-time-targeting_v2.ipynb) that calculates the travel time between each voter within a given commuting radius of a set of points of interest. 
 
 ## Developers
 Organizing Analytics Team. Nico Marchio, Data Science Engineer.
