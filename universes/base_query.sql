@@ -1,7 +1,7 @@
 
 -- Owner: Nico Marchio 
--- Entered Production: 
--- Last Update: 2020-02-03
+-- Entered Production: 2020-02-05
+-- Last Update: 2020-02-12
 -- Purpose: Builds data tables to inform voter targeting, list cutting, and voter contact
 
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -355,9 +355,9 @@ sortkey(person_id) as
     (select distinct person_id, 
                      count(distinct case when n_event_signups = 0 or n_event_signups is null then person_id end) as event_signup_0_flag,
                      count(distinct case when n_event_signups = 1 then person_id end) as event_signup_1_flag,
-                     count(distinct case when n_event_signups > 1 then person_id end) as event_signup_1plus_flag,
+                     count(distinct case when n_event_signups >= 1 then person_id end) as event_signup_1plus_flag,
                      count(distinct case when n_donations = 0 then person_id end) as donor_0_flag,
-                     count(distinct case when n_donations > 0 then person_id end) as donor_1plus_flag
+                     count(distinct case when n_donations >= 1 then person_id end) as donor_1plus_flag
    	from bernie_jshuman.donor_basetable where person_id is not null group by 1)) bdonor
     using(person_id)
 
@@ -1599,6 +1599,3 @@ drop table if exists bernie_nmarchio2.base_validation;
 drop table if exists bernie_nmarchio2.base_universe;
 
 grant select on bernie_data_commons.base_universe to group bernie_data;
-
-
-
