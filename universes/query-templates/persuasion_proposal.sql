@@ -3,7 +3,9 @@ CREATE TABLE bernie_aschang.persuasion_base_universes
 distkey(person_id) 
 sortkey(person_id) as
 (SELECT *
-        ,NTILE(10) OVER (PARTITION BY state_code||dem_primary_eligible_2way ORDER BY pers_rank_validation ASC) AS pers_tiers_10
+        ,NTILE(10) OVER (PARTITION BY state_code||dem_primary_eligible_2way ORDER BY pers_rank_validation ASC) AS pers_tiers_10_validation
+         ,NTILE(10) OVER (PARTITION BY state_code||dem_primary_eligible_2way ORDER BY pers_rank ASC) AS pers_tiers_10
+
  from
  (select  person_id
          ,state_code
@@ -14,7 +16,7 @@ sortkey(person_id) as
   			(age_5way != '1 - 18-34' and race_5way = '2 - Black')
   				or spoke_persuasion_1plus_100 > 70 
   				or sanders_very_excited_score_100 > 80
-  				or  ((biden_support_100 > 80 or warren_support_100 > 80) AND buttigieg_support_100 < 90) 
+  				or  ((biden_support_100 > 80 or warren_support_100 > 80) AND buttigieg_support_100 < 90)
   				then 1 else 0 end as persuasion_target
 
   -- remove non-electorate, anyone who is a 1, or anyone who is a 5, or anyone who is a strong supporter already 
@@ -30,7 +32,8 @@ sortkey(person_id) as
   				or field_id_1_score_100 > 90
   				or field_id_composite_score_100 > 90
   				or sanders_strong_support_score_100 > 90
-  				or field_id_5_score_100 > 70
+  				or field_id_5_score_100 > 80
+    			or ntile_trump in (1,2,3) 
   				then '6 - Non-target' 
  		WHEN  turnout_current_100 > 80 
   			AND persuasion_target = 1
@@ -51,7 +54,8 @@ sortkey(person_id) as
   				or field_id_1_score_100 > 90
   				or field_id_composite_score_100 > 90
   				or sanders_strong_support_score_100 > 90
-    			or field_id_5_score_100 > 70
+    			or field_id_5_score_100 > 80
+  				or ntile_trump in (1,2,3) 
   				then '6 - Non-target' 
  		WHEN  turnout_current_100 > 80 
   			AND persuasion_target = 1
@@ -68,7 +72,10 @@ sortkey(person_id) as
          ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY custom_tiers ASC, spoke_persuasion_1plus_100 DESC) as pers_rank
          ,row_number() OVER (PARTITION BY state_code||dem_primary_eligible_2way  ORDER BY custom_tiers_validation ASC, spoke_persuasion_1plus_100 DESC) as pers_rank_validation
 
-from bernie_data_commons.base_universe 
+from bernie_data_commons.base_universe  bu 
+left join (select person_id as dnc_id, 
+           ntile(10) over (partition by state_code order by trump_support_score desc) as ntile_trump 
+           from bernie_data_commons.all_scores
+           where trump_support_score is not null) s on bu.person_id = s.dnc_id
 where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
 and (civis_2020_partisanship >= .33 or party_8way in ('1 - Democratic', '3 - Independent', '5 - Unaffiliated', '4 - Nonpartisan'))
-));
