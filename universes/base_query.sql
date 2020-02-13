@@ -1366,7 +1366,7 @@ sortkey(person_id) AS
      (SELECT person_id::varchar,
              donut_segment,
              coalesce(current_support_raw/100,0) AS current_support_raw,
-             coalesce(current_support_rank_order as current_support_raw_100,
+             coalesce(current_support_rank_order,1) as current_support_raw_100,
              coalesce(field_id_1_score/100,0) AS field_id_1_score,
              coalesce(field_id_1_score_ntile,1) as field_id_1_score_100,
              coalesce(field_id_composite_score/100,0)  AS field_id_composite_score,
