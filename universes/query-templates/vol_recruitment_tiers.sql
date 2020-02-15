@@ -44,8 +44,8 @@ sortkey(person_id) as
          or kickoff_party_rally_barnstorm_attendee_100 >= 90
          or canvasser_phonebank_attendee_100 >= 90
          or bernie_action_100 >= 90 then '4 - Tier 4: Inside Invite Guardrail'
-         else '5 - Tier 5: Outside Invite Guardrail' end as event_invite_tiers
-         ,row_number() OVER (PARTITION BY state_code  ORDER BY event_invite_tiers ASC, canvasser_phonebank_attendee DESC) as vol_recruit_rank
+         else '5 - Tier 5: Outside Invite Guardrail' end as vol_recruit_tiers
+         ,row_number() OVER (PARTITION BY state_code  ORDER BY vol_recruit_tiers ASC, canvasser_phonebank_attendee DESC) as vol_recruit_rank
 from bernie_data_commons.base_universe 
 where civis_2020_partisanship >= .66 or party_8way = '1 - Democratic' 
 or any_activist_donor_flag = 1 
