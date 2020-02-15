@@ -49,7 +49,7 @@ sortkey(person_id) as
 from bernie_data_commons.base_universe 
 where civis_2020_partisanship >= .66 or party_8way = '1 - Democratic' 
 or any_activist_donor_flag = 1 
-and event_invite_tiers IN ('1 - Tier 1: Top Activists, Donors, Supporters', 
+and vol_recruit_tiers IN ('1 - Tier 1: Top Activists, Donors, Supporters', 
 	                       '2 - Tier 2: Activists, Donors, Supporters',
 	                       '3 - Tier 3: Households of Activists, Donors, Supporters', 
 	                       '4 - Tier 4: Inside Invite Guardrail') ) );
