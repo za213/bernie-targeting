@@ -221,7 +221,7 @@ when as20.civis_2020_partisanship < .4 then '5 - Republican'
 else '6 - Other' end as party_6way
 
 ,CASE 
-WHEN p.party_name_dnc = 'Democratic' OR p.party_id = 1 THEN '1 - Democratic' 
+WHEN p.party_name_dnc = 'Democratic' OR p.party_id = 1 THEN '1 - Democrat'
 WHEN p.party_name_dnc = 'Green' OR p.party_id = 5 THEN '2 - Green' 
 WHEN p.party_name_dnc = 'Independent' OR p.party_id = 6 THEN '3 - Independent' 
 WHEN p.party_name_dnc = 'Nonpartisan' OR p.party_id = 7 THEN '4 - Nonpartisan' 
@@ -410,11 +410,11 @@ else '4 - Did not vote absentee (2014-18)' end as absentee_voting_4way
 
 ,CASE 
 WHEN p.state_code IN ('AL','AR','GA','IL','IN','MI','MO','MS','MT','MN','ND','OH','SC','TN','TX','UT','VA','VT','WI','WA') THEN '1 - Dem Primary Eligible' --open
-WHEN p.state_code IN ('OK','NE') AND (party_8way IN ('1 - Democratic','3 - Independent') or party_3way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
-WHEN p.state_code IN ('SD','RI') AND (party_8way IN ('1 - Democratic','3 - Independent','4 - Nonpartisan','5 - Unaffiliated') or party_3way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
-WHEN p.state_code = 'CA' AND (party_8way IN ('1 - Democratic','4 - Nonpartisan','5 - Unaffiliated') or party_3way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
-WHEN p.state_code IN ('CO','ID','MA','NC','NH') AND (party_8way IN ('1 - Democratic','4 - Nonpartisan','5 - Unaffiliated') or party_3way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
-WHEN p.state_code IN ('AK','AZ','CT','DC','DE','FL','HI','IA','KS','KY','LA','MD','ME','NJ','NM','NV','NY','OR','PA','WV','WY') AND (party_8way = '1 - Democratic' or party_3way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
+WHEN p.state_code IN ('OK','NE') AND (party_8way IN ('1 - Democrat','3 - Independent')) THEN '1 - Dem Primary Eligible' -- mixed
+WHEN p.state_code IN ('SD','RI') AND (party_8way IN ('1 - Democrat','3 - Independent','4 - Nonpartisan','5 - Unaffiliated')) THEN '1 - Dem Primary Eligible' -- mixed
+WHEN p.state_code = 'CA' AND (party_8way IN ('1 - Democrat','4 - Nonpartisan','5 - Unaffiliated')) THEN '1 - Dem Primary Eligible' -- mixed
+WHEN p.state_code IN ('CO','ID','MA','NC','NH') AND (party_8way IN ('1 - Democrat','4 - Nonpartisan','5 - Unaffiliated')) THEN '1 - Dem Primary Eligible' -- mixed
+WHEN p.state_code IN ('AK','AZ','CT','DC','DE','FL','HI','IA','KS','KY','LA','MD','ME','NJ','NM','NV','NY','OR','PA','WV','WY') AND (party_8way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
 ELSE '2 - Must Register as Dem' END AS dem_primary_eligible_2way
 
 ,case 
