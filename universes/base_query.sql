@@ -1049,7 +1049,7 @@ sortkey(person_id) AS
 
           -- Electorate definition
           CASE WHEN voterinfo.dem_primary_eligible_2way = '1 - Dem Primary Eligible' 
-                 OR voterinfo.party_8way = '1 - Democratic' 
+                 OR voterinfo.party_8way = '1 - Democrat' 
                  OR voterinfo.civis_2020_partisanship >= .66
 
                  OR student_flag = 1
