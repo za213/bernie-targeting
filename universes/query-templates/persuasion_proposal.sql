@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS bernie_aschang.persuasion_base_universes;
-CREATE TABLE bernie_aschang.persuasion_base_universes
+DROP TABLE IF EXISTS bernie_data_commons.persuasion_base_universes;
+CREATE TABLE bernie_data_commons.persuasion_base_universes
 distkey(person_id) 
 sortkey(person_id) as
 (SELECT *
