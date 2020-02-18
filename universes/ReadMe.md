@@ -1,6 +1,5 @@
 
-## Voter Contact Universe Table 
-* [Workflow to Rebuild](https://platform.civisanalytics.com/spa/#/workflows/10551)
+## Voter Contact Universe Table ([Workflow to Rebuild](https://platform.civisanalytics.com/spa/#/workflows/10551))
 
 ### What is the purpose of the `bernie_data_commons.base_universe` table?
 * The `base_universe` table is designed to serve as a single source of truth for voter contact-related data and to streamline the list cutting process. Users can use the table for a variety of purposes, but for voter targeting users are encouraged to adapt the query examples available [here](https://github.com/Bernie-2020/bernie-targeting/blob/master/universes/query-templates/example-queries.sql) and the pre-launch QC example [here](https://github.com/Bernie-2020/bernie-targeting/blob/master/universes/query-templates/example_queries_prelaunch_qc.sql) to build a table [like this](https://docs.google.com/spreadsheets/d/15DofB9NSfflGj0GoHNd_XT8OdDGU0SXNnvIQs8N0TRc/edit#gid=0).
