@@ -29,6 +29,7 @@
 * **Refresh cadence** The `bernie_data_commons.base_universe` and upstream tables such as the `bernie_data_commons.rainbow_analytics_frame` will be refreshed periodically to ensure that the GOTV universe captures the latest support scores and new voters appearing in Phoenix.
 
 ### Platform Links and Other Resources:
+* [Workflow to rebuild the Base Universe](https://platform.civisanalytics.com/spa/#/workflows/10551)
 * [In Field Validation Pipeline](https://platform.civisanalytics.com/spa/#/projects/132576) and [Score Eval Gsheet](https://docs.google.com/spreadsheets/u/2/d/1sAgFBeBmHRSxzDC-1DBqvUFokNXQ8fqPphbGUK2awdE/edit#gid=0)
 * [GOTV/C Calendar](https://docs.google.com/spreadsheets/d/1iDr67EvqD_r4CSxAbBel2yVpHt2B3mcoF9viGEfMDLs/edit?ts=5e0f9554#gid=1817024849)
 * [Scores analysis and crosstab code](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes/analysis)
