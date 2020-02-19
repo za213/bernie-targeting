@@ -811,13 +811,13 @@ CREATE TABLE bernie_data_commons.base_universe
 distkey(person_id) 
 sortkey(person_id) AS
   (SELECT p.person_id::varchar,
-  	      p.voting_address_id,
-  	      xwalk.jsonid_encoded,
+  	  p.voting_address_id,
+  	  xwalk.jsonid_encoded,
           xwalk.myc_van_id,
           xwalk.st_myc_van_id,
           xwalk.myv_van_id,
           xwalk.st_myv_van_id,
-  	      xwalk.actionkit_id, 
+  	  xwalk.actionkit_id, 
           xwalk.bern_canvasser_id,
           p.state_code,
 
@@ -888,6 +888,14 @@ sortkey(person_id) AS
           bdcas.warren_support_100,
           bdcas.buttigieg_support,
           bdcas.buttigieg_support_100,
+          bdcas.bloomberg_support,
+          bdcas.bloomberg_support_100,
+          bdcas.klobuchar_support,
+          bdcas.klobuchar_support_100,
+          bdcas.steyer_support,
+          bdcas.steyer_support_100,
+          bdcas.trump_support,
+          bdcas.trump_support_100,
           round((bdcas.current_support_raw * bdcas.turnout_current),4) AS bernie_net_votes_current,
  
           -- Message microtargeting
@@ -1383,6 +1391,14 @@ sortkey(person_id) AS
              coalesce(warren_support_ntile,1) as warren_support_100,
              coalesce(buttigieg_support/100,0) AS buttigieg_support,
              coalesce(buttigieg_support_ntile,1) as buttigieg_support_100,
+             coalesce(trump_support/100,0) as trump_support,
+             coalesce(trump_support_ntile,1) as trump_support_100,
+             coalesce(bloomberg_support/100,0) as bloomberg_support,
+             coalesce(bloomberg_support_ntile,1) as bloomberg_support_100,
+             coalesce(klobuchar_support/100,0) as klobuchar_support,
+             coalesce(klobuchar_support_ntile,1) as klobuchar_support_100,
+             coalesce(steyer_support/100,0) as steyer_support,
+             coalesce(steyer_support_ntile,1) as steyer_support_100,
              coalesce(field_id_5_score/100,0) as field_id_5_score,
              coalesce(field_id_5_score_ntile,1) as field_id_5_score_100
       FROM bernie_data_commons.all_scores_ntile) bdcas
