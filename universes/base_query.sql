@@ -94,7 +94,7 @@ sortkey(person_id) as
            ,case when
             datediff(d, '2020-01-17', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state = 'MN' or
             datediff(d, '2020-01-22', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state IN ('TN','AR','MO','AL','KY','GA','MS') or
-            datediff(d, '2019-12-01', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') then 1 END as validtime -- HARDCODE
+            datediff(d, '2020-02-05', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') then 1 END as validtime -- HARDCODE
            ,case when first_choice = 'Bernie Sanders' then 1 else 0 end as thirdp_first_choice_bernie
            ,case when first_choice = 'Donald Trump' then 1 else 0 end as thirdp_first_choice_trump
            ,case when first_choice = 'Joe Biden' then 1 else 0 end as thirdp_first_choice_biden
