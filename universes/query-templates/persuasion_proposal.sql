@@ -80,5 +80,5 @@ left join (select person_id as dnc_id,
            from bernie_data_commons.all_scores
            where trump_support_score is not null) s on bu.person_id = s.dnc_id
 where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
-and (civis_2020_partisanship >= .33 or party_8way in ('1 - Democratic', '3 - Independent', '5 - Unaffiliated', '4 - Nonpartisan'))
+and (civis_2020_partisanship >= .33 or party_8way in ('1 - Democrat', '3 - Independent', '5 - Unaffiliated', '4 - Nonpartisan'))
                                                       ));
