@@ -811,13 +811,13 @@ CREATE TABLE bernie_data_commons.base_universe
 distkey(person_id) 
 sortkey(person_id) AS
   (SELECT p.person_id::varchar,
-  	      p.voting_address_id,
-  	      xwalk.jsonid_encoded,
+  	  p.voting_address_id,
+  	  xwalk.jsonid_encoded,
           xwalk.myc_van_id,
           xwalk.st_myc_van_id,
           xwalk.myv_van_id,
           xwalk.st_myv_van_id,
-  	      xwalk.actionkit_id, 
+  	  xwalk.actionkit_id, 
           xwalk.bern_canvasser_id,
           p.state_code,
 
