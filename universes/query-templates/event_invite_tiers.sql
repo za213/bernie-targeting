@@ -47,7 +47,7 @@ sortkey(person_id) as
          else '5 - Tier 5: Outside Invite Guardrail' end as event_invite_tiers
          ,row_number() OVER (PARTITION BY state_code  ORDER BY event_invite_tiers ASC, kickoff_party_rally_barnstorm_attendee DESC) as event_invite_rank
 from bernie_data_commons.base_universe 
-where civis_2020_partisanship >= .66 or party_8way = '1 - Democratic' 
+where civis_2020_partisanship >= .66 or party_8way = '1 - Democrat' 
 or any_activist_donor_flag = 1 
 and event_invite_tiers IN ('1 - Tier 1: Top Activists, Donors, Supporters', 
 	                       '2 - Tier 2: Activists, Donors, Supporters',
