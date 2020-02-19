@@ -84,7 +84,7 @@ sortkey(person_id) as
 from bernie_data_commons.base_universe 
 where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
 and state_code = 'UT' 
-and (civis_2020_partisanship >= .66 or party_8way = '1 - Democratic')
+and (civis_2020_partisanship >= .66 or party_8way = '1 - Democrat')
 and support_guardrail_validation IN ('0 - Donors and Activists','1 - Inside Support Guardrail') ));
 
 commit;
@@ -123,7 +123,7 @@ sortkey(person_id) as
 from bernie_data_commons.base_universe 
 where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
 and state_code = 'UT' 
-and (civis_2020_partisanship >= .66 or party_8way = '1 - Democratic')
+and (civis_2020_partisanship >= .66 or party_8way = '1 - Democrat')
 and support_guardrail_validation IN ('0 - Donors and Activists','1 - Inside Support Guardrail') ));
 
 commit;
@@ -162,7 +162,7 @@ sortkey(person_id) as
 from bernie_data_commons.base_universe 
 where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
 and state_code = 'UT' 
-and (civis_2020_partisanship >= .66 or party_8way = '1 - Democratic')
+and (civis_2020_partisanship >= .66 or party_8way = '1 - Democrat')
 and support_guardrail_validation IN ('0 - Donors and Activists','1 - Inside Support Guardrail') 
 and vote_ready_5way =  '1 - Vote-ready'));
 
@@ -214,7 +214,7 @@ sortkey(person_id) as
 from bernie_data_commons.base_universe 
 where dem_primary_eligible_2way  = '1 - Dem Primary Eligible' 
 and state_code = 'UT' 
-and (civis_2020_partisanship >= .66 or party_8way = '1 - Democratic')
+and (civis_2020_partisanship >= .66 or party_8way = '1 - Democrat')
 and support_guardrail_validation IN ('0 - Donors and Activists','1 - Inside Support Guardrail')));
 
 commit;
