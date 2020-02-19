@@ -888,6 +888,14 @@ sortkey(person_id) AS
           bdcas.warren_support_100,
           bdcas.buttigieg_support,
           bdcas.buttigieg_support_100,
+          bdcas.bloomberg_support,
+          bdcas.bloomberg_support_100,
+          bdcas.klobuchar_support,
+          bdcas.klobuchar_support_100,
+          bdcas.steyer_support,
+          bdcas.steyer_support_100,
+          bdcas.trump_support,
+          bdcas.trump_support_100,
           round((bdcas.current_support_raw * bdcas.turnout_current),4) AS bernie_net_votes_current,
  
           -- Message microtargeting
