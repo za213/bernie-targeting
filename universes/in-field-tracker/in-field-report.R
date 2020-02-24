@@ -24,6 +24,8 @@ table_info_df <- as.data.frame(civis::read_civis(sql(sql_table_info), database =
 validation_tables <- inner_join(table_info_df, metadata_df, by = c('schema_table'='universe_table') ) %>%
   mutate(pass_date = as.character(pass_date))
 
+print(validation_tables)
+
 queries <- c()
 for (i in 1:nrow(validation_tables)) {
   id <- validation_tables[[1]][i]
