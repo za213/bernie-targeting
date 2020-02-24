@@ -30,8 +30,7 @@
 
 ### Platform Links and Other Resources:
 * [Workflow to rebuild the Base Universe](https://platform.civisanalytics.com/spa/#/workflows/10551)
-* [In Field Validation Pipeline](https://platform.civisanalytics.com/spa/#/projects/132576) and [Score Eval Gsheet](https://docs.google.com/spreadsheets/u/2/d/1sAgFBeBmHRSxzDC-1DBqvUFokNXQ8fqPphbGUK2awdE/edit#gid=0)
-* [GOTV/C Calendar](https://docs.google.com/spreadsheets/d/1iDr67EvqD_r4CSxAbBel2yVpHt2B3mcoF9viGEfMDLs/edit?ts=5e0f9554#gid=1817024849)
+* [In Field Validation folder](https://platform.civisanalytics.com/spa/#/projects/132576), the [GOTV/C Calendar](https://docs.google.com/spreadsheets/d/1iDr67EvqD_r4CSxAbBel2yVpHt2B3mcoF9viGEfMDLs/edit?ts=5e0f9554#gid=1817024849), the [workflow](https://platform.civisanalytics.com/spa/#/workflows/11884), and [Score Eval Gsheet](https://docs.google.com/spreadsheets/u/2/d/1sAgFBeBmHRSxzDC-1DBqvUFokNXQ8fqPphbGUK2awdE/edit#gid=0) 
 * [Scores analysis and crosstab code](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes/analysis)
 
 
