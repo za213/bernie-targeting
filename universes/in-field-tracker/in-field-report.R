@@ -13,7 +13,7 @@ schema_list <- (paste0("('",paste(unique(gsub("\\..*","",metadata_df[[1]])), col
 sql_table_info <- paste0("select ordinal_position as position, column_name, t.table_schema , t.table_name 
 from information_schema.tables t inner join information_schema.columns c
 on c.table_name = t.table_name and c.table_schema = t.table_schema 
-where (c.column_name = 'external_id' or  c.column_name = 'voterid') and t.table_schema = ",schema_list," order by ordinal_position")
+where (c.column_name = 'external_id' or  c.column_name = 'voterid' or c.column_name = 'person_id') and t.table_schema = ",schema_list," order by ordinal_position")
 table_info_df <- as.data.frame(civis::read_civis(sql(sql_table_info), database = 'Bernie 2020')) %>% 
   mutate(schema_table = tolower(paste0(table_schema,'.',table_name))) %>% 
   mutate_at(vars('schema_table','column_name'),as.character) %>%
