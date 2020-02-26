@@ -33,12 +33,11 @@ with validation as (
                 then ((0.5*s.field_id_dv_1_aw2_xg)+(0.5*(100-s.field_id_dv_5_aw2_xg)))
                 else null
             end) as field_id_composite_score_ntile
-        from haystaq.va_scores_20200225_raw s
+        from haystaq.mo_scores_20200226_raw s
         join phoenix_analytics.person p on p.person_id = s.person_id
         join phoenix_scores.all_scores_2020 pas on pas.person_id = s.person_id
     ) s2 on s2.person_id = ccj.person_id
     where ccj.unique_id_flag = true
-    and ccj.voter_state = 'VA'
     and ccj.support_int in (1,2,3,4,5)
 )
 
