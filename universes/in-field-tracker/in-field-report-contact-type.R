@@ -82,8 +82,8 @@ FROM (
     ) x
 where person_id is not null)"
 
-final_query <- paste0("DROP TABLE if exists gotv_universes.in_field_validation;
-CREATE TABLE gotv_universes.in_field_validation distkey(person_id) sortkey(person_id) as 
+final_query <- paste0("DROP TABLE if exists gotv_universes.in_field_validation_breakdown;
+CREATE TABLE gotv_universes.in_field_validation_breakdown distkey(person_id) sortkey(person_id) as 
 (SELECT *
 from (
     select lists.person_id
@@ -136,8 +136,8 @@ cat(final_query,file="sql.sql")
 
 query_status <- query_civis(x=sql(final_query), database = "Bernie 2020")
 
-aggregation_sql <- paste0("DROP TABLE if exists gotv_universes.in_field_validation_totals;
-CREATE TABLE gotv_universes.in_field_validation_totals as 
+aggregation_sql <- paste0("DROP TABLE if exists gotv_universes.in_field_validation_breakdown_totals;
+CREATE TABLE gotv_universes.in_field_validation_breakdown_totals as 
 (select x.state_code,
        x.list_source,
        x.pass_date,
@@ -188,7 +188,7 @@ from (
 
            sum(ccj_contact_made) as total_contacts,
            sum(ccj_negative_result) as ccj_negativeresult
-    from gotv_universes.in_field_validation
+    from gotv_universes.in_field_validation_breakdown
     group by 1,2,3,4,5
     ) x
     left join (
@@ -202,7 +202,7 @@ from (
                                               OR donor_1plus_household_flag = 1 then person_id end)  activists_in_ventile
 
 
-        from gotv_universes.in_field_validation
+        from gotv_universes.in_field_validation_breakdown
         group by 1,2,3
         ) t on x.state_code = t.state_code
                    and x.list_source = t.list_source
@@ -213,8 +213,8 @@ query_status <- query_civis(x=sql(aggregation_sql), database = "Bernie 2020")
 
 
 
-state_aggregation_sql <- paste0("DROP TABLE if exists gotv_universes.in_field_validation_totals_state;
-CREATE TABLE gotv_universes.in_field_validation_totals_state as 
+state_aggregation_sql <- paste0("DROP TABLE if exists gotv_universes.in_field_validation_breakdown_totals_state;
+CREATE TABLE gotv_universes.in_field_validation_breakdown_totals_state as 
 (select x.state_code,
        x.collected_after_list_pass,
        contacttype,
@@ -261,7 +261,7 @@ from (
 
            sum(ccj_contact_made) as total_contacts,
            sum(ccj_negative_result) as ccj_negativeresult
-    from gotv_universes.in_field_validation
+    from gotv_universes.in_field_validation_breakdown
     group by 1,2,3
     ) x
     left join (
@@ -273,7 +273,7 @@ from (
                                               OR donor_1plus_household_flag = 1 then person_id end)  activists_in_ventile
 
 
-        from gotv_universes.in_field_validation
+        from gotv_universes.in_field_validation_breakdown
         group by 1
         ) t on x.state_code = t.state_code
 order by 1,2,3)")
