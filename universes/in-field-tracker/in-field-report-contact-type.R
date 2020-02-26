@@ -30,8 +30,9 @@ for (i in 1:nrow(validation_tables)) {
   id <- validation_tables[[1]][i]
   passdate <- validation_tables[[3]][i]
   tbl <- validation_tables[[2]][i]
+  state_code <- validation_tables[[4]][i]
   query <- paste0("(select regexp_replace(lower(",id,"), 'dnc_')::varchar as person_id, 
-                           TO_DATE('",passdate,"', 'YYYY-MM-DD') as pass_date, '",tbl,"' as list_source, state_code from ",tbl,")")
+                           TO_DATE('",passdate,"', 'YYYY-MM-DD') as pass_date, ",state_code," as state_code, '",tbl,"' as list_source from ",tbl,")")
   queries <- c(queries,query)
 }
 
