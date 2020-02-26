@@ -2,7 +2,7 @@ library(civis)
 library(tidyverse)
 
 # Google Sheet Import
-sql_metadata <- "select universe_table, TO_DATE(pass_date, 'YYYY-MM-DD') as pass_date from gotv_universes.in_field_lists_metadata;"
+sql_metadata <- "select universe_table, TO_DATE(pass_date, 'YYYY-MM-DD') as pass_date, state state_code from gotv_universes.in_field_lists_metadata;"
 metadata_df <- civis::read_civis(sql(sql_metadata), database = 'Bernie 2020') %>% 
   mutate(universe_table = gsub("\\'", "", tolower(universe_table)))  %>%
   mutate_at(vars('universe_table'),as.character)
@@ -31,7 +31,7 @@ for (i in 1:nrow(validation_tables)) {
   passdate <- validation_tables[[3]][i]
   tbl <- validation_tables[[2]][i]
   query <- paste0("(select regexp_replace(lower(",id,"), 'dnc_')::varchar as person_id, 
-                           TO_DATE('",passdate,"', 'YYYY-MM-DD') as pass_date, '",tbl,"' as list_source from ",tbl,")")
+                           TO_DATE('",passdate,"', 'YYYY-MM-DD') as pass_date, '",tbl,"' as list_source, state_code from ",tbl,")")
   queries <- c(queries,query)
 }
 
