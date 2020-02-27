@@ -92,9 +92,9 @@ sortkey(person_id) as
            ,max(TO_DATE(survey_date, 'YYYY-MM-DD')) OVER (PARTITION BY person_id) AS thirdp_survey_date
            ,ROW_NUMBER() OVER(PARTITION BY person_id ORDER BY TO_DATE(survey_date, 'YYYY-MM-DD') DESC) AS duplicate
 	   ,case when
-                 datediff(d, '2020-02-22', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('SC') or
-                 datediff(d, '2020-02-24', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('MO','VA') or
-                 datediff(d, '2020-02-05', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state NOT IN ('MN','TN','AR','AL','KY','GA','MS','NH','NV','IA') THEN 1 END as validtime -- HARDCODE
+                 datediff(d, '2020-02-22', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and voter_state IN ('SC') or
+                 datediff(d, '2020-02-24', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and voter_state IN ('MO','VA') or
+                 datediff(d, '2020-02-05', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and voter_state NOT IN ('MN','TN','AR','AL','KY','GA','MS','NH','NV','IA') THEN 1 END as validtime -- HARDCODE
            ,case when first_choice = 'Bernie Sanders' then 1 else 0 end as thirdp_first_choice_bernie
            ,case when first_choice = 'Donald Trump' then 1 else 0 end as thirdp_first_choice_trump
            ,case when first_choice = 'Joe Biden' then 1 else 0 end as thirdp_first_choice_biden
