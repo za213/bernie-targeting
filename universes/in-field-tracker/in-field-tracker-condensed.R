@@ -156,6 +156,15 @@ CREATE TABLE gotv_universes.in_field_validation_condensed_totals_state as
        b.contacttype,
        coalesce(number_of_voters_in_ventile,0) as number_of_voters_in_ventile,
        coalesce(reachable_voters, 0) as reachable_voters,
+
+       round(coalesce(1.0*unique_attempts_in_pass/nullif(reachable_voters,0),0),4) as percent_attempted_in_pass,
+       round(coalesce(1.0*unique_contacts_in_pass/nullif(reachable_voters,0),0),4) as percent_canvassed_in_pass,
+
+       round(coalesce(1.0*unique_attempts_all_time/nullif(reachable_voters,0),0),4) as percent_attempted_all_time,
+       round(coalesce(1.0*unique_contacts_all_time/nullif(reachable_voters,0),0),4) as percent_canvassed_all_time,
+
+       round(coalesce(1.0*ccj_1/nullif(ccj_all,0),0),4) as ccj_1rate,
+
        coalesce(number_of_voters_attempted, 0) as unique_attempts_in_pass,
        coalesce(number_of_voters_canvassed, 0) as unique_contacts_in_pass,
 
@@ -165,13 +174,9 @@ CREATE TABLE gotv_universes.in_field_validation_condensed_totals_state as
        coalesce(voters_ever_attempted, 0) as unique_attempts_all_time,
        coalesce(voters_ever_canvassed, 0) as unique_contacts_all_time,
        
-       round(coalesce(1.0*unique_attempts_in_pass/nullif(reachable_voters,0),0),4) as percent_attempted_in_pass,
-       round(coalesce(1.0*unique_contacts_in_pass/nullif(reachable_voters,0),0),4) as percent_canvassed_in_pass,
 
-       round(coalesce(1.0*unique_attempts_all_time/nullif(reachable_voters,0),0),4) as percent_attempted_all_time,
-       round(coalesce(1.0*unique_contacts_all_time/nullif(reachable_voters,0),0),4) as percent_canvassed_all_time,
 
-       round(coalesce(1.0*ccj_1/nullif(ccj_all,0),0),4) as ccj_1rate,
+       
        coalesce(ccj_1,0) as ccj_1,
        coalesce(ccj_2,0) as ccj_2,
        coalesce(ccj_3,0) as ccj_3,
@@ -209,8 +214,9 @@ from (
                sum(ccj_id_4) as ccj_4,
                sum(ccj_id_5) as ccj_5,
                sum(ccj_id_1_2_3_4_5) as ccj_all,
-               sum(ccj_contact_made) as total_contacts,
-               sum(ccj_negative_result) as ccj_negativeresult
+               sum(ccj_negative_result) as ccj_negativeresult,
+               sum(ccj_contact_made) as total_contacts
+
         from gotv_universes.in_field_validation_condensed
         group by 1,2
     ) x on b.state = x.state_code
