@@ -85,7 +85,7 @@ where person_id is not null)"
 
 final_query <- paste0("DROP TABLE if exists gotv_universes.in_field_validation_breakdown;
 CREATE TABLE gotv_universes.in_field_validation_breakdown distkey(person_id) sortkey(person_id) as 
-(SELECT *
+(SELECT distinct *
 from (
     select lists.person_id
          ,lists.list_source
