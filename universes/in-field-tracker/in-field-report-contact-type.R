@@ -221,7 +221,7 @@ CREATE TABLE gotv_universes.in_field_validation_breakdown_totals_state as
        b.contacttype,
        coalesce(number_of_voters_in_ventile,0) as number_of_voters_in_ventile,
        coalesce(number_of_voters,0) as number_of_voters,
-
+       round(coalesce(1.0*number_of_voters/nullif(number_of_voters_in_ventile,0),0),4) as percent_of_ventile,
        coalesce(number_of_voters_attempted, 0) as unique_attempts,
        coalesce(all_attempts_in_pass_period, 0) as all_attempts,
        round(coalesce(1.0*unique_attempts/nullif(number_of_voters,0),0),4) as percent_attempted,
