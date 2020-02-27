@@ -282,7 +282,7 @@ from (
 
                sum(ccj_contact_made) as total_contacts,
                sum(ccj_negative_result) as ccj_negativeresult
-        from gotv_universes.in_field_validation
+        from gotv_universes.in_field_validation_breakdown
         group by 1,2,3
     ) x on b.state = x.state_code
                and b.status = x.collected_after_list_pass
@@ -296,7 +296,7 @@ from (
                                               OR donor_1plus_household_flag = 1 then person_id end)  activists_in_ventile
 
 
-        from gotv_universes.in_field_validation
+        from gotv_universes.in_field_validation_breakdown
         group by 1
         ) t on b.state = t.state_code
 order by 1,2,3)")
