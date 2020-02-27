@@ -149,8 +149,8 @@ CREATE TABLE gotv_universes.in_field_validation_breakdown_totals as
 
        coalesce(number_of_voters_attempted, 0) as unique_attempts,
        coalesce(all_attempts_in_pass_period, 0) as all_attempts,
-       round(coalesce(1.0*unique_attempts/nullif(number_of_voters,0),0),4) as "% attempted",
-       round(coalesce(1.0*unique_attempts/nullif(all_attempts,0),0),4) as "% unique attempts",
+       round(coalesce(1.0*unique_attempts/nullif(number_of_voters,0),0),4) as percent_attempted,
+       round(coalesce(1.0*unique_attempts/nullif(all_attempts,0),0),4) as percent_unique_attempts,
 
        coalesce(activists_in_ventile,0) as activists_in_ventile,
        coalesce(activists,0) as activists,
@@ -224,8 +224,8 @@ CREATE TABLE gotv_universes.in_field_validation_breakdown_totals_state as
 
        coalesce(number_of_voters_attempted, 0) as unique_attempts,
        coalesce(all_attempts_in_pass_period, 0) as all_attempts,
-       round(coalesce(1.0*unique_attempts/nullif(number_of_voters,0),0),4) as "% attempted",
-       round(coalesce(1.0*unique_attempts/nullif(all_attempts,0),0),4) as "% unique attempts",
+       round(coalesce(1.0*unique_attempts/nullif(number_of_voters,0),0),4) as precent_attempted,
+       round(coalesce(1.0*unique_attempts/nullif(all_attempts,0),0),4) as percent_unique_attempts,
 
        coalesce(activists_in_ventile,0) as activists_in_ventile,
        coalesce(activists,0) as activists,
