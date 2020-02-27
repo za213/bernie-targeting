@@ -216,16 +216,16 @@ query_status <- query_civis(x=sql(aggregation_sql), database = "Bernie 2020")
 
 state_aggregation_sql <- paste0("DROP TABLE if exists gotv_universes.in_field_validation_breakdown_totals_state;
 CREATE TABLE gotv_universes.in_field_validation_breakdown_totals_state as 
-(select x.state_code,
-       x.collected_after_list_pass,
-       contacttype,
+(select b.state state_code,
+       b.status collected_after_list_pass,
+       b.contacttype,
        coalesce(number_of_voters_in_ventile,0) as number_of_voters_in_ventile,
        coalesce(number_of_voters,0) as number_of_voters,
 
        coalesce(number_of_voters_attempted, 0) as unique_attempts,
        coalesce(all_attempts_in_pass_period, 0) as all_attempts,
-       round(coalesce(1.0*unique_attempts/nullif(number_of_voters,0),0),4) as precent_attempted,
-       round(coalesce(1.0*unique_attempts/nullif(all_attempts,0),0),4) as percent_unique_attempts,
+       round(coalesce(1.0*unique_attempts/nullif(number_of_voters,0),0),4) as "% attempted",
+       round(coalesce(1.0*unique_attempts/nullif(all_attempts,0),0),4) as "% unique attempts",
 
        coalesce(activists_in_ventile,0) as activists_in_ventile,
        coalesce(activists,0) as activists,
@@ -241,30 +241,52 @@ CREATE TABLE gotv_universes.in_field_validation_breakdown_totals_state as
        coalesce(ccj_negativeresult,0) as ccj_negativeresult,
        coalesce(total_contacts,0) as all_time_contacts
 from (
-    select state_code,
-           collected_after_list_pass,
-           contacttype,
-           count(distinct case when attempted = 1 then person_id end) number_of_voters_attempted,
-           count(distinct person_id) as number_of_voters,
+    select *
+    from (select distinct state_code state from (",queries_unioned,")) y
+    cross join (
+        select '1 - Contacted after pass date' status
+        union
+        select '2 - Contacted before pass date' status
+        union
+        select '3 - Uncanvassed' status
+        union
+        select '4 - Unattempted' status
+        )  x
+    cross join (
+            select 'canvasses' contacttype
+            union
+            select 'getthru_dialer'
+            union
+            select 'spoke'
+        ) ct
+    ) b
+    left join (
+        select state_code,
+               collected_after_list_pass,
+               contacttype,
+               count(distinct case when attempted = 1 then person_id end) number_of_voters_attempted,
+               count(distinct person_id) as number_of_voters,
 
-           count(distinct case when contactdate >= pass_date then contactcontact_id end) all_attempts_in_pass_period,
+               count(distinct case when contactdate >= pass_date then contactcontact_id end) all_attempts_in_pass_period,
 
-           count(distinct case when activist_flag = 1
-               OR activist_household_flag = 1
-               OR donor_1plus_flag = 1
-               OR donor_1plus_household_flag = 1 then person_id end) as activists,
-           sum(ccj_id_1) as ccj_1,
-           sum(ccj_id_2) as ccj_2,
-           sum(ccj_id_3) as ccj_3,
-           sum(ccj_id_4) as ccj_4,
-           sum(ccj_id_5) as ccj_5,
-           sum(ccj_id_1_2_3_4_5) as ccj_all,
+               count(distinct case when activist_flag = 1
+                   OR activist_household_flag = 1
+                   OR donor_1plus_flag = 1
+                   OR donor_1plus_household_flag = 1 then person_id end) as activists,
+               sum(ccj_id_1) as ccj_1,
+               sum(ccj_id_2) as ccj_2,
+               sum(ccj_id_3) as ccj_3,
+               sum(ccj_id_4) as ccj_4,
+               sum(ccj_id_5) as ccj_5,
+               sum(ccj_id_1_2_3_4_5) as ccj_all,
 
-           sum(ccj_contact_made) as total_contacts,
-           sum(ccj_negative_result) as ccj_negativeresult
-    from gotv_universes.in_field_validation_breakdown
-    group by 1,2,3
-    ) x
+               sum(ccj_contact_made) as total_contacts,
+               sum(ccj_negative_result) as ccj_negativeresult
+        from gotv_universes.in_field_validation
+        group by 1,2,3
+    ) x on b.state = x.state_code
+               and b.status = x.collected_after_list_pass
+               and b.contacttype = x.contacttype
     left join (
         select state_code,
                count(distinct person_id) number_of_voters_in_ventile,
@@ -274,9 +296,9 @@ from (
                                               OR donor_1plus_household_flag = 1 then person_id end)  activists_in_ventile
 
 
-        from gotv_universes.in_field_validation_breakdown
+        from gotv_universes.in_field_validation
         group by 1
-        ) t on x.state_code = t.state_code
+        ) t on b.state = t.state_code
 order by 1,2,3)")
 
 query_status <- query_civis(x=sql(state_aggregation_sql), database = "Bernie 2020")
