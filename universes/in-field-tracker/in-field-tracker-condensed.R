@@ -195,7 +195,6 @@ from (
         from gotv_universes.in_field_validation_condensed
         group by 1,2
     ) x on b.state = x.state_code
-               and b.status = x.collected_after_list_pass
                and b.contacttype = x.contacttype
     left join (
         select state_code,
