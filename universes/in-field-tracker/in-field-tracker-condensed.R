@@ -88,6 +88,16 @@ CREATE TABLE gotv_universes.in_field_validation_condensed distkey(person_id) sor
 (SELECT distinct *
 from (
     select lists.person_id
+         ,case when lists.contacttype = 'spoke'
+                        and apcd.cell_rank_for_person = 1 then 1
+             when lists.contacttype = 'getthru_dialer'
+                      and (apcd.phone_rank_for_person = 1 or apcd.cell_rank_for_person = 1) then 1
+             when lists.contacttype = 'canvasses'
+                      and (p.voting_address_id is not null
+                               and p.myv_van_id is not null
+                               and p.voting_street_address not ilike '%po box%'
+                          ) then 1
+             else 0 end valid_person
          ,lists.list_source
          ,TO_DATE(lists.pass_date, 'YYYY-MM-DD') as pass_date
          ,ccj.contactdate
@@ -128,6 +138,12 @@ from (
         left join  (",ccj_ids,") ccj on lists.person_id = ccj.person_id
                                    and lists.contacttype = ccj.contacttype
         left join bernie_data_commons.base_universe base on lists.person_id = base.person_id
+        left join (
+            select person_id, phone_rank_for_person, cell_rank_for_person
+            from bernie_data_commons.apcd_dnc
+            where (phone_rank_for_person = 1 or cell_rank_for_person = 1)
+            ) apcd on lists.person_id = apcd.person_id
+        left join phoenix_analytics.person p on lists.person_id = p.person_id
     ) x);")
 
 cat(final_query,file="sql.sql")
@@ -139,6 +155,7 @@ CREATE TABLE gotv_universes.in_field_validation_condensed_totals_state as
 (select b.state state_code,
        b.contacttype,
        coalesce(number_of_voters_in_ventile,0) as number_of_voters_in_ventile,
+       coalesce(reachable_voters, 0) as reachable_voters,
        coalesce(number_of_voters_attempted, 0) as unique_attempts_in_pass,
        coalesce(number_of_voters_canvassed, 0) as unique_contacts_in_pass,
 
@@ -148,11 +165,11 @@ CREATE TABLE gotv_universes.in_field_validation_condensed_totals_state as
        coalesce(voters_ever_attempted, 0) as unique_attempts_all_time,
        coalesce(voters_ever_canvassed, 0) as unique_contacts_all_time,
        
-       round(coalesce(1.0*unique_attempts_in_pass/nullif(number_of_voters_in_ventile,0),0),4) as percent_attempted_in_pass,
-       round(coalesce(1.0*unique_contacts_in_pass/nullif(number_of_voters_in_ventile,0),0),4) as percent_canvassed_in_pass,
+       round(coalesce(1.0*unique_attempts_in_pass/nullif(reachable_voters,0),0),4) as percent_attempted_in_pass,
+       round(coalesce(1.0*unique_contacts_in_pass/nullif(reachable_voters,0),0),4) as percent_canvassed_in_pass,
 
-       round(coalesce(1.0*unique_attempts_all_time/nullif(number_of_voters_in_ventile,0),0),4) as percent_attempted_all_time,
-       round(coalesce(1.0*unique_contacts_all_time/nullif(number_of_voters_in_ventile,0),0),4) as percent_canvassed_all_time,
+       round(coalesce(1.0*unique_attempts_all_time/nullif(reachable_voters,0),0),4) as percent_attempted_all_time,
+       round(coalesce(1.0*unique_contacts_all_time/nullif(reachable_voters,0),0),4) as percent_canvassed_all_time,
 
        round(coalesce(1.0*ccj_1/nullif(ccj_all,0),0),4) as ccj_1rate,
        coalesce(ccj_1,0) as ccj_1,
@@ -176,6 +193,8 @@ from (
     left join (
         select state_code,
                contacttype,
+               count(distinct case when valid_person = 1 then person_id end) reachable_voters,
+
                count(distinct case when attempted = 1 then person_id end) number_of_voters_attempted,
                count(distinct case when canvassed = 1 then person_id end) number_of_voters_canvassed,
                count(distinct case when ever_attempted = 1 then person_id end) voters_ever_attempted,
