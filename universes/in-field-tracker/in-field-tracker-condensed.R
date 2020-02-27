@@ -182,7 +182,7 @@ from (
                count(distinct case when ever_canvassed = 1 then person_id end) voters_ever_canvassed,
 
                count(distinct case when contactdate >= pass_date then contactcontact_id end) all_attempts_in_pass_period,
-               count(distinct case when contactdate >= pass_date and ccj_contact_made = 1 then person_id end) all_contacts_in_pass_period,
+               count(distinct case when contactdate >= pass_date and ccj_contact_made = 1 then contactcontact_id end) all_contacts_in_pass_period,
                
                sum(ccj_id_1) as ccj_1,
                sum(ccj_id_2) as ccj_2,
