@@ -39,7 +39,7 @@ pii_param = list(primary_key='id',
 
 # Destination table and schema
 output_table_param = list(schema = 'bernie_nmarchio2',
-                          table = 'ak_civis_match')
+                          table = 'ak_civis_match_out')
 
 # output_table_param <- Sys.getenv("OUTPUT_SCHEMA_TABLE_LIST")
 
