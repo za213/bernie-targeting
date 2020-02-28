@@ -1,14 +1,17 @@
 
-# Parameters --------------------------------------------------------------
+library(civis)
+library(tidyverse)
 
-#enable_cass = TRUE # boolean, TRUE to run CASS address standardization (CASS not recommended for jobs over 2 million)
+# Parameters --------------------------------------------------------------
 matches_per_id = 3 # integer, number of matches allowed per source ID (will be deduplicated in destination table)
-rematch_threshold = .7 # decimal, rematch all records with scores below this threshold on each update
-cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this match score threshold in final table
+rematch_threshold = .6 # decimal, rematch all records less than this match score on each update (automatically includes new records without scores)
+cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this match score in final table
 
 # Source table and schema
 input_table_param = list(schema = 'bernie_nmarchio2',
                          table = 'ak_for_matching')
+
+# input_table_param <- Sys.getenv("INPUT_SCHEMA_TABLE_LIST")
 
 # Source table columns
 pii_param = list(primary_key='id',
@@ -32,31 +35,36 @@ pii_param = list(primary_key='id',
                  lat=NULL,
                  lon=NULL)
 
-# Destination table and schema, columns: <primary_key>, person_id, voterbase_id, score, matched_date
+# input_table_param <- Sys.getenv("COLUMN_MAPPING")
+
+# Destination table and schema
 output_table_param = list(schema = 'bernie_nmarchio2',
                           table = 'ak_civis_match')
+
+# output_table_param <- Sys.getenv("OUTPUT_SCHEMA_TABLE_LIST")
 
 # Functions ---------------------------------------------------------------
 
 dedupe_match_table <- function(input_schema_table = NULL,
                                match_schema_table = NULL,
                                output_schema_table = NULL,
-                               cutoff_param = rematch_threshold){
+                               cutoff_param = .5){
         sql_pii <- c()
+        state_must_match = ''
         state_sort = ''
         for (i in names(compact(pii_param))) {
-                v = paste0('\n,input.',compact(pii_param)[[i]],'')
+                v = paste0('\n,',compact(pii_param)[[i]],'')
                 if (i == "state_code") {
-                        v = paste0("\n,case when input.",compact(pii_param)[[i]]," = pxpa.state_code or input.",compact(pii_param)[[i]]," = mxts.state_code then 1 else 0 end as state_match")
+                        state_must_match = paste0("\n, case when input.",compact(pii_param)[[i]]," = pxpa.state_code or input.",compact(pii_param)[[i]]," = mxts.state_code then 1 else 0 end as state_match ")
                         state_sort = 'state_match desc, '
                 }
                 sql_pii<- c(sql_pii,v)
         }
         
         sql_query_xwalk <- c()
-        sql_query_xwalk <- paste0("(select ",pii_param$primary_key," , person_id, matched_id as voterbase_id, score , getdate()::date as matched_date from 
+        sql_query_xwalk <- paste0("(select person_id, matched_id as voterbase_id, score , getdate()::date as matched_date ",paste0(sql_pii,collapse='')," from 
         (select * , row_number() over(partition by source_id order by ",state_sort," score desc) as best_record_rank
-        from (select coalesce(pxpa.person_id, mxts.person_id) as person_id,match.source_id,match.matched_id,match.score",paste0(sql_pii,collapse=''),"
+        from (select coalesce(pxpa.person_id, mxts.person_id) as person_id,match.source_id,match.matched_id,match.score ",paste0(sql_pii,collapse=''),state_must_match," 
         from (select * from ",match_schema_table," where score >= ",cutoff_param,") match
         left join ",input_schema_table," input on match.source_id = input.",pii_param$primary_key,"
         left join (select person_id , voterbase_id , state_code from phoenix_analytics.person) pxpa on match.matched_id = pxpa.voterbase_id
@@ -71,21 +79,19 @@ dedupe_match_table <- function(input_schema_table = NULL,
         return(match_output_status)
 }
 
+# Set up initial table ----------------------------------------------------
 
-# Packages ----------------------------------------------------------------
-
-library(civis)
-library(tidyverse)
-
-# Build Input Table
+# Check if final table exists and if so take records below rematch threshold from previous run
 cass_row_count <- civis::read_civis(x=sql(paste0('select count(*) from ',input_table_param$schema,'.',input_table_param$table)), database = 'Bernie 2020') 
 parallel_chunks <- ceiling((cass_row_count$count/250000)/4)
 check_if_final_table_exists <- civis::read_civis(x=sql(paste0("select count(*) from information_schema.tables where table_schema = '",output_table_param$schema,"' and table_name = '",output_table_param$table,"';")), database = 'Bernie 2020')
 if (check_if_final_table_exists$count == 1) {
-        match_universe <- paste0("(select *, ntile(",parallel_chunks,") over (order by random()) as chunk from ",paste0(input_table_param$schema,'.',input_table_param$table)," left join (select ",pii_param$primary_key,", score from ",output_table_param$schema,'.',output_table_param$table,") using(",pii_param$primary_key,") where score < ",rematch_threshold," or score is null)")
+        match_universe <- paste0("(select *, ntile(",parallel_chunks,") over (order by random()) as chunk from ",paste0(output_table_param$schema,'.',input_table_param$table)," 
+                                 left join (select ",pii_param$primary_key,", score from ",output_table_param$schema,'.',output_table_param$table,") using(",pii_param$primary_key,") where score < ",rematch_threshold," or score is null)")
 } else {
-        match_universe <- paste0("(select *, ntile(",parallel_chunks,") over (order by random()) as chunk from ",paste0(input_table_param$schema,'.',input_table_param$table),")")
+        match_universe <- paste0("(select *, ntile(",parallel_chunks,") over (order by random()) as chunk from ",paste0(output_table_param$schema,'.',input_table_param$table),")")
 }
+# Create initial staging table based on above checks
 input_table_sql <- paste0('drop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),';
                           create table ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
                           ' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as ',match_universe,';') 
@@ -114,28 +120,19 @@ m <- await(f=enhancements_get_civis_data_match_runs,
            run_id=match_job_run_civis$id)
 get_status(m)
 
-# Collapse match table to best matches
-deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
-                                     match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),
-                                     output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),
-                                     cutoff_param = rematch_threshold)
-deduped_status 
-
-# Save best matches and create separate table of weak matches for CASS 
-if (check_if_final_table_exists$count == 1) {
-        new_matches_sql <- paste0('insert into ',paste0(output_table_param$schema,'.',output_table_param$table),' (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch);')
-} else {
-        new_matches_sql <- paste0("create table ",output_table_param$schema,'.',output_table_param$table," as (select * from ",output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch);')
-}
-create_rematch_table_sql <- paste0('create table ',output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch as (select input0.* from ',output_table_param$schema,'.',input_table_param$table,'_stage_0_input input0 left join ',output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch input2 using(',pii_param$primary_key,') where input2.',pii_param$primary_key,' is null);')
-rematch_table_status <- civis::query_civis(x=sql(paste0(new_matches_sql,create_rematch_table_sql)), database = 'Bernie 2020') 
+# Create separate table of weak matches to run through CASS and rematch
+rematch_table_sql <- paste0('create table ',output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch as 
+                            (select input0.* from ',output_table_param$schema,'.',input_table_param$table,'_stage_0_input input0 
+                            left join ',output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch input2 using(',pii_param$primary_key,') 
+                            where input2.',pii_param$primary_key,' is null);')
+rematch_table_status <- civis::query_civis(x=sql(paste0(rematch_table_sql)), database = 'Bernie 2020') 
 rematch_table_status
 
 # CASS Address Standardization --------------------------------------------
 
-# Run parallelized CASS jobs and coalesce with raw PII table
-
-for (chunk_i in 1:parallel_chunks) {
+# Submit CASS jobs in parallel
+chunk_jobs <- c()
+for (chunk_i in parallel_chunks) {
         clean_job <- civis::enhancements_post_cass_ncoa(name = paste0('CASS Job Chunk ',chunk_i,': ',output_table_param$schema,'.',input_table_param$table), 
                                                         source = list(databaseTable = list(schema = output_table_param$schema,
                                                                                            table = paste0(input_table_param$table,'_stage_3_rematch'),
@@ -154,41 +151,51 @@ for (chunk_i in 1:parallel_chunks) {
                                                         output_level = "cass",
                                                         limiting_sql = paste0(pii_param$primary_key,' is not null and chunk = ',chunk_i))
         clean_job_run <- enhancements_post_cass_ncoa_runs(clean_job$id)
+        chunk_jobs <- c(chunk_jobs,clean_job_run$id)
 }
 
-# Block until the last CASS job finishes
-r <- await(f=enhancements_get_cass_ncoa_runs, 
-           id=clean_job_run$cassNcoaId, 
-           run_id=clean_job_run$id)
-get_status(r)
+# Capture successful CASS jobs
+chunk_df <- data.frame(parallel_chunks,chunk_jobs)
+chunk_successes <- c()
+for (i in unique(chunk_df$parallel_chunks)) {
+        r <- await(f=enhancements_get_cass_ncoa_runs, 
+                   id=clean_job_run$cassNcoaId, 
+                   run_id=chunk_df$chunk_jobs[i])
+        if (get_status(r) == "succeeded") {
+                chunk_success <- parallel_chunks[i]
+                chunk_successes <- c(chunk_successes, chunk_success)
+        }
+}
 
-# Union CASS jobs together and then drop chunked tables
-sql_cass_union <- c()
-sql_cass_drop <- c()
-for (chunk_i in 1:parallel_chunks) {
+# Union CASS jobs together and then drop staging tables
+cass_union_sql <- c()
+cass_drop_sql <- c()
+for (chunk_i in chunk_successes) {
         u <- paste0("(select * from ",output_table_param$schema,'.',input_table_param$table,'_stage_4_cass_',chunk_i,')')
-        sql_cass_union <- c(sql_cass_union, u)
-        d <- paste0("drop table if exists ",output_table_param$schema,'.',input_table_param$table,'_stage_4_cass_',chunk_i,';')
-        sql_cass_drop <- c(sql_cass_drop, d)
+        cass_union_sql <- c(cass_union_sql, u)
+        d <- paste0("\n drop table if exists ",output_table_param$schema,'.',input_table_param$table,'_stage_4_cass_',chunk_i,'; ')
+        cass_drop_sql <- c(cass_drop_sql, d)
 }
-# Union tables
-sql_cass_union <- paste0('create table ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_4_cass'),' as (select * from ',paste(sql_cass_union, collapse = ' union all '),');')
-cat(sql_cass_union ,file="sql.sql")
-cass_union_status <- civis::query_civis(x=sql(sql_cass_union), database = 'Bernie 2020') 
+
+cass_union_sql <- paste0('create table ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_4_cass'),' as (select * from ',paste(sql_cass_union, collapse = ' union all '),');')
+cat(cass_union_sql ,file="sql.sql")
+cass_union_status <- civis::query_civis(x=sql(cass_union_sql), database = 'Bernie 2020') 
 cass_union_status
-# Drop tables
-cat(sql_cass_drop, file="sql.sql")
-cass_drop_status <- civis::query_civis(x=sql(sql_cass_drop), database = 'Bernie 2020') 
+
+cass_drop_sql <- paste(cass_drop_sql, collapse = ' ')
+cat(cass_drop_sql, file="sql.sql")
+cass_drop_status <- civis::query_civis(x=sql(cass_drop_sql), database = 'Bernie 2020') 
 cass_drop_status
+
 # Coalesce CASS table with input table's PII
-sql_coalesce_columns <- c()
+coalesce_columns_sql <- c()
 for (i in names(compact(pii_param))) {
         v = paste0('input.',compact(pii_param)[[i]],'')
         if (i == "first_name") {
-                v = paste0("coalesce(input.",compact(pii_param)[[i]],", name.first_name_guess) as ",compact(pii_param)[[i]])
+                v = paste0("coalesce(name.first_name_guess, input.",compact(pii_param)[[i]],") as ",compact(pii_param)[[i]])
         }
         if (i == "last_name") {
-                v = paste0("coalesce(input.",compact(pii_param)[[i]],", name.last_name_guess ) as ",compact(pii_param)[[i]])
+                v = paste0("coalesce(name.last_name_guess, input.",compact(pii_param)[[i]],") as ",compact(pii_param)[[i]])
         }
         if (i == "full_address") {
                 v = paste0('coalesce(cass.std_priadr::varchar(256) , input.',compact(pii_param)[[i]],'::varchar(256) ) AS ',compact(pii_param)[[i]])
@@ -205,37 +212,41 @@ for (i in names(compact(pii_param))) {
         if (i == "zip") {
                 v = paste0('coalesce(cass.std_zip::varchar(256) , input.',compact(pii_param)[[i]],'::varchar(256) ) AS ',compact(pii_param)[[i]])
         }
-        sql_coalesce_columns <- c(sql_coalesce_columns,v)
+        coalesce_columns_sql <- c(coalesce_columns_sql,v)
 }
 
-# Guess names from first_name and email
+# Guess first_name and last_name from email (or if last name is empty and two words are in first name field)
 if ((is.null(pii_param$first_name) && is.null(pii_param$last_name) && is.null(pii_param$email)) == FALSE) {
         clean_name_sql <- paste0(" left join (select ",pii_param$primary_key,", first_name_guess, last_name_guess 
                                          from (select ",pii_param$primary_key,"
-                                        ,nullif(regexp_replace(lower(LEFT(email, CHARINDEX('@',email)-1)), '[^a-zA-Z\\.]',''),'') as email_preparse
-                                        ,nullif(initcap(SPLIT_PART(email_preparse, '.', 1)),'') as first_from_email
-                                        ,nullif(initcap(REGEXP_SUBSTR( email_preparse, '[^.]*$')),'') as last_from_email
-                                        ,nullif(left(first_name, CHARINDEX(' ', first_name)),'') as first_from_first
-                                        ,nullif(substring(first_name, CHARINDEX(' ', first_name)+1, len(first_name)-(CHARINDEX(' ', first_name)-1)),'') as last_from_first
-                                        ,case when last_from_first = first_name then NULL else last_from_first end as last_from_first_2
-                                        ,nullif(coalesce(first_from_first, first_name, first_from_email),'') as first_name_guess
-                                        ,nullif(coalesce(last_name, last_from_first_2, last_from_email, first_from_email, first_name_guess),'') as last_name_coalesced
-                                        ,case when last_name_coalesced = first_name then NULL else last_name_coalesced end as last_name_guess
+                                         ,nullif(initcap(SPLIT_PART(regexp_replace(first_name,' and | & | \+ ',';'), ';', 1)),'') as first_name_partner_1
+                                         ,nullif(initcap(SPLIT_PART(regexp_replace(first_name,' and | & | \+ ',';'), ';', 2)),'') as first_name_partner_2
+                                         ,nullif(regexp_replace(lower(LEFT(email, CHARINDEX('@',email)-1)), '[^a-zA-Z\\.]',''),'') as email_preparse
+                                         ,nullif(initcap(REGEXP_SUBSTR( email_preparse, '^([^.]+)')),'') as first_from_email
+                                         ,nullif(initcap(REGEXP_SUBSTR( email_preparse, '[^.]*$')),'') as last_from_email
+                                         ,nullif(initcap(left(first_name, CHARINDEX(' ', first_name))),'') as first_from_first
+                                         ,nullif(initcap(substring(first_name, CHARINDEX(' ', first_name)+1, len(first_name)-(CHARINDEX(' ', first_name)-1))),'') as last_from_first
+                                         ,case when last_from_first = first_name then NULL else last_from_first end as last_from_first_2
+                                         ,case when (first_name is null or first_name_partner_2 is not null) and first_name_partner_1 <> '' then first_name_partner_1
+                                               when (last_name is null and last_from_first_2 is not null) and first_from_first <> '' then first_from_first
+                                               when (first_name is null and last_from_email is not null) and first_from_email <> '' then first_from_email
+                                               else initcap(first_name) end as first_name_guess
+                                         ,case when last_name is null then nullif(coalesce(last_from_first_2, last_from_email),'') else initcap(last_name) end as last_name_guess
                                          from ",output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch)) name using(',pii_param$primary_key,')')
 } else {
         clean_name_sql <- paste0(" left join (select ",pii_param$primary_key,", NULL as first_name_guess, NULL as last_name_guess 
                                          from ",output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch)) name using(',pii_param$primary_key,')')
 }
 
-sql_coalesce_table <- paste0('\n (select ',paste(sql_coalesce_columns, collapse = '\n, '),' 
+coalesce_table_sql <- paste0('\n (select ',paste(coalesce_columns_sql, collapse = '\n, '),' 
                                       \n from ',output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch input',' 
                                       \n ',clean_name_sql,' 
                                       \n left join ',output_table_param$schema,'.',input_table_param$table,'_stage_4_cass cass',' 
                                       \n using(',pii_param$primary_key,') \nwhere ',pii_param$primary_key,' is not null)')
 
-# Submit coalesce query
+# Submit coalesce query to combine raw PII and successful CASS jobs
 match_input_sql <- paste0('drop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),';
-                          create table ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as ',sql_coalesce_table,';')  
+                          create table ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as ',coalesce_table_sql,';')  
 cat(match_input_sql,file="sql.sql")
 match_input_status <- civis::query_civis(x=sql(match_input_sql), database = 'Bernie 2020') 
 match_input_status
@@ -265,20 +276,42 @@ get_status(m)
 
 # Find Best Record --------------------------------------------------------
 
-# Collapse match table to best matches
+# Best matches from first run
+deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
+                                     match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),
+                                     output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),
+                                     cutoff_param = rematch_threshold)
+deduped_status 
+
+# Best matches from second run
 deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),
                                      match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_6_match2'),
                                      output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch'),
-                                     cutoff_param = cutoff_threshold)
+                                     cutoff_param = 0)
 deduped_status 
 
-# Insert matched into final table 
-new_matches_sql <- paste0('insert into ',paste0(output_table_param$schema,'.',output_table_param$table),' (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch);')
-match_table_status <- civis::query_civis(x=sql(new_matches_sql), database = 'Bernie 2020') 
-match_table_status
+# Matched Table (all records)
+complete_table_sql <- paste0('drop table if exists ',output_table_param$schema,'.',output_table_param$table,'_all_matches; 
+                              create table ',output_table_param$schema,'.',output_table_param$table,'_all_matches distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as 
+                              (select * from
+                              (select *, row_number() over(partition by ',pii_param$primary_key,' order by score desc) as best_record_rank from 
+                              (select * from
+                              (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch) 
+                              union all 
+                              (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch))) where best_record_rank = 1);')
 
+complete_table_status <- civis::query_civis(x=sql(complete_table_sql), database = 'Bernie 2020') 
+complete_table_status
 
-# Drop staging tables
+# Matched Table (only records above cutoff_threshold)
+complete_table_sql <- paste0('drop table if exists ',output_table_param$schema,'.',output_table_param$table,'; 
+                              create table ',output_table_param$schema,'.',output_table_param$table,' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as 
+                              (select * from ',output_table_param$schema,'.',output_table_param$table,' where score >= ',cutoff_threshold,';')
+
+complete_table_status <- civis::query_civis(x=sql(complete_table_sql), database = 'Bernie 2020') 
+complete_table_status
+
+#Drop staging tables
 # drop_tables_sql <- paste0('drop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch'),';
@@ -286,5 +319,7 @@ match_table_status
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_6_match2'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch'),';')
-# drop_table_status <- civis::query_civis(x=sql(drop_tables_sql), database = 'Bernie 2020') 
+# drop_table_status <- civis::query_civis(x=sql(drop_tables_sql), database = 'Bernie 2020')
 
+#sink(file("match_console.log"), append=TRUE, type="message")
+#cat(readLines("match_console.log"), sep="\n")
