@@ -106,8 +106,6 @@ from (
          ,coalesce(ccj.ccj_contact_made,0) as ccj_contact_made
          ,case when most_recent_attempt >= pass_date then 1 else 0 end attempted
          ,case when most_recent_canvass >= pass_date then 1 else 0 end canvassed
-         ,case when most_recent_attempt is not null then 1 else 0 end ever_attempted
-         ,case when most_recent_canvass is not null then 1 else 0 end ever_canvassed
          ,coalesce(ccj.ccj_negative_result,0) as ccj_negative_result
          ,coalesce(ccj.ccj_id_1,0) as ccj_id_1
          ,coalesce(ccj.ccj_id_2,0) as ccj_id_2
@@ -152,81 +150,65 @@ query_status <- query_civis(x=sql(final_query), database = "Bernie 2020")
 
 state_aggregation_sql <- paste0("DROP TABLE if exists gotv_universes.in_field_validation_condensed_totals_state;
 CREATE TABLE gotv_universes.in_field_validation_condensed_totals_state as 
-(select b.state state_code,
-       b.contacttype,
-       coalesce(number_of_voters_in_ventile,0) as number_of_voters_in_ventile,
-       coalesce(reachable_voters, 0) as reachable_voters,
+(select state_code,
+       coalesce(total_voters,0) as total_voters,
+       round(coalesce(1.0*ccj_1/nullif(ccj_all,0),0),4) as total_1_rate,
+       coalesce(number_of_voters_attempted, 0) as total_attempted,
+       coalesce(number_of_voters_canvassed, 0) as total_canvassed,
+       round(coalesce(1.0*total_attempted/nullif(total_voters,0),0),4) as percent_attempted,
+       round(coalesce(1.0*total_canvassed/nullif(total_voters,0),0),4) as percent_canvassed,
 
-       round(coalesce(1.0*unique_attempts_in_pass/nullif(reachable_voters,0),0),4) as percent_attempted_in_pass,
-       round(coalesce(1.0*unique_contacts_in_pass/nullif(reachable_voters,0),0),4) as percent_canvassed_in_pass,
+       coalesce(total_doors,0) as total_doors,
+       round(coalesce(1.0*doors_ccj_1/nullif(doors_ccj_all,0),0),4) as canvass_1_rate,
+       coalesce(doors_attempted, 0) as doors_attempted,
+       coalesce(doors_canvassed, 0) as doors_canvassed,
+       round(coalesce(1.0*doors_attempted/nullif(total_doors,0),0),4) as percent_doors_attempted,
+       round(coalesce(1.0*doors_canvassed/nullif(total_voters,0),0),4) as percent_doors_canvassed,
 
-       round(coalesce(1.0*unique_attempts_all_time/nullif(reachable_voters,0),0),4) as percent_attempted_all_time,
-       round(coalesce(1.0*unique_contacts_all_time/nullif(reachable_voters,0),0),4) as percent_canvassed_all_time,
+       coalesce(total_phones,0) as total_phones,
+       round(coalesce(1.0*dialer_ccj_1/nullif(dialer_ccj_all,0),0),4) as phone_1_rate,
+       coalesce(dialer_attempted, 0) as phones_attempted,
+       coalesce(dialer_canvassed, 0) as phones_canvassed,
+       round(coalesce(1.0*phones_attempted/nullif(total_phones,0),0),4) as percent_phones_attempted,
+       round(coalesce(1.0*phones_canvassed/nullif(total_phones,0),0),4) as percent_phones_canvassed,
 
-       round(coalesce(1.0*ccj_1/nullif(ccj_all,0),0),4) as ccj_1rate,
-
-       coalesce(number_of_voters_attempted, 0) as unique_attempts_in_pass,
-       coalesce(number_of_voters_canvassed, 0) as unique_contacts_in_pass,
-
-       coalesce(all_attempts_in_pass_period, 0) as all_attempts_in_pass,
-       coalesce(all_contacts_in_pass_period, 0) as all_contacts_in_pass,
-
-       coalesce(voters_ever_attempted, 0) as unique_attempts_all_time,
-       coalesce(voters_ever_canvassed, 0) as unique_contacts_all_time,
-       
+       coalesce(total_cells,0) as total_cells,
+       round(coalesce(1.0*cells_ccj_1/nullif(cells_ccj_all,0),0),4) as cell_1_rate,
+       coalesce(cells_attempted, 0) as cells_attempted,
+       coalesce(cells_canvassed, 0) as cells_canvassed,
+       round(coalesce(1.0*cells_attempted/nullif(total_cells,0),0),4) as percent_cells_attempted,
+       round(coalesce(1.0*cells_canvassed/nullif(total_cells,0),0),4) as percent_cells_canvassed
 
 
-       
-       coalesce(ccj_1,0) as ccj_1,
-       coalesce(ccj_2,0) as ccj_2,
-       coalesce(ccj_3,0) as ccj_3,
-       coalesce(ccj_4,0) as ccj_4,
-       coalesce(ccj_5,0) as ccj_5,
-       coalesce(ccj_all,0) as ccj_all,
-       coalesce(ccj_negativeresult,0) as ccj_negativeresult
 from (
-    select *
-    from (select distinct state_code state from (",queries_unioned,")) y
-    cross join (
-            select 'canvasses' contacttype
-            union
-            select 'getthru_dialer'
-            union
-            select 'spoke'
-        ) ct
-    ) b
-    left join (
-        select state_code,
-               contacttype,
-               count(distinct case when valid_person = 1 then person_id end) reachable_voters,
+      select state_code, 
+             count(distinct person_id) total_voters,
+             sum(ccj_id_1) ccj_1,
+             sum(ccj_id_1_2_3_4_5) as ccj_all,
+             count(distinct case when attempted = 1 then person_id end) number_of_voters_attempted,
+             count(distinct case when canvassed = 1 then person_id end) number_of_voters_canvassed,
 
-               count(distinct case when attempted = 1 then person_id end) number_of_voters_attempted,
-               count(distinct case when canvassed = 1 then person_id end) number_of_voters_canvassed,
-               count(distinct case when ever_attempted = 1 then person_id end) voters_ever_attempted,
-               count(distinct case when ever_canvassed = 1 then person_id end) voters_ever_canvassed,
+             count(distinct case when valid_person = 1 and contacttype = 'canvasses' then person_id end) total_doors,
+             sum(case when contacttype = 'canvasses' then ccj_id_1 else 0 end) doors_ccj_1,
+             sum(case when contacttype = 'canvasses' then ccj_id_1_2_3_4_5 else 0 end) as doors_ccj_all,
+             count(distinct case when attempted = 1 and contacttype = 'canvasses' then person_id end) doors_attempted,
+             count(distinct case when canvassed = 1 and contacttype = 'canvasses' then person_id end) doors_canvassed,
 
-               count(distinct case when contactdate >= pass_date then contactcontact_id end) all_attempts_in_pass_period,
-               count(distinct case when contactdate >= pass_date and ccj_contact_made = 1 then contactcontact_id end) all_contacts_in_pass_period,
-               
-               sum(ccj_id_1) as ccj_1,
-               sum(ccj_id_2) as ccj_2,
-               sum(ccj_id_3) as ccj_3,
-               sum(ccj_id_4) as ccj_4,
-               sum(ccj_id_5) as ccj_5,
-               sum(ccj_id_1_2_3_4_5) as ccj_all,
-               sum(ccj_negative_result) as ccj_negativeresult,
-               sum(ccj_contact_made) as total_contacts
+             count(distinct case when valid_person = 1 and contacttype = 'getthru_dialer' then person_id end) total_phones,
+             sum(case when contacttype = 'getthru_dialer' then ccj_id_1 else 0 end) dialer_ccj_1,
+             sum(case when contacttype = 'getthru_dialer' then ccj_id_1_2_3_4_5 else 0 end) as dialer_ccj_all,
+             count(distinct case when attempted = 1 and contacttype = 'getthru_dialer' then person_id end) dialer_attempted,
+             count(distinct case when canvassed = 1 and contacttype = 'getthru_dialer' then person_id end) dialer_canvassed,
 
-        from gotv_universes.in_field_validation_condensed
-        group by 1,2
-    ) x on b.state = x.state_code
-               and b.contacttype = x.contacttype
-    left join (
-        select state_code,
-               count(distinct person_id) number_of_voters_in_ventile
-        from gotv_universes.in_field_validation_condensed
-        group by 1
-        ) t on b.state = t.state_code
-order by 1,2)")
+             count(distinct case when valid_person = 1 and contacttype = 'spoke' then person_id end) total_cells,
+             sum(case when contacttype = 'spoke' then ccj_id_1 else 0 end) cells_ccj_1,
+             sum(case when contacttype = 'spoke' then ccj_id_1_2_3_4_5 else 0 end) as cells_ccj_all,
+             count(distinct case when attempted = 1 and contacttype = 'spoke' then person_id end) cells_attempted,
+             count(distinct case when canvassed = 1 and contacttype = 'spoke' then person_id end) cells_canvassed
+
+      from gotv_universes.in_field_validation_condensed
+      group by 1
+  ) x
+order by 1)")
 
 query_status <- query_civis(x=sql(state_aggregation_sql), database = "Bernie 2020")
