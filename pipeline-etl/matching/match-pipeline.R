@@ -81,7 +81,8 @@ dedupe_match_table <- function(input_schema_table = NULL,
 
 # Drop staging tables if they exist ---------------------------------------
 
-drop_tables_sql <- paste0('drop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),';
+drop_tables_sql <- paste0('\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),';
+\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),';
 \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),';
 \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch'),';
 \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_4_cass'),';
@@ -332,7 +333,8 @@ final_table_status <- civis::query_civis(x=sql(final_table_sql), database = 'Ber
 final_table_status
 
 #Drop staging tables
-# drop_tables_sql <- paste0('drop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),';
+# drop_tables_sql <- paste0('\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),';
+# \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_4_cass'),';
