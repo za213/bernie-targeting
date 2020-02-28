@@ -79,6 +79,17 @@ dedupe_match_table <- function(input_schema_table = NULL,
         return(match_output_status)
 }
 
+# Drop staging tables if they exist ---------------------------------------
+
+drop_tables_sql <- paste0('drop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),';
+\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),';
+\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch'),';
+\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_4_cass'),';
+\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),';
+\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_6_match2'),';
+\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch'),';')
+drop_table_status <- civis::query_civis(x=sql(drop_tables_sql), database = 'Bernie 2020')
+
 # Set up initial table ----------------------------------------------------
 
 # Check if final table exists and if so take records below rematch threshold from previous run
@@ -290,26 +301,35 @@ deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_pa
                                      cutoff_param = 0)
 deduped_status 
 
+
+column_list <- paste0(' person_id , voterbase_id , score , matched_date , ',paste(as.vector(unlist(compact(pii_param))),collapse = ' , '))
+
+if (check_if_final_table_exists$count == 1) {
+        existing_universe <- paste0(" union all (select ",column_list," from ",output_table_param$schema,'.',output_table_param$table,")")
+} else {
+        existing_universe <- ''
+}
+
 # Matched Table (all records)
 complete_table_sql <- paste0('drop table if exists ',output_table_param$schema,'.',output_table_param$table,'_all_matches; 
                               create table ',output_table_param$schema,'.',output_table_param$table,'_all_matches distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as 
-                              (select * from
+                              (select ',column_list,' from
                               (select *, row_number() over(partition by ',pii_param$primary_key,' order by score desc) as best_record_rank from 
                               (select * from
                               (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch) 
                               union all 
-                              (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch))) where best_record_rank = 1);')
+                              (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch)',existing_universe,')) where best_record_rank = 1);')
 
 complete_table_status <- civis::query_civis(x=sql(complete_table_sql), database = 'Bernie 2020') 
 complete_table_status
 
 # Matched Table (only records above cutoff_threshold)
-complete_table_sql <- paste0('drop table if exists ',output_table_param$schema,'.',output_table_param$table,'; 
-                              create table ',output_table_param$schema,'.',output_table_param$table,' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as 
-                              (select * from ',output_table_param$schema,'.',output_table_param$table,' where score >= ',cutoff_threshold,';')
+final_table_sql <- paste0('drop table if exists ',output_table_param$schema,'.',output_table_param$table,'; 
+                          create table ',output_table_param$schema,'.',output_table_param$table,' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as 
+                          (select * from ',output_table_param$schema,'.',output_table_param$table,' where score >= ',cutoff_threshold,';')
 
-complete_table_status <- civis::query_civis(x=sql(complete_table_sql), database = 'Bernie 2020') 
-complete_table_status
+final_table_status <- civis::query_civis(x=sql(final_table_sql), database = 'Bernie 2020') 
+final_table_status
 
 #Drop staging tables
 # drop_tables_sql <- paste0('drop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),';
