@@ -328,7 +328,7 @@ complete_table_status
 # Matched Table (only records above cutoff_threshold)
 final_table_sql <- paste0('drop table if exists ',output_table_param$schema,'.',output_table_param$table,'; 
                           create table ',output_table_param$schema,'.',output_table_param$table,' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as 
-                          (select * from ',output_table_param$schema,'.',output_table_param$table,' where score >= ',cutoff_threshold,';')
+                          (select * from ',output_table_param$schema,'.',output_table_param$table,'_all_matches where score >= ',cutoff_threshold,';')
 
 final_table_status <- civis::query_civis(x=sql(final_table_sql), database = 'Bernie 2020') 
 final_table_status
