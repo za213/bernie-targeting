@@ -152,8 +152,7 @@ state_aggregation_sql <- paste0("DROP TABLE if exists gotv_universes.in_field_va
 CREATE TABLE gotv_universes.in_field_validation_condensed_totals_state as 
 (select state_code,
        coalesce(total_voters,0) as total_voters,
-       round(coalesce(1.0*ccj_1/nullif(ccj_all,0),0),4) as total_1_rate,
-       round(coalesce(1.0*ccj_1_pass/nullif(ccj_all_pass,0),0),4) as total_1_rate_pass,
+       round(coalesce(1.0*ccj_1_pass/nullif(ccj_all_pass,0),0),4) as total_1_rate,
        coalesce(number_of_voters_attempted, 0) as total_attempted,
        coalesce(number_of_voters_canvassed, 0) as total_canvassed,
        round(coalesce(1.0*total_attempted/nullif(total_voters,0),0),4) as percent_attempted,
@@ -184,8 +183,6 @@ CREATE TABLE gotv_universes.in_field_validation_condensed_totals_state as
 from (
       select state_code, 
              count(distinct person_id) total_voters,
-             sum(ccj_id_1) ccj_1,
-             sum(ccj_id_1_2_3_4_5) as ccj_all,
              sum(case when contactdate > pass_date then ccj_id_1 else 0 end) ccj_1_pass,
              sum(case when contactdate > pass_date then ccj_id_1_2_3_4_5 else 0 end) as ccj_all_pass,
              count(distinct case when attempted = 1 then person_id end) number_of_voters_attempted,
