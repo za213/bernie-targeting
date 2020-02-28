@@ -9,7 +9,7 @@ cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this 
 
 # Source table and schema
 input_table_param = list(schema = 'bernie_nmarchio2',
-                         table = 'ak_for_matching')
+                         table = 'ak_for_matching_test')
 
 # input_table_param <- Sys.getenv("INPUT_SCHEMA_TABLE_LIST")
 
