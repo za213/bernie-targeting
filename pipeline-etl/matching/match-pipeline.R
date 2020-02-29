@@ -241,8 +241,8 @@ for (i in names(compact(pii_param))) {
 if ((is.null(pii_param$first_name) && is.null(pii_param$last_name) && is.null(pii_param$email)) == FALSE) {
         clean_name_sql <- paste0(" left join (select ",pii_param$primary_key,", first_name_guess, last_name_guess 
                                          from (select ",pii_param$primary_key,"
-                                         ,nullif(initcap(SPLIT_PART(regexp_replace(first_name,' and | & | \+ ',';'), ';', 1)),'') as first_name_partner_1
-                                         ,nullif(initcap(SPLIT_PART(regexp_replace(first_name,' and | & | \+ ',';'), ';', 2)),'') as first_name_partner_2
+                                         ,nullif(initcap(SPLIT_PART(regexp_replace(first_name,' and | & ',';'), ';', 1)),'') as first_name_partner_1
+                                         ,nullif(initcap(SPLIT_PART(regexp_replace(first_name,' and | & ',';'), ';', 2)),'') as first_name_partner_2
                                          ,nullif(regexp_replace(lower(LEFT(email, CHARINDEX('@',email)-1)), '[^a-zA-Z\\.]',''),'') as email_preparse
                                          ,nullif(initcap(REGEXP_SUBSTR( email_preparse, '^([^.]+)')),'') as first_from_email
                                          ,nullif(initcap(REGEXP_SUBSTR( email_preparse, '[^.]*$')),'') as last_from_email
