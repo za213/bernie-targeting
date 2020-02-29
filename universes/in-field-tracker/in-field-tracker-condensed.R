@@ -143,9 +143,10 @@ from (
             from bernie_data_commons.apcd_dnc
             where (phone_rank_for_person = 1 or cell_rank_for_person = 1)
             ) apcd on lists.person_id = apcd.person_id
-        left join phoenix_analytics.person p on lists.person_id = p.person_id
+        left join phoenix_analytics.person p on lists.person_id = p.person_id 
+                                                        and contactdate >= TO_DATE(lists.pass_date, 'YYYY-MM-DD')
     ) x 
-where contactdate >= pass_date);")
+);")
 
 cat(final_query,file="sql.sql")
 
