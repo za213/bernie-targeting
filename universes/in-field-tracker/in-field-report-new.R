@@ -59,7 +59,8 @@ FROM (
          ,contactcontact_id
          ,contactdate
          ,voter_state
-         ,CASE WHEN resultcode IN ('Canvassed', 'Do Not Contact', 'Refused', 'Call Back', 'Language Barrier', 'Hostile', 'Come Back', 'Cultivation', 'Refused Contact', 'Spanish', 'Other', 'Not Interested') THEN 1 ELSE 0 END AS ccj_contact_made
+         --,CASE WHEN resultcode IN ('Canvassed', 'Do Not Contact', 'Refused', 'Call Back', 'Language Barrier', 'Hostile', 'Come Back', 'Cultivation', 'Refused Contact', 'Spanish', 'Other', 'Not Interested') THEN 1 ELSE 0 END AS ccj_contact_made
+         ,case when support_int is not null then 1 else 0 end ccj_contact_made
          ,max(TO_DATE(contactdate, 'YYYY-MM-DD')) OVER (PARTITION BY person_id) AS most_recent_attempt
          ,max(case when ccj_contact_made = 1 then TO_DATE(contactdate, 'YYYY-MM-DD') else null end) OVER (PARTITION BY person_id) AS most_recent_canvass
          ,CASE WHEN resultcode IN ('Do Not Contact','Hostile','Refused','Refused Contact') OR ((support_int = 4 OR support_int = 5) AND mrc = 1) THEN 1 ELSE 0 END AS ccj_negative_result
