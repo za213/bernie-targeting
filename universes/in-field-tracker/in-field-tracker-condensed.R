@@ -103,7 +103,7 @@ from (
          ,case when (p.voting_address_id is not null
                                and p.myv_van_id is not null
                                and p.voting_street_address not ilike '%po box%'
-                          ) then 1 else 0 end as has_phone
+                          ) then 1 else 0 end as has_door
          ,lists.list_source
          ,TO_DATE(lists.pass_date, 'YYYY-MM-DD') as pass_date
          ,ccj.contactdate
