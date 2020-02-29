@@ -136,7 +136,7 @@ from (
             from (",queries_unioned,")
             ) l
         ) lists
-        left join  (",ccj_ids,") ccj on lists.person_id = ccj.person_id
+        left join  (",ccj_ids,") ccj on lists.person_id = ccj.person_id and contactdate >= TO_DATE(lists.pass_date, 'YYYY-MM-DD')
         left join bernie_data_commons.base_universe base on lists.person_id = base.person_id
         left join (
             select person_id, phone_rank_for_person, cell_rank_for_person
@@ -144,7 +144,7 @@ from (
             where (phone_rank_for_person = 1 or cell_rank_for_person = 1)
             ) apcd on lists.person_id = apcd.person_id
         left join phoenix_analytics.person p on lists.person_id = p.person_id 
-                                                        and contactdate >= TO_DATE(lists.pass_date, 'YYYY-MM-DD')
+                                                        
     ) x 
 );")
 
