@@ -9,6 +9,7 @@ rematch_threshold = .6 # decimal, rematch all records less than this match score
 cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this match score in final table
 
 # Source table and schema
+# Can be an incremental or complete source table (records already in destination table and above match threshold will be excluded)
 input_table_param = list(schema = 'bernie_nmarchio2',
                          table = 'ak_for_matching_test')
 
@@ -39,7 +40,7 @@ pii_param = list(primary_key='id',
 # input_table_param <- Sys.getenv("COLUMN_MAPPING")
 
 # Destination table and schema
-# If the job is recurring the workflow updates this table with new matches
+# If this table already exists and the matching pipeline the existing output table will be unioned and deduplicated into the updated output table
 output_table_param = list(schema = 'bernie_nmarchio2',
                           table = 'ak_civis_match_out')
 
