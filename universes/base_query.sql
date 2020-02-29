@@ -288,7 +288,9 @@ sortkey(person_id) as
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Teacher%' THEN mx.person_id END) AS teacher_myc ,
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Labor%' THEN mx.person_id END) AS labor_myc
      FROM phoenix_demssanders20_vansync_derived.activist_myc ac
-     LEFT JOIN phoenix_demssanders20_vansync.activist_codes ac_lookup ON ac_lookup.activist_code_id = ac.activist_code_id and ac_lookup.state_code = ac.state_code
+     LEFT JOIN 
+     (select distinct activist_code_id, activist_code_type, activist_code_name from phoenix_demssanders20_vansync.activist_codes) ac_lookup 
+      ON ac_lookup.activist_code_id = ac.activist_code_id 
      LEFT JOIN bernie_data_commons.master_xwalk_st_myc mx ON mx.myc_van_id = ac.myc_van_id AND mx.state_code = ac.state_code
      WHERE ac.committee_id = 73296 and mx.person_id is not null
      GROUP BY 1)) myc
@@ -618,7 +620,8 @@ sortkey(jsonid_encoded) as
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Teacher%' THEN ac.myc_van_id END) AS teacher_myc ,
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Labor%' THEN ac.myc_van_id END) AS labor_myc
      FROM phoenix_demssanders20_vansync_derived.activist_myc ac
-     LEFT JOIN phoenix_demssanders20_vansync.activist_codes ac_lookup ON ac_lookup.activist_code_id = ac.activist_code_id and ac_lookup.state_code = ac.state_code
+     LEFT JOIN (select distinct activist_code_id, activist_code_type, activist_code_name from phoenix_demssanders20_vansync.activist_codes) ac_lookup 
+      ON ac_lookup.activist_code_id = ac.activist_code_id 
      WHERE ac.committee_id = 73296 and ac.myc_van_id is not null
      GROUP BY 1,2) ) myc
     ON xwalk.myc_van_id = myc.myc_van_id AND xwalk.state_code = myc.state_code
