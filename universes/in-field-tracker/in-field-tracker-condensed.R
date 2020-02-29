@@ -188,19 +188,19 @@ from (
              count(distinct case when attempted = 1 then person_id end) number_of_voters_attempted,
              count(distinct case when canvassed = 1 then person_id end) number_of_voters_canvassed,
 
-             count(distinct case when has_door = 1 and contacttype = 'canvasses' then person_id end) total_doors,
+             count(distinct case when has_door = 1 then person_id end) total_doors,
              sum(case when contacttype = 'canvasses' then ccj_id_1 else 0 end) doors_ccj_1,
              sum(case when contacttype = 'canvasses' then ccj_id_1_2_3_4_5 else 0 end) as doors_ccj_all,
              count(distinct case when attempted = 1 and contacttype = 'canvasses' then person_id end) doors_attempted,
              count(distinct case when canvassed = 1 and contacttype = 'canvasses' then person_id end) doors_canvassed,
 
-             count(distinct case when has_phone = 1 and contacttype = 'getthru_dialer' then person_id end) total_phones,
+             count(distinct case when has_phone = 1 then person_id end) total_phones,
              sum(case when contacttype = 'getthru_dialer' then ccj_id_1 else 0 end) dialer_ccj_1,
              sum(case when contacttype = 'getthru_dialer' then ccj_id_1_2_3_4_5 else 0 end) as dialer_ccj_all,
              count(distinct case when attempted = 1 and contacttype = 'getthru_dialer' then person_id end) dialer_attempted,
              count(distinct case when canvassed = 1 and contacttype = 'getthru_dialer' then person_id end) dialer_canvassed,
 
-             count(distinct case when has_cell = 1 and contacttype = 'spoke' then person_id end) total_cells,
+             count(distinct case when has_cell = 1 then person_id end) total_cells,
              sum(case when contacttype = 'spoke' then ccj_id_1 else 0 end) cells_ccj_1,
              sum(case when contacttype = 'spoke' then ccj_id_1_2_3_4_5 else 0 end) as cells_ccj_all,
              count(distinct case when attempted = 1 and contacttype = 'spoke' then person_id end) cells_attempted,
