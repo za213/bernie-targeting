@@ -74,12 +74,23 @@ FROM (
          ,CASE WHEN support_int = 5 AND mrc = 1 THEN 1 ELSE 0 END AS ccj_id_5
          ,CASE WHEN support_int IN (1,2,3,4,5) AND mrc = 1 THEN 1 ELSE 0 END AS ccj_id_1_2_3_4_5
     FROM (
-        select *,
-               row_number() over (partition by person_id, contacttype, case when support_int is not null then 1 else 0 end order by contacttimestamp desc) mrc
+    select h.*,
+           row_number() over (partition by person_id, contacttype, case when support_int is not null then 1 else 0 end order by contacttimestamp desc) mrc
+    from (
+        select contactcontact_id,
+               person_id,
+               contactdate,
+               voter_state,
+               resultcode,
+               support_int,
+               contacttimestamp,
+           case when contacttype in ('pdi_mobile', 'bern_app_crowd_canvass','minivan_doors', 'minivan_paid_doors','myc-Paid Walk', 'myc_minivan_doors', 'myv-Paid Walk') then 'canvasses'
+             else contacttype end contacttype
         from bernie_data_commons.ccj_dnc
-        ) mr
+        where contacttype in ('pdi_mobile', 'bern_app_crowd_canvass','minivan_doors', 'minivan_paid_doors','myc-Paid Walk', 'myc_minivan_doors', 'myv-Paid Walk', 'getthru_dialer', 'spoke')
+        ) h
+    ) mr
     WHERE person_id IS NOT NULL
-      and contacttype in ('pdi_mobile', 'bern_app_crowd_canvass','minivan_doors', 'minivan_paid_doors','myc-Paid Walk', 'myc_minivan_doors', 'myv-Paid Walk', 'getthru_dialer', 'spoke')
     ) x
 where person_id is not null)"
 
