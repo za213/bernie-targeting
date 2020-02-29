@@ -4,7 +4,7 @@ library(civis)
 library(tidyverse)
 
 # Parameters --------------------------------------------------------------
-matches_per_id = 3 # integer, number of matches allowed per source ID (will be deduplicated in destination table)
+matches_per_id = 3 # integer, number of matches allowed per source ID (will be deduplicated in output table)
 rematch_threshold = .6 # decimal, rematch all records less than this match score on each update (automatically includes new records without scores)
 cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this match score in final table
 
@@ -39,6 +39,7 @@ pii_param = list(primary_key='id',
 # input_table_param <- Sys.getenv("COLUMN_MAPPING")
 
 # Destination table and schema
+# If the job is recurring the workflow updates this table with new matches
 output_table_param = list(schema = 'bernie_nmarchio2',
                           table = 'ak_civis_match_out')
 
@@ -92,7 +93,7 @@ drop_tables_sql <- paste0('\ndrop table if exists ',paste0(output_table_param$sc
 \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch'),';')
 drop_table_status <- civis::query_civis(x=sql(drop_tables_sql), database = 'Bernie 2020')
 
-# Set up initial table ----------------------------------------------------
+# Setup Initial Table ----------------------------------------------------
 
 # Check if final table exists and if so take records below rematch threshold from previous run
 cass_row_count <- civis::read_civis(x=sql(paste0('select count(*) from ',input_table_param$schema,'.',input_table_param$table)), database = 'Bernie 2020') 
@@ -112,7 +113,7 @@ input_table_status <- civis::query_civis(x=sql(input_table_sql), database = 'Ber
 
 # Person Match  -----------------------------------------------------------
 
-# Submit the Initial Person Match Job
+# Submit the person match job
 match_job_civis <- civis::enhancements_post_civis_data_match(name = paste0('Civis Match Job 1: ',input_table_param$schema,'.',input_table_param$table),
                                                              input_field_mapping = compact(pii_param),
                                                              match_target_id = civis::match_targets_list()[[1]]$id, # Civis Voterfile = 1, DNC = 2
@@ -127,7 +128,7 @@ match_job_civis <- civis::enhancements_post_civis_data_match(name = paste0('Civi
                                                              threshold = 0)
 match_job_run_civis <- civis::enhancements_post_civis_data_match_runs(id = match_job_civis$id)
 
-# Block until the Match jobs finish
+# Block until the match job finishes
 m <- await(f=enhancements_get_civis_data_match_runs, 
            id=match_job_run_civis$civisDataMatchId,
            run_id=match_job_run_civis$id)
@@ -140,7 +141,7 @@ deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_pa
                                      cutoff_param = rematch_threshold)
 deduped_status 
 
-# Create separate table of weak matches to run through CASS and rematch
+# Create table of below threshold matches to run through CASS and rematch again
 rematch_table_sql <- paste0('create table ',output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch as 
                             (select input0.* from ',output_table_param$schema,'.',input_table_param$table,'_stage_0_input input0 
                             left join ',output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch input2 using(',pii_param$primary_key,') 
@@ -187,7 +188,7 @@ for (i in unique(chunk_df$parallel_chunks)) {
         }
 }
 
-# Union CASS jobs together and then drop staging tables
+# Union chunked CASS jobs together and then drop staging tables
 cass_union_sql <- c()
 cass_drop_sql <- c()
 for (chunk_i in chunk_successes) {
@@ -197,7 +198,7 @@ for (chunk_i in chunk_successes) {
         cass_drop_sql <- c(cass_drop_sql, d)
 }
 
-cass_union_sql <- paste0('create table ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_4_cass'),' as (select * from ',paste(sql_cass_union, collapse = ' union all '),');')
+cass_union_sql <- paste0('create table ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_4_cass'),' as (select * from ',paste(cass_union_sql, collapse = ' union all '),');')
 cat(cass_union_sql ,file="sql.sql")
 cass_union_status <- civis::query_civis(x=sql(cass_union_sql), database = 'Bernie 2020') 
 cass_union_status
@@ -271,7 +272,7 @@ cat(match_input_sql,file="sql.sql")
 match_input_status <- civis::query_civis(x=sql(match_input_sql), database = 'Bernie 2020') 
 match_input_status
 
-# Civis Person Match --------------------------------------------------------
+# Person Match --------------------------------------------------------
 
 # Submit the Person Match Job
 match_job_civis <- civis::enhancements_post_civis_data_match(name = paste0('Civis Match Job 2: ',input_table_param$schema,'.',input_table_param$table),
@@ -294,7 +295,7 @@ m <- await(f=enhancements_get_civis_data_match_runs,
            run_id=match_job_run_civis$id)
 get_status(m)
 
-# Find Best Record --------------------------------------------------------
+# Find Best Records --------------------------------------------------------
 
 # Best matches from second run
 deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),
@@ -312,7 +313,7 @@ if (check_if_final_table_exists$count == 1) {
         existing_universe <- ''
 }
 
-# Matched Table (all records)
+# Matched table (all records)
 complete_table_sql <- paste0('drop table if exists ',output_table_param$schema,'.',output_table_param$table,'_all_matches; 
                               create table ',output_table_param$schema,'.',output_table_param$table,'_all_matches distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as 
                               (select ',column_list,' from
@@ -325,7 +326,7 @@ complete_table_sql <- paste0('drop table if exists ',output_table_param$schema,'
 complete_table_status <- civis::query_civis(x=sql(complete_table_sql), database = 'Bernie 2020') 
 complete_table_status
 
-# Matched Table (only records above cutoff_threshold)
+# Matched table (only records above cutoff_threshold)
 final_table_sql <- paste0('drop table if exists ',output_table_param$schema,'.',output_table_param$table,'; 
                           create table ',output_table_param$schema,'.',output_table_param$table,' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as 
                           (select * from ',output_table_param$schema,'.',output_table_param$table,'_all_matches where score >= ',cutoff_threshold,';')
