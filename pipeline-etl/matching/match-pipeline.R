@@ -241,19 +241,21 @@ for (i in names(compact(pii_param))) {
 if ((is.null(pii_param$first_name) && is.null(pii_param$last_name) && is.null(pii_param$email)) == FALSE) {
         clean_name_sql <- paste0(" left join (select ",pii_param$primary_key,", first_name_guess, last_name_guess 
                                          from (select ",pii_param$primary_key,"
-                                         ,nullif(initcap(SPLIT_PART(regexp_replace(first_name,' and | & ',';'), ';', 1)),'') as first_name_partner_1
-                                         ,nullif(initcap(SPLIT_PART(regexp_replace(first_name,' and | & ',';'), ';', 2)),'') as first_name_partner_2
-                                         ,nullif(regexp_replace(lower(LEFT(email, CHARINDEX('@',email)-1)), '[^a-zA-Z\\.]',''),'') as email_preparse
-                                         ,nullif(initcap(REGEXP_SUBSTR( email_preparse, '^([^.]+)')),'') as first_from_email
-                                         ,nullif(initcap(REGEXP_SUBSTR( email_preparse, '[^.]*$')),'') as last_from_email
-                                         ,nullif(initcap(left(first_name, CHARINDEX(' ', first_name))),'') as first_from_first
-                                         ,nullif(initcap(substring(first_name, CHARINDEX(' ', first_name)+1, len(first_name)-(CHARINDEX(' ', first_name)-1))),'') as last_from_first
-                                         ,case when last_from_first = first_name then NULL else last_from_first end as last_from_first_2
-                                         ,case when (first_name is null or first_name_partner_2 is not null) and first_name_partner_1 <> '' then first_name_partner_1
-                                               when (last_name is null and last_from_first_2 is not null) and first_from_first <> '' then first_from_first
-                                               when (first_name is null and last_from_email is not null) and first_from_email <> '' then first_from_email
-                                               else initcap(first_name) end as first_name_guess
-                                         ,case when last_name is null then nullif(coalesce(last_from_first_2, last_from_email),'') else initcap(last_name) end as last_name_guess
+                                        ,nullif(initcap(SPLIT_PART(regexp_replace(lower(first_name),' and | & ',';'), ';', 1)),'') as first_name_partner_1
+                                        ,nullif(initcap(SPLIT_PART(regexp_replace(lower(first_name),' and | & ',';'), ';', 2)),'') as first_name_partner_2
+                                        ,nullif(regexp_replace(lower(LEFT(email, CHARINDEX('@',email)-1)), '[^a-zA-Z\\.\\_]',''),'') as email_preparse
+                                        ,nullif(initcap(REGEXP_SUBSTR( email_preparse, '^([^._]+)')),'') as first_from_email
+                                        ,nullif(initcap(REGEXP_SUBSTR( email_preparse, '[^._]*$')),'') as last_from_email
+                                        ,nullif(initcap(left(first_name, CHARINDEX(' ', first_name))),'') as first_from_first
+                                        ,nullif(initcap(substring(first_name, CHARINDEX(' ', first_name)+1, len(first_name)-(CHARINDEX(' ', first_name)-1))),'') as last_from_first
+                                        ,case when last_from_first = first_name then NULL else last_from_first end as last_from_first_2
+                                        ,case when (first_name is not null and first_name_partner_2 is not null) and first_name_partner_1 <> '' then first_name_partner_1
+                                              when (first_name is not null and last_name is null and last_from_first_2 is not null) and first_from_first <> '' then first_from_first
+                                              when (first_name is null and last_from_email is not null) and (first_from_email <> last_from_email ) and first_from_email <> '' then first_from_email
+                                              else initcap(first_name) end as first_name_guess
+                                        ,case 
+                                              when last_name is null then nullif(coalesce(last_from_first_2, last_from_email),'') 
+                                              else initcap(last_name) end as last_name_guess
                                          from ",output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch)) name using(',pii_param$primary_key,')')
 } else {
         clean_name_sql <- paste0(" left join (select ",pii_param$primary_key,", NULL as first_name_guess, NULL as last_name_guess 
