@@ -133,6 +133,13 @@ m <- await(f=enhancements_get_civis_data_match_runs,
            run_id=match_job_run_civis$id)
 get_status(m)
 
+# Best matches from first run
+deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
+                                     match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),
+                                     output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),
+                                     cutoff_param = rematch_threshold)
+deduped_status 
+
 # Create separate table of weak matches to run through CASS and rematch
 rematch_table_sql <- paste0('create table ',output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch as 
                             (select input0.* from ',output_table_param$schema,'.',input_table_param$table,'_stage_0_input input0 
@@ -288,13 +295,6 @@ m <- await(f=enhancements_get_civis_data_match_runs,
 get_status(m)
 
 # Find Best Record --------------------------------------------------------
-
-# Best matches from first run
-deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
-                                     match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),
-                                     output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),
-                                     cutoff_param = rematch_threshold)
-deduped_status 
 
 # Best matches from second run
 deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),
