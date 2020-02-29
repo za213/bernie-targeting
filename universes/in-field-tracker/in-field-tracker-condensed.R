@@ -88,11 +88,11 @@ CREATE TABLE gotv_universes.in_field_validation_condensed distkey(person_id) sor
 (SELECT distinct *
 from (
     select lists.person_id
-         ,case when lists.contacttype = 'spoke'
+         ,case when ccj.contacttype = 'spoke'
                         and apcd.cell_rank_for_person = 1 then 1
-             when lists.contacttype = 'getthru_dialer'
+             when ccj.contacttype = 'getthru_dialer'
                       and (apcd.phone_rank_for_person = 1 or apcd.cell_rank_for_person = 1) then 1
-             when lists.contacttype = 'canvasses'
+             when ccj.contacttype = 'canvasses'
                       and (p.voting_address_id is not null
                                and p.myv_van_id is not null
                                and p.voting_street_address not ilike '%po box%'
@@ -125,16 +125,8 @@ from (
             select *
             from (",queries_unioned,")
             ) l
-        cross join (
-            select 'canvasses' contacttype
-            union
-            select 'getthru_dialer'
-            union
-            select 'spoke'
-            ) ct
         ) lists
         left join  (",ccj_ids,") ccj on lists.person_id = ccj.person_id
-                                   and lists.contacttype = ccj.contacttype
         left join bernie_data_commons.base_universe base on lists.person_id = base.person_id
         left join (
             select person_id, phone_rank_for_person, cell_rank_for_person
@@ -142,7 +134,8 @@ from (
             where (phone_rank_for_person = 1 or cell_rank_for_person = 1)
             ) apcd on lists.person_id = apcd.person_id
         left join phoenix_analytics.person p on lists.person_id = p.person_id
-    ) x);")
+    ) x 
+where contactdate >= pass_date);")
 
 cat(final_query,file="sql.sql")
 
@@ -183,26 +176,26 @@ CREATE TABLE gotv_universes.in_field_validation_condensed_totals_state as
 from (
       select state_code, 
              count(distinct person_id) total_voters,
-             count(distinct case when contactdate >= pass_date then person_id end) ccj_1_pass,
-             count(distinct case when contactdate >= pass_date then person_id end) as ccj_all_pass,
+             count(distinct case when ccj_id_1 = 1 then person_id end) ccj_1_pass,
+             count(distinct case when ccj_id_1_2_3_4_5 = 1 then person_id end) as ccj_all_pass,
              count(distinct case when attempted = 1 then person_id end) number_of_voters_attempted,
              count(distinct case when canvassed = 1 then person_id end) number_of_voters_canvassed,
 
              count(distinct case when valid_person = 1 and contacttype = 'canvasses' then person_id end) total_doors,
-             count(distinct case when contacttype = 'canvasses' and contactdate >= pass_date then person_id end) doors_ccj_1,
-             count(distinct case when contacttype = 'canvasses' and contactdate >= pass_date then person_id end) as doors_ccj_all,
+             sum(case when contacttype = 'canvasses' then ccj_id_1 else 0 end) doors_ccj_1,
+             sum(case when contacttype = 'canvasses' then ccj_id_1_2_3_4_5 else 0 end) as doors_ccj_all,
              count(distinct case when attempted = 1 and contacttype = 'canvasses' then person_id end) doors_attempted,
              count(distinct case when canvassed = 1 and contacttype = 'canvasses' then person_id end) doors_canvassed,
 
              count(distinct case when valid_person = 1 and contacttype = 'getthru_dialer' then person_id end) total_phones,
-             count(distinct case when contacttype = 'getthru_dialer' and contactdate >= pass_date then person_id end) dialer_ccj_1,
-             count(distinct case when contacttype = 'getthru_dialer' and contactdate >= pass_date then person_id end) as dialer_ccj_all,
+             sum(case when contacttype = 'getthru_dialer' then ccj_id_1 else 0 end) dialer_ccj_1,
+             sum(case when contacttype = 'getthru_dialer' then ccj_id_1_2_3_4_5 else 0 end) as dialer_ccj_all,
              count(distinct case when attempted = 1 and contacttype = 'getthru_dialer' then person_id end) dialer_attempted,
              count(distinct case when canvassed = 1 and contacttype = 'getthru_dialer' then person_id end) dialer_canvassed,
 
              count(distinct case when valid_person = 1 and contacttype = 'spoke' then person_id end) total_cells,
-             count(distinct case when contacttype = 'spoke' and contactdate >= pass_date then person_id end) cells_ccj_1,
-             count(distinct case when contacttype = 'spoke' and contactdate >= pass_date then person_id end) as cells_ccj_all,
+             sum(case when contacttype = 'spoke' then ccj_id_1 else 0 end) cells_ccj_1,
+             sum(case when contacttype = 'spoke' then ccj_id_1_2_3_4_5 else 0 end) as cells_ccj_all,
              count(distinct case when attempted = 1 and contacttype = 'spoke' then person_id end) cells_attempted,
              count(distinct case when canvassed = 1 and contacttype = 'spoke' then person_id end) cells_canvassed
 
