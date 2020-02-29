@@ -146,7 +146,7 @@ rematch_table_status
 # Submit CASS jobs in parallel
 chunk_jobs <- c()
 for (chunk_i in parallel_chunks) {
-        clean_job <- civis::enhancements_post_cass_ncoa(name = paste0('CASS Job Chunk ',chunk_i,': ',output_table_param$schema,'.',input_table_param$table), 
+        clean_job <- civis::enhancements_post_cass_ncoa(name = paste0('CASS Job Chunk ',chunk_i,': ',input_table_param$schema,'.',input_table_param$table), 
                                                         source = list(databaseTable = list(schema = output_table_param$schema,
                                                                                            table = paste0(input_table_param$table,'_stage_3_rematch'),
                                                                                            remoteHostId = get_database_id('Bernie 2020'),
