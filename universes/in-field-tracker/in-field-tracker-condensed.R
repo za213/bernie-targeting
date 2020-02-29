@@ -101,7 +101,7 @@ from (
          ,lists.list_source
          ,TO_DATE(lists.pass_date, 'YYYY-MM-DD') as pass_date
          ,ccj.contactdate
-         ,lists.contacttype
+         ,ccj.contacttype
          ,contactcontact_id
          ,coalesce(ccj.ccj_contact_made,0) as ccj_contact_made
          ,case when most_recent_attempt >= pass_date then 1 else 0 end attempted
