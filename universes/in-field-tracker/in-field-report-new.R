@@ -74,9 +74,10 @@ FROM (
         select *,
                row_number() over (partition by person_id, case when support_int is not null then 1 else 0 end order by contacttimestamp desc) mrc
         from bernie_data_commons.ccj_dnc
+        where contacttype in ('pdi_mobile', 'bern_app_crowd_canvass','minivan_doors', 'minivan_paid_doors','myc-Paid Walk', 'myc_minivan_doors', 'myv-Paid Walk', 'getthru_dialer', 'spoke')
         ) mr
     WHERE person_id IS NOT NULL
-      and contacttype in ('pdi_mobile', 'bern_app_crowd_canvass','minivan_doors', 'minivan_paid_doors','myc-Paid Walk', 'myc_minivan_doors', 'myv-Paid Walk', 'getthru_dialer', 'spoke')
+
     ) x
 where person_id is not null)"
 
