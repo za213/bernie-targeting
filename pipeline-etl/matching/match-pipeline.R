@@ -51,7 +51,7 @@ output_table_param = list(schema = 'bernie_nmarchio2',
 dedupe_match_table <- function(input_schema_table = NULL,
                                match_schema_table = NULL,
                                output_schema_table = NULL,
-                               prefer_state_matches = TRUE,
+                               prefer_state_match = TRUE,
                                cutoff_param = 0){
         sql_pii <- c()
         state_must_match = ''
@@ -140,7 +140,7 @@ get_status(m)
 deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
                                      match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),
                                      output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch'),
-                                     prefer_state_matches = FALSE,
+                                     prefer_state_match = FALSE,
                                      cutoff_param = 0)
 deduped_status 
 
@@ -307,7 +307,7 @@ get_status(m)
 deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),
                                      match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_6_match2'),
                                      output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_fullmatch'),
-                                     prefer_state_matches = TRUE,
+                                     prefer_state_match = TRUE,
                                      cutoff_param = 0)
 deduped_status 
 
