@@ -58,7 +58,7 @@ dedupe_match_table <- function(input_schema_table = NULL,
         state_sort = ''
         for (i in names(compact(pii_param))) {
                 v = paste0('\n,',compact(pii_param)[[i]],'')
-                if (i == "state_code" & prefer_state_matches = TRUE) {
+                if (i == "state_code" & prefer_state_match = TRUE) {
                         state_must_match = paste0("\n, case when input.",compact(pii_param)[[i]]," is not null and (input.",compact(pii_param)[[i]]," = pxpa.state_code or input.",compact(pii_param)[[i]]," = mxts.state_code) then 1 else 0 end as state_match ")
                         state_sort = 'state_match desc, '
                 }
