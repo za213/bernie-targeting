@@ -99,7 +99,7 @@ drop_table_status <- civis::query_civis(x=sql(drop_tables_sql), database = 'Bern
 
 # Check if final table exists and if so take records below rematch threshold from previous run
 cass_row_count <- civis::read_civis(x=sql(paste0('select count(*) from ',input_table_param$schema,'.',input_table_param$table)), database = 'Bernie 2020') 
-parallel_chunks <- ceiling((cass_row_count$count/250000)/4)
+parallel_chunks <- ceiling((cass_row_count$count/250000)/2)
 check_if_final_table_exists <- civis::read_civis(x=sql(paste0("select count(*) from information_schema.tables where table_schema = '",output_table_param$schema,"' and table_name = '",output_table_param$table,"';")), database = 'Bernie 2020')
 if (check_if_final_table_exists$count == 1) {
         match_universe <- paste0("(select *, ntile(",parallel_chunks,") over (order by random()) as chunk from ",paste0(output_table_param$schema,'.',input_table_param$table)," 
