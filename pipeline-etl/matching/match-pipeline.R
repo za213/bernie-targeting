@@ -11,7 +11,7 @@ cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this 
 # Source table and schema
 # Can be an partial or complete source table (records already in destination table and above match threshold will be excluded from matching)
 input_table_param = list(schema = 'bernie_nmarchio2',
-                         table = 'ak_for_matching_test')
+                         table = 'ak_for_matching')
 
 # input_table_param <- Sys.getenv("INPUT_SCHEMA_TABLE_LIST")
 
