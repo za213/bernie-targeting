@@ -5,7 +5,7 @@ library(tidyverse)
 
 # Parameters --------------------------------------------------------------
 matches_per_id = 3 # integer, number of matches allowed per source ID (will be deduplicated in output table)
-rematch_threshold = .6 # decimal, rematch all records less than this match score on each update (automatically includes new records without scores)
+rematch_threshold = .5 # decimal, rematch all records less than this match score on each update (automatically includes new records without scores)
 cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this match score in final table
 
 # Source table and schema
