@@ -157,7 +157,10 @@ rematch_table_status
 
 # Submit CASS jobs in parallel
 chunk_jobs <- c()
-for (chunk_i in parallel_chunks) {
+chunk_runs <- c()
+for (chunk_i in 1:parallel_chunks) {
+        Sys.sleep(2)
+        print(chunk_i)
         clean_job <- civis::enhancements_post_cass_ncoa(name = paste0('CASS Job Chunk ',chunk_i,': ',input_table_param$schema,'.',input_table_param$table), 
                                                         source = list(databaseTable = list(schema = output_table_param$schema,
                                                                                            table = paste0(input_table_param$table,'_stage_3_rematch'),
@@ -176,19 +179,19 @@ for (chunk_i in parallel_chunks) {
                                                         output_level = "cass",
                                                         limiting_sql = paste0(pii_param$primary_key,' is not null and chunk = ',chunk_i))
         clean_job_run <- enhancements_post_cass_ncoa_runs(clean_job$id)
-        chunk_jobs <- c(chunk_jobs,clean_job_run$id)
+        chunk_jobs <- c(chunk_jobs,clean_job_run$cassNcoaId)
+        chunk_runs <- c(chunk_runs,clean_job_run$id)
+
+        
 }
 
+rs <- await_all(f=enhancements_get_cass_ncoa_runs, .x = chunk_jobs, .y = chunk_runs)
+
 # Capture successful CASS jobs
-chunk_df <- data.frame(parallel_chunks,chunk_jobs)
 chunk_successes <- c()
-for (i in unique(chunk_df$parallel_chunks)) {
-        r <- await(f=enhancements_get_cass_ncoa_runs, 
-                   id=clean_job_run$cassNcoaId, 
-                   run_id=chunk_df$chunk_jobs[i])
-        if (get_status(r) == "succeeded") {
-                chunk_success <- parallel_chunks[i]
-                chunk_successes <- c(chunk_successes, chunk_success)
+for (i in 1:parallel_chunks) {
+        if (rs[[i]]['state'] == "succeeded") {
+                chunk_successes <- c(chunk_successes, i)
         }
 }
 
