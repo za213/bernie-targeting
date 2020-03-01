@@ -5,7 +5,7 @@ library(tidyverse)
 
 # Parameters --------------------------------------------------------------
 matches_per_id = 3 # integer, number of matches allowed per source ID (will be deduplicated in output table)
-rematch_threshold = .5 # decimal, rematch all records less than this match score on each update (automatically includes new records without scores)
+rematch_threshold = .6 # decimal, rematch all records less than this match score on each update (automatically includes new records without scores)
 cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this match score in final table
 
 # Source table and schema
@@ -42,7 +42,7 @@ pii_param = list(primary_key='id',
 # Destination table and schema
 # If this table already exists it will be unioned and deduplicated into the updated output table
 output_table_param = list(schema = 'bernie_nmarchio2',
-                          table = 'ak_civis_match_out')
+                          table = 'ak_civis_match')
 
 # output_table_param <- Sys.getenv("OUTPUT_SCHEMA_TABLE_LIST")
 
@@ -181,8 +181,6 @@ for (chunk_i in 1:parallel_chunks) {
         clean_job_run <- enhancements_post_cass_ncoa_runs(clean_job$id)
         chunk_jobs <- c(chunk_jobs,clean_job_run$cassNcoaId)
         chunk_runs <- c(chunk_runs,clean_job_run$id)
-
-        
 }
 
 rs <- await_all(f=enhancements_get_cass_ncoa_runs, .x = chunk_jobs, .y = chunk_runs)
