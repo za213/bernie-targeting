@@ -253,7 +253,9 @@ sortkey(person_id) as
             ELSE 0
         END AS any_activist_donor_flag,
 
-        case when voting_address_count <= 10 then 1 else 0 end as household_under_10,
+        case 
+ 	    when voting_address_count <= 10 then 1 else 0 
+        end as household_under_10
 
  from 
 (SELECT person_id::varchar,
