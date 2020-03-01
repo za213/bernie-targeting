@@ -51,14 +51,15 @@ output_table_param = list(schema = 'bernie_nmarchio2',
 dedupe_match_table <- function(input_schema_table = NULL,
                                match_schema_table = NULL,
                                output_schema_table = NULL,
-                               cutoff_param = .5){
+                               prefer_state_matches = TRUE,
+                               cutoff_param = 0){
         sql_pii <- c()
         state_must_match = ''
         state_sort = ''
         for (i in names(compact(pii_param))) {
                 v = paste0('\n,',compact(pii_param)[[i]],'')
-                if (i == "state_code") {
-                        state_must_match = paste0("\n, case when input.",compact(pii_param)[[i]]," = pxpa.state_code or input.",compact(pii_param)[[i]]," = mxts.state_code then 1 else 0 end as state_match ")
+                if (i == "state_code" & prefer_state_matches = TRUE) {
+                        state_must_match = paste0("\n, case when input.",compact(pii_param)[[i]]," is not null and (input.",compact(pii_param)[[i]]," = pxpa.state_code or input.",compact(pii_param)[[i]]," = mxts.state_code) then 1 else 0 end as state_match ")
                         state_sort = 'state_match desc, '
                 }
                 sql_pii<- c(sql_pii,v)
@@ -71,10 +72,10 @@ dedupe_match_table <- function(input_schema_table = NULL,
         from (select * from ",match_schema_table," where score >= ",cutoff_param,") match
         left join ",input_schema_table," input on match.source_id = input.",pii_param$primary_key,"
         left join (select person_id , voterbase_id , state_code from phoenix_analytics.person) pxpa on match.matched_id = pxpa.voterbase_id
-        left join (select person_id, voterbase_id, state_code from bernie_data_commons.master_xwalk_ts) mxts on match.matched_id = mxts.voterbase_id ) ) where best_record_rank = 1 and person_id is not null)")
+        left join (select person_id, voterbase_id, state_code from bernie_data_commons.master_xwalk_ts) mxts on match.matched_id = mxts.voterbase_id ) ) where best_record_rank = 1 and (person_id is not null or voterbase_id is not null))")
         
-        match_output_sql <- paste0('DROP TABLE IF EXISTS ',output_schema_table,"; set query_group to 'importers'; set wlm_query_slot_count to 2;
-                                   CREATE TABLE ",output_schema_table,' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') AS ',sql_query_xwalk,';') 
+        match_output_sql <- paste0('DROP TABLE IF EXISTS ',output_schema_table,"; 
+                              CREATE TABLE ",output_schema_table,' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') AS ',sql_query_xwalk,';') 
         cat(match_output_sql,file="sql.sql")
         
         match_output_status <- civis::query_civis(x=sql(match_output_sql), database = 'Bernie 2020') 
@@ -86,12 +87,12 @@ dedupe_match_table <- function(input_schema_table = NULL,
 
 drop_tables_sql <- paste0('\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),';
 \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),';
-\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),';
+\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch'),';
 \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch'),';
 \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_4_cass'),';
 \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),';
 \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_6_match2'),';
-\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch'),';')
+\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_fullmatch'),';')
 drop_table_status <- civis::query_civis(x=sql(drop_tables_sql), database = 'Bernie 2020')
 
 # Setup Initial Table ----------------------------------------------------
@@ -138,14 +139,16 @@ get_status(m)
 # Best matches from first run
 deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
                                      match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),
-                                     output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),
-                                     cutoff_param = rematch_threshold)
+                                     output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch'),
+                                     prefer_state_matches = FALSE,
+                                     cutoff_param = 0)
 deduped_status 
 
 # Create table of below threshold matches to run through CASS and rematch again
 rematch_table_sql <- paste0('create table ',output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch as 
                             (select input0.* from ',output_table_param$schema,'.',input_table_param$table,'_stage_0_input input0 
-                            left join ',output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch input2 using(',pii_param$primary_key,') 
+                            left join 
+                            (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch where score >= ',rematch_threshold,') input2 using(',pii_param$primary_key,') 
                             where input2.',pii_param$primary_key,' is null);')
 rematch_table_status <- civis::query_civis(x=sql(paste0(rematch_table_sql)), database = 'Bernie 2020') 
 rematch_table_status
@@ -303,7 +306,8 @@ get_status(m)
 # Best matches from second run
 deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),
                                      match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_6_match2'),
-                                     output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch'),
+                                     output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_fullmatch'),
+                                     prefer_state_matches = TRUE,
                                      cutoff_param = 0)
 deduped_status 
 
@@ -322,9 +326,9 @@ complete_table_sql <- paste0('drop table if exists ',output_table_param$schema,'
                               (select ',column_list,' from
                               (select *, row_number() over(partition by ',pii_param$primary_key,' order by score desc) as best_record_rank from 
                               (select * from
-                              (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch) 
+                              (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch) 
                               union all 
-                              (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch)',existing_universe,')) where best_record_rank = 1);')
+                              (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_7_fullmatch)',existing_universe,')) where best_record_rank = 1);')
 
 complete_table_status <- civis::query_civis(x=sql(complete_table_sql), database = 'Bernie 2020') 
 complete_table_status
@@ -340,12 +344,12 @@ final_table_status
 #Drop staging tables
 # drop_tables_sql <- paste0('\ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),';
-# \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_bestmatch'),';
+# \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_4_cass'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),';
 # \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_6_match2'),';
-# \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_bestmatch'),';')
+# \ndrop table if exists ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_fullmatch'),';')
 # drop_table_status <- civis::query_civis(x=sql(drop_tables_sql), database = 'Bernie 2020')
 
 #sink(file("match_console.log"), append=TRUE, type="message")
