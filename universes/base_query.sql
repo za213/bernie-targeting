@@ -809,10 +809,14 @@ begin;
 set query_group to 'importers';
 set wlm_query_slot_count to 3;
 
+/*
 DROP TABLE IF EXISTS bernie_data_commons.base_universe;
-CREATE TABLE bernie_data_commons.base_universe
+--CREATE TABLE bernie_data_commons.base_universe
 distkey(person_id) 
 sortkey(person_id) AS
+*/   
+truncate bernie_data_commons.base_universe;
+insert into bernie_data_commons.base_universe
   (SELECT p.person_id::varchar,
   	  p.voting_address_id,
   	  xwalk.jsonid_encoded,
