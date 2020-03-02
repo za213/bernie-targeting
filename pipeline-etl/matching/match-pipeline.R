@@ -333,22 +333,24 @@ if (enable_cass == TRUE) {
         
 }
 
-
+# Custom list of input columns
 column_list <- paste0(' person_id , voterbase_id , score , matched_date , ',paste(as.vector(unlist(compact(pii_param))),collapse = ' , '))
 
+# Union in existing matched output
 if (check_if_final_table_exists$count == 1) {
         existing_universe <- paste0(" union all (select ",column_list," from ",output_table_param$schema,'.',output_table_param$table,")")
 } else {
         existing_universe <- ''
 }
 
+# Union in rematched CASS results 
 if (enable_cass == 1) {
         cass_rematch <- paste0(' union all (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_7_fullmatch)')
 } else {
         cass_rematch <- ''
 }
 
-# Matched table (all records)
+# Union together everything and select best matches
 complete_table_sql <- paste0('drop table if exists ',output_table_param$schema,'.',output_table_param$table,'_all_matches; 
                               create table ',output_table_param$schema,'.',output_table_param$table,'_all_matches distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as 
                               (select ',column_list,' from
@@ -361,7 +363,7 @@ complete_table_sql <- paste0('drop table if exists ',output_table_param$schema,'
 complete_table_status <- civis::query_civis(x=sql(complete_table_sql), database = 'Bernie 2020') 
 complete_table_status
 
-# Matched table (only records above cutoff_threshold)
+# Output matched table with only records above cutoff_threshold
 final_table_sql <- paste0('drop table if exists ',output_table_param$schema,'.',output_table_param$table,'; 
                           create table ',output_table_param$schema,'.',output_table_param$table,' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') as 
                           (select * from ',output_table_param$schema,'.',output_table_param$table,'_all_matches where score >= ',cutoff_threshold,');')
