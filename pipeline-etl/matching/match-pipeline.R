@@ -14,7 +14,7 @@ library(tidyverse)
 
 # Parameters --------------------------------------------------------------
 matches_per_id = 3 # integer, number of matches allowed per source ID (will be deduplicated in output table)
-enable_cass = TRUE # boolean, run CASS address standardization
+enable_cass = FALSE # boolean, run CASS address standardization
 rematch_threshold = .6 # decimal, rematch all records less than this match score on each update (automatically includes new records without scores in input table)
 cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this match score in final table
 
@@ -151,7 +151,7 @@ if (enable_cass == TRUE) {
         deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
                                              match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),
                                              output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch'),
-                                             prefer_state_match = FALSE,
+                                             prefer_state_match = TRUE,
                                              cutoff_param = 0)
         deduped_status 
         
