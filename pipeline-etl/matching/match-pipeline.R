@@ -125,47 +125,48 @@ input_table_status <- civis::query_civis(x=sql(input_table_sql), database = 'Ber
 
 # Person Match  -----------------------------------------------------------
 
-if (enable_cass == TRUE) { 
-        # Submit the person match job
-        match_job_civis <- civis::enhancements_post_civis_data_match(name = paste0('Civis Match Job 1: ',input_table_param$schema,'.',input_table_param$table),
-                                                                     input_field_mapping = compact(pii_param),
-                                                                     match_target_id = civis::match_targets_list()[[1]]$id, # Civis Voterfile = 1, DNC = 2
-                                                                     parent_id = NULL,
-                                                                     input_table = list(databaseName = 'Bernie 2020',
-                                                                                        schema = output_table_param$schema,
-                                                                                        table = paste0(input_table_param$table,'_stage_0_input')),
-                                                                     output_table = list(databaseName = 'Bernie 2020',
-                                                                                         schema = output_table_param$schema,
-                                                                                         table = paste0(input_table_param$table,'_stage_1_match1')),
-                                                                     max_matches = matches_per_id,
-                                                                     threshold = 0)
-        match_job_run_civis <- civis::enhancements_post_civis_data_match_runs(id = match_job_civis$id)
-        
-        # Block until the match job finishes
-        m <- await(f=enhancements_get_civis_data_match_runs, 
-                   id=match_job_run_civis$civisDataMatchId,
-                   run_id=match_job_run_civis$id)
-        get_status(m)
-        
-        # Best matches from first run
-        deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
-                                             match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),
-                                             output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch'),
-                                             prefer_state_match = TRUE,
-                                             cutoff_param = 0)
-        deduped_status 
-        
-        # Create table of below threshold matches to run through CASS and rematch again
-        rematch_table_sql <- paste0('create table ',output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch as 
+# Submit the person match job
+match_job_civis <- civis::enhancements_post_civis_data_match(name = paste0('Civis Match Job 1: ',input_table_param$schema,'.',input_table_param$table),
+                                                             input_field_mapping = compact(pii_param),
+                                                             match_target_id = civis::match_targets_list()[[1]]$id, # Civis Voterfile = 1, DNC = 2
+                                                             parent_id = NULL,
+                                                             input_table = list(databaseName = 'Bernie 2020',
+                                                                                schema = output_table_param$schema,
+                                                                                table = paste0(input_table_param$table,'_stage_0_input')),
+                                                             output_table = list(databaseName = 'Bernie 2020',
+                                                                                 schema = output_table_param$schema,
+                                                                                 table = paste0(input_table_param$table,'_stage_1_match1')),
+                                                             max_matches = matches_per_id,
+                                                             threshold = 0)
+match_job_run_civis <- civis::enhancements_post_civis_data_match_runs(id = match_job_civis$id)
+
+# Block until the match job finishes
+m <- await(f=enhancements_get_civis_data_match_runs, 
+           id=match_job_run_civis$civisDataMatchId,
+           run_id=match_job_run_civis$id)
+get_status(m)
+
+# Best matches from first run
+deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
+                                     match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),
+                                     output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch'),
+                                     prefer_state_match = TRUE,
+                                     cutoff_param = 0)
+deduped_status 
+
+# Create table of below threshold matches to run through CASS and rematch again
+rematch_table_sql <- paste0('create table ',output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch as 
                             (select input0.* from ',output_table_param$schema,'.',input_table_param$table,'_stage_0_input input0 
                             left join 
                             (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch where score >= ',rematch_threshold,') input2 using(',pii_param$primary_key,') 
                             where input2.',pii_param$primary_key,' is null);')
-        rematch_table_status <- civis::query_civis(x=sql(paste0(rematch_table_sql)), database = 'Bernie 2020') 
-        rematch_table_status
-        
-        # CASS Address Standardization --------------------------------------------
-        
+rematch_table_status <- civis::query_civis(x=sql(paste0(rematch_table_sql)), database = 'Bernie 2020') 
+rematch_table_status
+   
+# CASS Address Standardization --------------------------------------------
+
+if (enable_cass == TRUE) {  
+  
         # Submit CASS jobs in parallel
         chunk_jobs <- c()
         chunk_runs <- c()
