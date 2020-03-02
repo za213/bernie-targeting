@@ -153,19 +153,19 @@ deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_pa
                                      prefer_state_match = TRUE,
                                      cutoff_param = 0)
 deduped_status 
-
-# Create table of below threshold matches to run through CASS and rematch again
-rematch_table_sql <- paste0('create table ',output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch as 
-                            (select input0.* from ',output_table_param$schema,'.',input_table_param$table,'_stage_0_input input0 
-                            left join 
-                            (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch where score >= ',rematch_threshold,') input2 using(',pii_param$primary_key,') 
-                            where input2.',pii_param$primary_key,' is null);')
-rematch_table_status <- civis::query_civis(x=sql(paste0(rematch_table_sql)), database = 'Bernie 2020') 
-rematch_table_status
    
 # CASS Address Standardization --------------------------------------------
 
 if (enable_cass == TRUE) {  
+  
+        # Create table of below threshold matches to run through CASS and rematch again
+        rematch_table_sql <- paste0('create table ',output_table_param$schema,'.',input_table_param$table,'_stage_3_rematch as 
+                            (select input0.* from ',output_table_param$schema,'.',input_table_param$table,'_stage_0_input input0 
+                            left join 
+                            (select * from ',output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch where score >= ',rematch_threshold,') input2 using(',pii_param$primary_key,') 
+                            where input2.',pii_param$primary_key,' is null);')
+        rematch_table_status <- civis::query_civis(x=sql(paste0(rematch_table_sql)), database = 'Bernie 2020') 
+        rematch_table_status
   
         # Submit CASS jobs in parallel
         chunk_jobs <- c()
