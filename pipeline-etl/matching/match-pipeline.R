@@ -202,28 +202,35 @@ if (enable_cass == TRUE) {
         for (i in 1:parallel_chunks) {
                 if (rs[[i]]['state'] == "succeeded") {
                         chunk_successes <- c(chunk_successes, i)
+                        print('CASS Job Success: ',i)
                 }
         }
         
-        # Union chunked CASS jobs together and then drop staging tables
+        # Pull down all CASS tables that exist
+        cass_tables_sql <- paste0("select tab.table_schema, tab.table_name, tinf.tbl_rows as table_rows from svv_tables tab join svv_table_info tinf on tab.table_schema = tinf.schema and tab.table_name = tinf.table where tab.table_schema = '", 
+                                  output_table_param$schema,"' and tab.table_name similar to '%_stage_4_cass_%' and tab.table_schema not in('pg_catalog','information_schema') order by tinf.tbl_rows desc;")
+        cass_tables_df <- read_civis(x = sql(find_cass_tables_sql), database = 'Bernie 2020')
+        cass_tables_to_union <- cass_tables_df %>% filter(table_rows > 1) 
+
+        # Union tables with more than 1 row (sometimes CASS jobs fail but successfully export a table)
         cass_union_sql <- c()
         cass_drop_sql <- c()
-        for (chunk_i in chunk_successes) {
-                u <- paste0("(select * from ",output_table_param$schema,'.',input_table_param$table,'_stage_4_cass_',chunk_i,')')
+        for (cass_tbl in unique(cass_tables_to_union$table_name)) {
+                u <- paste0("(select * from ",output_table_param$schema,'.',cass_tbl,')')
                 cass_union_sql <- c(cass_union_sql, u)
-                d <- paste0("\n drop table if exists ",output_table_param$schema,'.',input_table_param$table,'_stage_4_cass_',chunk_i,'; ')
-                cass_drop_sql <- c(cass_drop_sql, d)
         }
-        
         cass_union_sql <- paste0('create table ',paste0(output_table_param$schema,'.',input_table_param$table,'_stage_4_cass'),' as (select * from ',paste(cass_union_sql, collapse = ' union all '),');')
         cat(cass_union_sql ,file="sql.sql")
         cass_union_status <- civis::query_civis(x=sql(cass_union_sql), database = 'Bernie 2020') 
-        cass_union_status
         
+        # Drop all intermediary chunked CASS tables
+        for (cass_tbl in unique(cass_tables_df$table_name)) {
+                d <- paste0("\n drop table if exists ",output_table_param$schema,'.',cass_tbl,'; ')
+                cass_drop_sql <- c(cass_drop_sql, d)
+        }
         cass_drop_sql <- paste(cass_drop_sql, collapse = ' ')
         cat(cass_drop_sql, file="sql.sql")
         cass_drop_status <- civis::query_civis(x=sql(cass_drop_sql), database = 'Bernie 2020') 
-        cass_drop_status
         
         # Coalesce CASS table with input table's PII
         coalesce_columns_sql <- c()
