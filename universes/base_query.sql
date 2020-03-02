@@ -16,7 +16,7 @@ CREATE TABLE bernie_nmarchio2.base_validation
 distkey(person_id) 
 sortkey(person_id) as
 (SELECT * FROM      
-  (SELECT person_id, case when voting_address_count <= 10 then 1 else 0 end as household_under_10     
+  (SELECT person_id, case when voting_address_count <= 10 then 1 else 0 end as household_under_10 from   
      (SELECT person_id::varchar,
           voting_address_id,
           count(*) over (partition BY voting_address_id) as voting_address_count
