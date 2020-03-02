@@ -104,6 +104,7 @@ from (
                                and p.myv_van_id is not null
                                and p.voting_street_address not ilike '%po box%'
                           ) then 1 else 0 end as has_door
+         ,p.voting_address_id
          ,lists.list_source
          ,TO_DATE(lists.pass_date, 'YYYY-MM-DD') as pass_date
          ,ccj.contactdate
@@ -188,11 +189,11 @@ from (
              count(distinct case when attempted = 1 then person_id end) number_of_voters_attempted,
              count(distinct case when canvassed = 1 then person_id end) number_of_voters_canvassed,
 
-             count(distinct case when has_door = 1 then person_id end) total_doors,
+             count(distinct case when has_door = 1 then voting_address_id end) total_doors,
              sum(case when contacttype = 'canvasses' then ccj_id_1 else 0 end) doors_ccj_1,
              sum(case when contacttype = 'canvasses' then ccj_id_1_2_3_4_5 else 0 end) as doors_ccj_all,
-             count(distinct case when attempted = 1 and contacttype = 'canvasses' then person_id end) doors_attempted,
-             count(distinct case when canvassed = 1 and contacttype = 'canvasses' then person_id end) doors_canvassed,
+             count(distinct case when attempted = 1 and contacttype = 'canvasses' then voting_address_id end) doors_attempted,
+             count(distinct case when canvassed = 1 and contacttype = 'canvasses' then voting_address_id end) doors_canvassed,
 
              count(distinct case when has_phone = 1 then person_id end) total_phones,
              sum(case when contacttype = 'getthru_dialer' then ccj_id_1 else 0 end) dialer_ccj_1,
