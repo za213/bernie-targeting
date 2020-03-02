@@ -16,12 +16,15 @@ CREATE TABLE bernie_nmarchio2.base_validation
 distkey(person_id) 
 sortkey(person_id) as
 (SELECT * FROM      
-	(SELECT person_id::varchar
+  (SELECT person_id, case when voting_address_count <= 10 then 1 else 0 end as household_under_10     
+     (SELECT person_id::varchar,
+          voting_address_id,
+          count(*) over (partition BY voting_address_id) as voting_address_count
       FROM phoenix_analytics.person
       WHERE is_deceased = 'f'
         AND reg_record_merged = 'f'
         AND reg_on_current_file = 't'
-        AND reg_voter_flag = 't') p
+        AND reg_voter_flag = 't')) p
    LEFT JOIN
 -- FIELD IDS
     (select person_id::varchar
