@@ -14,7 +14,7 @@ output_schema = output_table_param[1]
 output_table = output_table_param[2]
 
 # Matching parameters
-#matches_per_id = Sys.getenv('MATCHES_PER_ID') # integer, number of matches allowed per source ID (will be deduplicated in output table)
+matches_per_id = Sys.getenv('MATCHES_PER_ID') # integer, number of matches allowed per source ID (will be deduplicated in output table)
 #enable_cass = Sys.getenv('ENABLE_CASS') # boolean, run CASS address standardization
 #rematch_threshold = Sys.getenv('REMATCH_THRESHOLD') # decimal, rematch all records less than this match score on each update (automatically includes new records without scores in input table)
 #cutoff_threshold =  Sys.getenv('CUTOFF_THRESHOLD') # decimal, keep all matches greater than or equal to this match score in final table
