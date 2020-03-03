@@ -42,4 +42,24 @@ select * from
 sum(case when support_int in (1,2,3,4,5) then 1 end) as id_all, 1.0*id_1/id_all as rate1
 from bernie_nmarchio2.message_aggregates where support_int in (1,2,3,4,5) group by 1) where id_all > 2000  order by rate1 desc
 
+select
+ 1.0 * sum(case when support_int = 1 and marijuana_message = 1 then 1 end) / sum(marijuana_message) as marijuana_message
+,1.0 * sum(case when support_int = 1 and climate_message = 1 then 1 end) / sum(climate_message) as climate_message
+,1.0 * sum(case when support_int = 1 and green_new_deal_message = 1 then 1 end) / sum(green_new_deal_message) as green_new_deal_message
+,1.0 * sum(case when support_int = 1 and big_pharma_message = 1 then 1 end) / sum(big_pharma_message) as big_pharma_message
+,1.0 * sum(case when support_int = 1 and health_care_message = 1 then 1 end) / sum(health_care_message) as health_care_message
+,1.0 * sum(case when support_int = 1 and car_insurance_message = 1 then 1 end) / sum(car_insurance_message) as car_insurance_message
+,1.0 * sum(case when support_int = 1 and movement_message = 1 then 1 end) / sum(movement_message) as movement_message
+,1.0 * sum(case when support_int = 1 and annoucement_message = 1 then 1 end) / sum(annoucement_message) as annoucement_message
+,1.0 * sum(case when support_int = 1 and first_3_wins_message = 1 then 1 end) / sum(first_3_wins_message) as first_3_wins_message
+,1.0 * sum(case when support_int = 1 and beat_trump_message = 1 then 1 end) / sum(beat_trump_message) as beat_trump_message
+,1.0 * sum(case when support_int = 1 and fight_for_workers_spanish_message = 1 then 1 end) / sum(fight_for_workers_spanish_message) as fight_for_workers_spanish_message
+,1.0 * sum(case when support_int = 1 and fight_against_greed_corrupt_message = 1 then 1 end) / sum(fight_against_greed_corrupt_message) as fight_against_greed_corrupt_message
+,1.0 * sum(case when support_int = 1 and corrupt_system_needs_major_change_message = 1 then 1 end) / sum(corrupt_system_needs_major_change_message) as corrupt_system_needs_major_change_message
+,1.0 * sum(case when support_int = 1 and working_people_against_corpelite_message = 1 then 1 end) / sum(working_people_against_corpelite_message) as working_people_against_corpelite_message
+,1.0 * sum(case when support_int = 1 and standing_up_to_corpelite_message = 1 then 1 end) / sum(standing_up_to_corpelite_message) as standing_up_to_corpelite_message
+,1.0 * sum(case when support_int = 1 and take_on_billionaire_class_message = 1 then 1 end) / sum(take_on_billionaire_class_message) as take_on_billionaire_class_message
+,1.0 * sum(case when support_int = 1 and work_for_all_not_wealthy_message = 1 then 1 end) / sum(work_for_all_not_wealthy_message) as work_for_all_not_wealthy_message
+,1.0 * sum(case when support_int = 1 and strong_class_based_language_message = 1 then 1 end) / sum(strong_class_based_language_message) as strong_class_based_language_message
+from  bernie_nmarchio2.message_aggregates 
 
