@@ -8,13 +8,12 @@ matches_per_id = 3 # integer, number of matches allowed per source ID (will be d
 enable_cass = FALSE # boolean, run CASS address standardization
 rematch_threshold = .6 # decimal, rematch all records less than this match score on each update (automatically includes new records without scores in input table)
 cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this match score in final table
+require_state_match = TRUE # boolean, to preference matches where states tie out
 
 # Source table and schema
 # Can be an partial or complete source table (records already in destination table and above match threshold will be excluded from matching)
-input_table_param = list(schema = 'bernie_nmarchio2',
+input_table_param = list(schema = 'matching',
                          table = 'ak_for_matching')
-
-# input_table_param <- Sys.getenv("INPUT_SCHEMA_TABLE_LIST")
 
 # Source table columns
 pii_param = list(primary_key='id',
@@ -38,14 +37,10 @@ pii_param = list(primary_key='id',
                  lat=NULL,
                  lon=NULL)
 
-# input_table_param <- Sys.getenv("COLUMN_MAPPING")
-
 # Destination table and schema
 # If this table already exists it will be unioned and deduplicated into the updated output table
-output_table_param = list(schema = 'bernie_nmarchio2',
-                          table = 'ak_civis_match')
-
-# output_table_param <- Sys.getenv("OUTPUT_SCHEMA_TABLE_LIST")
+output_table_param = list(schema = 'matching,
+                          table = 'ak_matched_dev')
 
 # Functions ---------------------------------------------------------------
 
@@ -145,7 +140,7 @@ get_status(m)
 deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_0_input'),
                                      match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_1_match1'),
                                      output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_2_fullmatch'),
-                                     prefer_state_match = TRUE,
+                                     prefer_state_match = require_state_match,
                                      cutoff_param = 0)
 deduped_status 
    
@@ -322,7 +317,7 @@ if (enable_cass == TRUE) {
         deduped_status <- dedupe_match_table(input_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_5_coalesce'),
                                              match_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_6_match2'),
                                              output_schema_table = paste0(output_table_param$schema,'.',input_table_param$table,'_stage_7_fullmatch'),
-                                             prefer_state_match = TRUE,
+                                             prefer_state_match = require_state_match,
                                              cutoff_param = 0)
         deduped_status 
         
