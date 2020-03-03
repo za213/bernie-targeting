@@ -18,7 +18,7 @@ matches_per_id = as.integer(Sys.getenv('MATCHES_PER_ID')) # integer, number of m
 enable_cass = as.logical(Sys.getenv('ENABLE_CASS')) # boolean, run CASS address standardization
 rematch_threshold = as.numeric(Sys.getenv('REMATCH_THRESHOLD')) # decimal, rematch all records less than this match score on each update (automatically includes new records without scores in input table)
 cutoff_threshold =  as.numeric(Sys.getenv('CUTOFF_THRESHOLD')) # decimal, keep all matches greater than or equal to this match score in final table
-pii_param <- rjson::fromJSON(Sys.getenv('INPUT_COLUMN_MAPPING'), simplify=FALSE)[1][[1]] # Source table columns
+#pii_param <- rjson::fromJSON(Sys.getenv('INPUT_COLUMN_MAPPING'), simplify=FALSE)[1][[1]] # Source table columns
 
 # Assert input params
 #stopifnot(matches_per_id >= 1 & matches_per_id <= 10) 
