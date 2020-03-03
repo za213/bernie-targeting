@@ -19,3 +19,9 @@ left join
 
 
 
+select * from
+(select text_stripped, count(*), sum(case when support_int = 1 then 1 end) as id_1,
+sum(case when support_int in (1,2,3,4,5) then 1 end) as id_all, 1.0*id_1/id_all as rate1
+from bernie_nmarchio2.message_aggregates where support_int in (1,2,3,4,5) group by 1) where id_all > 2000  order by rate1 desc
+
+
