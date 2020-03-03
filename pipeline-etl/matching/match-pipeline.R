@@ -1,14 +1,5 @@
 # Container: https://platform.civisanalytics.com/spa/#/scripts/containers/65101602
 
-#Template https://platform.civisanalytics.com/spa/#/scripts/containers/65712954
-#INPUT_TABLE
-#OUTPUT_TABLE
-#MATCHES_PER_ID
-#ENABLE_CASS
-#REMATCH_THRESHOLD
-#CUTOFF_THRESHOLD
-#INPUT_TABLE_PII
-
 library(civis)
 library(tidyverse)
 
