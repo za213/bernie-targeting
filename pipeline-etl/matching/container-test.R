@@ -4,14 +4,14 @@ library(civis)
 library(tidyverse)
 
 # Input table parameters
-input_table_param <- stringr::str_split(Sys.getenv('INPUT_TABLE'), '[.]', simplify=TRUE)
-input_schema = input_table_param[1] 
-input_table = input_table_param[2] 
+#input_table_param <- stringr::str_split(Sys.getenv('INPUT_TABLE'), '[.]', simplify=TRUE)
+#input_schema = input_table_param[1] 
+#input_table = input_table_param[2] 
 
 # Output table parameters
-output_table_param <- stringr::str_split(Sys.getenv('OUTPUT_TABLE'), '[.]', simplify=TRUE)
-output_schema = output_table_param[1]
-output_table = output_table_param[2]
+#output_table_param <- stringr::str_split(Sys.getenv('OUTPUT_TABLE'), '[.]', simplify=TRUE)
+#output_schema = output_table_param[1]
+#output_table = output_table_param[2]
 
 # Matching parameters
 matches_per_id = as.integer(Sys.getenv('MATCHES_PER_ID')) # integer, number of matches allowed per source ID (will be deduplicated in output table)
