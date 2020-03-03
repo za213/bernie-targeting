@@ -39,7 +39,7 @@ pii_param = list(primary_key='id',
 
 # Destination table and schema
 # If this table already exists it will be unioned and deduplicated into the updated output table
-output_table_param = list(schema = 'matching,
+output_table_param = list(schema = 'bernie_nmarchio2',
                           table = 'ak_matched_dev')
 
 # Functions ---------------------------------------------------------------
