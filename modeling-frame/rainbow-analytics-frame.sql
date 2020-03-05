@@ -231,9 +231,9 @@ WHEN p.party_name_dnc = 'Republican' OR p.party_id = 2 THEN '7 - Republican'
 WHEN p.party_name_dnc = 'Other' OR p.party_id = 3 THEN '8 - Other' 
 -- when as20.civis_2020_partisanship >= .85 then '1 - Democrat'
 -- when as20.civis_2020_partisanship >= .7 and as20.civis_2020_partisanship < .85 then '2 - Green'
-when as20.civis_2020_partisanship >= .7 then '1 - Democrat'
-when as20.civis_2020_partisanship >= .6 and as20.civis_2020_partisanship < .7 then '3 - Independent'
-when as20.civis_2020_partisanship >= .4 and as20.civis_2020_partisanship < .6 then '6 - Libertarian'
+-- when as20.civis_2020_partisanship >= .6 and as20.civis_2020_partisanship < .7 then '3 - Independent'
+when as20.civis_2020_partisanship >= .66 then '1 - Democrat'
+when as20.civis_2020_partisanship >= .4 and as20.civis_2020_partisanship < .66 then '3 - Independent'
 when as20.civis_2020_partisanship < .4 then '7 - Republican'
 ELSE '8 - Other' END AS party_8way
 
