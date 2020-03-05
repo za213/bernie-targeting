@@ -1,0 +1,7 @@
+sink()
+
+VARIABLE_PARAM <- Sys.getenv('VARIABLE')
+
+cat(VARIABLE_PARAM)
+
+print(VARIABLE_PARAM)
