@@ -1,10 +1,19 @@
 
+sink()
+
 INPUT_TABLE <- Sys.getenv('INPUT_TABLE')
 OUTPUT_TABLE <- Sys.getenv('OUTPUT_TABLE')
 MATCHES_PER_ID <- Sys.getenv('MATCHES_PER_ID')
 ENABLE_CASS <- Sys.getenv('ENABLE_CASS')
 CUTOFF_THRESHOLD <- Sys.getenv('CUTOFF_THRESHOLD')
 INPUT_COLUMN_MAPPING <- Sys.getenv('INPUT_COLUMN_MAPPING')
+
+cat(INPUT_TABLE)
+cat(OUTPUT_TABLE)
+cat(MATCHES_PER_ID)
+cat(ENABLE_CASS)
+cat(CUTOFF_THRESHOLD)
+cat(INPUT_COLUMN_MAPPING)
 
 library(rjson)
 library(stringr)
