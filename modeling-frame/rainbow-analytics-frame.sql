@@ -415,7 +415,7 @@ WHEN p.state_code IN ('OK','NE') AND (party_8way IN ('1 - Democrat','3 - Indepen
 WHEN p.state_code IN ('SD','RI') AND (party_8way IN ('1 - Democrat','3 - Independent','4 - Nonpartisan','5 - Unaffiliated')) THEN '1 - Dem Primary Eligible' -- mixed
 WHEN p.state_code = 'CA' AND (party_8way IN ('1 - Democrat','4 - Nonpartisan','5 - Unaffiliated')) THEN '1 - Dem Primary Eligible' -- mixed
 WHEN p.state_code IN ('CO','ID','MA','NC','NH') AND (party_8way IN ('1 - Democrat','4 - Nonpartisan','5 - Unaffiliated')) THEN '1 - Dem Primary Eligible' -- mixed
-WHEN p.state_code IN ('AK','AZ','CT','DC','DE','FL','HI','IA','KS','KY','LA','MD','ME','NJ','NM','NV','NY','OR','PA','WV','WY') AND (party_8way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- mixed
+WHEN p.state_code IN ('AK','AZ','CT','DC','DE','FL','HI','IA','KS','KY','LA','MD','ME','NJ','NM','NV','NY','OR','PA','WV','WY') AND (party_8way = '1 - Democrat') THEN '1 - Dem Primary Eligible' -- closed
 ELSE '2 - Must Register as Dem' END AS dem_primary_eligible_2way
 
 ,case 
