@@ -39,7 +39,7 @@ pii_param = list(primary_key='id',
 
 # Destination table and schema
 # If this table already exists it will be unioned and deduplicated into the updated output table
-output_table_param = list(schema = 'matching',
+output_table_param = list(schema = 'bernie_nmarchio2',
                           table = 'ak_matched_dev')
 
 # Alias column names
@@ -56,43 +56,43 @@ dedupe_match_table <- function(input_schema_table = NULL,
                                output_schema_table = NULL,
                                extra_match = TRUE,
                                cutoff_param = 0) {
-  sql_pii <- c()
-  match_sql = ''
-  extra_match_sort = ''
-  for (i in names(compact(pii_param))) {
-    v = paste0('\n,',compact(pii_param)[[i]],'')
-    if (i == "first_name" && extra_match == TRUE) {
-      first_name_match = paste0(' left(lower(input.',compact(pii_param)[[i]],'),3) = left(lower(first_phoenix),3) ')
-    } 
-    if (i == "last_name" && extra_match == TRUE) {
-      last_name_match = paste0(' lower(input.',compact(pii_param)[[i]],') = lower(last_phoenix) ')
-    } 
-    if (i == "state_code" && extra_match == TRUE) { 
-      state_code_match = paste0('  input.',compact(pii_param)[[i]]," is not null and input.",compact(pii_param)[[i]]," = phxp.state_code ")
-    }
-    sql_pii<- c(sql_pii,v)
-  }
-  if (all(c("first_name","last_name","state_code") %in% names(compact(pii_param))) && extra_match == TRUE) {
-     match_sql = paste0("\n, case when ",state_code_match," and ",first_name_match," and ",last_name_match,' then 1 else 0 end as extra_match ')
-     extra_match_sort = ' extra_match desc, '
-  }
-  sql_query_xwalk <- c()
-  sql_query_xwalk <- paste0("(select person_id, voterbase_id, score , getdate()::date as matched_date ",paste0(sql_pii,collapse='')," from 
+        sql_pii <- c()
+        match_sql = ''
+        extra_match_sort = ''
+        for (i in names(compact(pii_param))) {
+                v = paste0('\n,',compact(pii_param)[[i]],'')
+                if (i == "first_name" && extra_match == TRUE) {
+                        first_name_match = paste0(' left(lower(input.',compact(pii_param)[[i]],'),3) = left(lower(first_phoenix),3) ')
+                } 
+                if (i == "last_name" && extra_match == TRUE) {
+                        last_name_match = paste0(' lower(input.',compact(pii_param)[[i]],') = lower(last_phoenix) ')
+                } 
+                if (i == "state_code" && extra_match == TRUE) { 
+                        state_code_match = paste0('  input.',compact(pii_param)[[i]]," is not null and input.",compact(pii_param)[[i]]," = phxp.state_code ")
+                }
+                sql_pii<- c(sql_pii,v)
+        }
+        if (all(c("first_name","last_name","state_code") %in% names(compact(pii_param))) && extra_match == TRUE) {
+                match_sql = paste0("\n, case when ",state_code_match," and ",first_name_match," and ",last_name_match,' then 1 else 0 end as extra_match ')
+                extra_match_sort = ' extra_match desc, '
+        }
+        sql_query_xwalk <- c()
+        sql_query_xwalk <- paste0("(select person_id, voterbase_id, score , getdate()::date as matched_date ",paste0(sql_pii,collapse='')," from 
         (select * , row_number() over(partition by source_id order by ",extra_match_sort," score desc) as best_record_rank
         from (select phxp.person_id, match.source_id, match.matched_id as voterbase_id, match.score ",paste0(sql_pii,collapse=''),match_sql," from 
         (select * from ",match_schema_table," where matched_id is not null) match
         left join ",input_schema_table," input on match.source_id = input.",pii_param$primary_key,"
         left join (select person_id, voterbase_id, state_code, lower(first_name) as first_phoenix, lower(last_name) as last_phoenix from phoenix_analytics.person) phxp on match.matched_id = phxp.voterbase_id ))  
         where best_record_rank = 1 and (score >= ",cutoff_param," or extra_match = 1) and person_id is not null and voterbase_id is not null )")
-  
-  match_output_sql <- paste0('DROP TABLE IF EXISTS ',output_schema_table,"; set query_group to 'importers'; set wlm_query_slot_count to 2; 
+        
+        match_output_sql <- paste0('DROP TABLE IF EXISTS ',output_schema_table,"; set query_group to 'importers'; set wlm_query_slot_count to 2; 
                               CREATE TABLE ",output_schema_table,' distkey(',pii_param$primary_key,') sortkey(',pii_param$primary_key,') AS ',sql_query_xwalk,';') 
-  cat(match_output_sql,file="sql.sql")
-  cat(match_output_sql)
-  
-  match_output_status <- civis::query_civis(x=sql(match_output_sql), database = 'Bernie 2020') 
-  
-  return(match_output_status)
+        cat(match_output_sql,file="sql.sql")
+        cat(match_output_sql)
+        
+        match_output_status <- civis::query_civis(x=sql(match_output_sql), database = 'Bernie 2020') 
+        
+        return(match_output_status)
 }
 
 # Drop staging tables if they exist ---------------------------------------
@@ -165,11 +165,20 @@ deduped_status
 if (enable_cass == TRUE) {  
         
         # Create table of below threshold matches to run through CASS and rematch again
-        rematch_table_sql <- paste0('create table ',output_schema,'.',input_table,'_stage_3_rematch as 
-                            (select input0.* from ',output_schema,'.',input_table,'_stage_0_input input0 
-                            left join 
-                            (select * from ',output_schema,'.',input_table,'_stage_2_fullmatch where score >= ',rematch_threshold,') input2 using(',pii_param$primary_key,') 
-                            where input2.',pii_param$primary_key,' is null);')
+        check_if_cass_table_exists <- civis::read_civis(x=sql(paste0("select count(*) from information_schema.tables where table_schema = '",output_schema,"' and table_name = '",paste0(input_table,'_stage_cass'),"';")), database = 'Bernie 2020')
+        if (check_if_cass_table_exists$count == 1) {
+                cass_universe <- paste0('(select input0.* from ',output_schema,'.',input_table,'_stage_0_input input0 
+                                        left join 
+                                        (select * from ',output_schema,'.',input_table,'_stage_2_fullmatch) input2 using(',pii_param$primary_key,') 
+                                        (select * from ',output_schema,'.',input_table,'_stage_cass) input3 using(',pii_param$primary_key,') 
+                                        where input2.',pii_param$primary_key,' is null and input3.',pii_param$primary_key,' is null )')
+        } else {
+                cass_universe <- paste0('(select input0.* from ',output_schema,'.',input_table,'_stage_0_input input0 
+                                        left join 
+                                        (select * from ',output_schema,'.',input_table,'_stage_2_fullmatch) input2 using(',pii_param$primary_key,') 
+                                        where input2.',pii_param$primary_key,' is null)')
+        }
+        rematch_table_sql <- paste0('create table ',output_schema,'.',input_table,'_stage_3_rematch as ',cass_universe,';')
         rematch_table_status <- civis::query_civis(x=sql(paste0(rematch_table_sql)), database = 'Bernie 2020') 
         rematch_table_status
         
@@ -303,6 +312,10 @@ if (enable_cass == TRUE) {
         cat(match_input_sql,file="sql.sql")
         match_input_status <- civis::query_civis(x=sql(match_input_sql), database = 'Bernie 2020') 
         match_input_status
+        
+        cass_save_sql <- paste0('create table ',paste0(output_schema,'.',input_table,'_stage_cass'),' as (select *, getdate()::date as cass_date from ',paste0(output_schema,'.',input_table,'_stage_5_coalesce'),');')
+        cat(cass_save_sql ,file="sql.sql")
+        cass_save_status <- civis::query_civis(x=sql(cass_save_sql), database = 'Bernie 2020') 
         
         # Person Match --------------------------------------------------------
         
