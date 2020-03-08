@@ -50,6 +50,7 @@ sortkey(person_id) as
 	    ,case when
                   datediff(d, '2020-02-22', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('SC') or
                   datediff(d, '2020-02-24', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('MO','VA') or
+		  datediff(d, '2020-03-03', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('OH') or
                   datediff(d, '2020-02-05', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state NOT IN ('MN','TN','AR','AL','KY','GA','MS','NH','NV','IA') THEN 1 END as validtime -- HARDCODE
             ,CASE WHEN resultcode IN ('Canvassed', 'Do Not Contact', 'Refused', 'Call Back', 'Language Barrier', 'Hostile', 'Come Back', 'Cultivation', 'Refused Contact', 'Spanish', 'Other', 'Not Interested') THEN 1 ELSE 0 END AS ccj_contact_made 
             ,CASE WHEN resultcode IN ('Do Not Contact','Hostile','Refused','Refused Contact') OR (support_int = 4 OR support_int = 5) THEN 1 ELSE 0 END AS ccj_negative_result 
@@ -97,6 +98,7 @@ sortkey(person_id) as
 	   ,case when
                  datediff(d, '2020-02-22', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state IN ('SC') or
                  datediff(d, '2020-02-24', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state IN ('MO','VA') or
+                 datediff(d, '2020-03-03', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state IN ('OH') or
                  datediff(d, '2020-02-05', TO_DATE(survey_date, 'YYYY-MM-DD')) > 0 and state NOT IN ('MN','TN','AR','AL','KY','GA','MS','NH','NV','IA') THEN 1 END as validtime -- HARDCODE
            ,case when first_choice = 'Bernie Sanders' then 1 else 0 end as thirdp_first_choice_bernie
            ,case when first_choice = 'Donald Trump' then 1 else 0 end as thirdp_first_choice_trump
@@ -588,6 +590,7 @@ sortkey(jsonid_encoded) as
             ,case when
              datediff(d, '2020-01-17', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state = 'MN' or
              datediff(d, '2020-01-22', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('TN','AR','MO','AL','KY','GA','MS') or
+             datediff(d, '2020-03-03', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state IN ('OH') or
              datediff(d, '2020-02-05', TO_DATE(contactdate, 'YYYY-MM-DD')) > 0 and voter_state NOT IN ('MN','TN','AR','MO','AL','KY','GA','MS','NH','NV','IA','SC') THEN 1 END as validtime -- HARDCODE
             ,CASE WHEN resultcode IN ('Canvassed', 'Do Not Contact', 'Refused', 'Call Back', 'Language Barrier', 'Hostile', 'Come Back', 'Cultivation', 'Refused Contact', 'Spanish', 'Other', 'Not Interested') THEN 1 ELSE 0 END AS ccj_contact_made 
             ,CASE WHEN resultcode IN ('Do Not Contact','Hostile','Refused','Refused Contact') OR (support_int = 4 OR support_int = 5) THEN 1 ELSE 0 END AS ccj_negative_result 
