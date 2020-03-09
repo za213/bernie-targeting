@@ -20,18 +20,18 @@ zip_arg <- Sys.getenv('zip')
 gender_arg <- Sys.getenv('gender')
 birth_date_arg <- Sys.getenv('birth_date')
 
-pii_param <- list(primary_key = primary_key_arg
-                  first_name = first_name_arg
-                  middle_name = middle_name_arg
-                  last_name = last_name_arg
-                  phone = phone_arg
-                  email = email_arg
-                  full_address = full_address_arg
-                  unit = unit_arg
-                  city = city_arg
-                  state_code = state_code_arg
-                  zip = zip_arg
-                  gender = gender_arg
+pii_param <- list(primary_key = primary_key_arg,
+                  first_name = first_name_arg,
+                  middle_name = middle_name_arg,
+                  last_name = last_name_arg,
+                  phone = phone_arg,
+                  email = email_arg,
+                  full_address = full_address_arg,
+                  unit = unit_arg,
+                  city = city_arg,
+                  state_code = state_code_arg,
+                  zip = zip_arg,
+                  gender = gender_arg,
                   birth_date = birth_date_arg)
 
 library(rjson)
