@@ -5,15 +5,15 @@ library(tidyverse)
 
 # Parameters --------------------------------------------------------------
 matches_per_id = 3 # integer, number of matches allowed per source ID (will be deduplicated in output table)
-enable_cass = FALSE # boolean, run CASS address standardization
+enable_cass = TRUE # boolean, run CASS address standardization
 rematch_threshold = .6 # decimal, rematch all records less than this match score on each update (automatically includes new records without scores in input table)
 cutoff_threshold = .4 # decimal, keep all matches greater than or equal to this match score in final table
 use_extra_match = TRUE # boolean, to include matches below threshold where states, first names, and last names tie out
 
 # Source table and schema
 # Can be an partial or complete source table (records already in destination table and above match threshold will be excluded from matching)
-input_table_param = list(schema = 'matching',
-                         table = 'ak_for_matching')
+input_table_param = list(schema = 'bernie_nmarchio2', 
+                         table = 'ak_for_matching_full')
 
 # Source table columns
 pii_param = list(primary_key='id',
