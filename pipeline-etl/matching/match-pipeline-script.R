@@ -1,4 +1,6 @@
 
+source('/app/pipeline-etl/matching/match-pipeline-params.R')
+
 # Functions ---------------------------------------------------------------
 
 dedupe_match_table <- function(input_schema_table = NULL,
