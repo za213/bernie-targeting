@@ -1,6 +1,5 @@
-sink()
 
-VARIABLE_PARAM <- Sys.getenv('VARIABLE')
+VARIABLE_PARAM <- Sys.getenv('INPUT_TABLE')
 
 cat(VARIABLE_PARAM)
 
