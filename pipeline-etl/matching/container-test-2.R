@@ -5,6 +5,7 @@ ENABLE_CASS <- Sys.getenv('ENABLE_CASS')
 MATCHES_PER_ID <- Sys.getenv('MATCHES_PER_ID')
 CUTOFF_THRESHOLD <- Sys.getenv('CUTOFF_THRESHOLD')
 REMATCH_THRESHOLD <- Sys.getenv('REMATCH_THRESHOLD')
+INPUT_COLUMN_MAPPING <- Sys.getenv('INPUT_COLUMN_MAPPING')
 
 library(rjson)
 library(stringr)
