@@ -224,7 +224,7 @@ if (enable_cass == TRUE) {
         # Pull down all CASS tables that exist
         cass_tables_sql <- paste0("select tab.table_schema, tab.table_name, tinf.tbl_rows as table_rows from svv_tables tab join svv_table_info tinf on tab.table_schema = tinf.schema and tab.table_name = tinf.table where tab.table_schema = '", 
                                   output_schema,"' and tab.table_name similar to '%_stage_4_cass_%' and tab.table_schema not in('pg_catalog','information_schema') order by tinf.tbl_rows desc;")
-        cass_tables_df <- read_civis(x = sql(find_cass_tables_sql), database = 'Bernie 2020')
+        cass_tables_df <- read_civis(x = sql(cass_tables_sql), database = 'Bernie 2020')
         cass_tables_to_union <- cass_tables_df %>% filter(table_rows > 1) 
         
         # Union tables with more than 1 row (sometimes CASS jobs fail but successfully export a table)
