@@ -34,7 +34,6 @@ pii_param <- list(primary_key = primary_key_arg,
                   gender = gender_arg,
                   birth_date = birth_date_arg)
 
-library(rjson)
 library(stringr)
 library(civis)
 library(tidyverse)
