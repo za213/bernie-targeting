@@ -20,6 +20,7 @@ create table bernie_nmarchio2.message_aggregates distkey(campaign_contact_id) so
 ,case when text_stripped similar to ('%standing up to the greed and corruption of the corporate elite%') then 1 else 0 end as standing_up_to_corpelite_message
 ,case when text_stripped similar to ('%take on the billionaire class%') then 1 else 0 end as take_on_billionaire_class_message
 ,case when text_stripped similar to ('%work for all of us, not just wealthy campaign contributors%') then 1 else 0 end as work_for_all_not_wealthy_message
+ ,case when lower("text") similar to ('%hola%') then 1 else 0 end as hola_message
 ,case when text_stripped similar to ('%take on the billionaire class%|%corporate elite%|%wealthy campaign contributors%|%corrupt political%|%greed and corruption%') then 1 else 0 end as strong_class_based_language_message
  from
 (select *, 
@@ -36,6 +37,7 @@ regexp_replace(text, '((Hi|Hey|Hola|This is).*(!|.|,) ((This is)|(Just wanted)|(
 left join
  (select person_id,externalcontactid,resultcode,support_id,support_int,support_response_text from bernie_data_commons.ccj_dnc where contacttype  = 'spoke' )
  on externalcontactid = campaign_contact_id where support_response_text is not null);
+
 
 
 select * from
