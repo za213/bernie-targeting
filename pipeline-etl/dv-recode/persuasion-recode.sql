@@ -66,3 +66,60 @@ select
 ,1.0 * sum(case when support_int = 1 and strong_class_based_language_message = 1 then 1 end) / sum(strong_class_based_language_message) as strong_class_based_language_message
 from  bernie_nmarchio2.message_aggregates 
 
+
+
+select * from
+(select 
+ script_version_hash,
+ text_stripped, 
+ state_code, 
+ county_fips, 
+age_5way,
+education_2way,
+income_5way,
+gender_2way,
+urban_3way,
+race_5way,
+religion_9way, 
+party_8way,
+vote_history_6way,
+case when convo_length = 0 then '0'
+when convo_length = 1 then '1'
+ when convo_length = 2 then '2'
+ when convo_length = 3 then '3'
+ when convo_length = 4 then '4'
+ when convo_length = 5 then '5'
+ when convo_length > 5 then '6+' end as text_convo_length,
+ count(*) num_of_texts, 
+ sum(case when support_int = 1 then 1 else 0 end) as id_1,
+ sum(case when support_int = 2 then 1 else 0 end) as id_2,
+ sum(case when support_int = 3 then 1 else 0 end) as id_3,
+ sum(case when support_int = 4 then 1 else 0 end) as id_4,
+ sum(case when support_int = 5 then 1 else 0 end) as id_5,
+ sum(case when support_int in (1,2,3,4,5) then 1 else 0 end) as id_1_2_3_4_5,
+sum(case when marijuana_message = 1 then 1 else 0 end) as marijuana_message_flag,
+sum(case when climate_message = 1 then 1 else 0 end) as climate_message_flag,
+sum(case when green_new_deal_message = 1 then 1 else 0 end) as green_new_deal_message_flag,
+sum(case when big_pharma_message = 1 then 1 else 0 end) as big_pharma_message_flag,
+sum(case when health_care_message = 1 then 1 else 0 end) as health_care_message_flag,
+sum(case when car_insurance_message = 1 then 1 else 0 end) as car_insurance_message_flag,
+sum(case when movement_message = 1 then 1 else 0 end) as movement_message_flag,
+sum(case when annoucement_message = 1 then 1 else 0 end) as annoucement_message_flag,
+sum(case when first_3_wins_message = 1 then 1 else 0 end) as first_3_wins_message_flag,
+sum(case when beat_trump_message = 1 then 1 else 0 end) as beat_trump_message_flag,
+sum(case when fight_for_workers_spanish_message = 1 then 1 else 0 end) as fight_for_workers_spanish_message_flag,
+sum(case when fight_against_greed_corrupt_message = 1 then 1 else 0 end) as fight_against_greed_corrupt_message_flag,
+sum(case when corrupt_system_needs_major_change_message = 1 then 1 else 0 end) as corrupt_system_needs_major_change_message_flag,
+sum(case when working_people_against_corpelite_message = 1 then 1 else 0 end) as working_people_against_corpelite_message_flag,
+sum(case when standing_up_to_corpelite_message = 1 then 1 else 0 end) as standing_up_to_corpelite_message_flag,
+sum(case when take_on_billionaire_class_message = 1 then 1 else 0 end) as take_on_billionaire_class_message_flag,
+sum(case when work_for_all_not_wealthy_message = 1 then 1 else 0 end) as work_for_all_not_wealthy_message_flag,
+sum(case when hola_message = 1 then 1 else 0 end) as hola_message_flag,
+sum(case when strong_class_based_language_message = 1 then 1 else 0 end) as strong_class_based_language_message_flag
+
+from bernie_nmarchio2.message_aggregates a
+left join 
+ bernie_data_commons.rainbow_analytics_frame b
+on a.person_id::varchar = b.person_id::varchar
+group by 1,2,3,4,5,6,7,8,9,10,11,12,13,14)  
+
