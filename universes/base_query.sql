@@ -1,7 +1,7 @@
 
 -- Owner: Nico Marchio
 -- Entered Production: 2020-02-05
--- Last Update: 2020-02-12
+-- Last Update: 2020-04-02
 -- Purpose: Builds data tables to inform voter targeting, list cutting, and voter contact
 
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -16,10 +16,10 @@ CREATE TABLE bernie_nmarchio2.base_validation
 distkey(person_id)
 sortkey(person_id) as
 (SELECT * FROM
-  (SELECT person_id, case when voting_address_count <= 10 then 1 else 0 end as household_under_10 from
+  (SELECT person_id, case when household_count <= 10 then 1 else 0 end as household_under_10 from
      (SELECT person_id::varchar,
-          voting_address_id,
-          count(*) over (partition BY voting_address_id) as voting_address_count
+          household_id,
+          count(*) over (partition BY household_id) as household_count
       FROM phoenix_analytics.person
       WHERE is_deceased = 'f'
         AND reg_record_merged = 'f'
@@ -188,7 +188,7 @@ CREATE TABLE bernie_nmarchio2.base_activists
 distkey(person_id)
 sortkey(person_id) as
 (select person_id,
-	    voting_address_id,
+	    household_id,
 	    coalesce(myc.all_flags_myc,0) as all_flags_myc, -- all myc flags
 	    coalesce(myc.mvp_myc ,0) as mvp_myc ,
         coalesce(myc.activist_myc ,0) as activist_myc ,
@@ -259,14 +259,14 @@ sortkey(person_id) as
         END AS any_activist_donor_flag,
 
         case
- 	    when voting_address_count <= 10 then 1 else 0
+ 	    when household_count <= 10 then 1 else 0
         end as household_under_10
 
  from
 (SELECT person_id::varchar,
         state_code,
-        voting_address_id,
-        count(*) over (partition BY voting_address_id) as voting_address_count
+        household_id,
+        count(*) over (partition BY household_id) as household_count
       FROM phoenix_analytics.person
       WHERE is_deceased = 'f'
         AND reg_record_merged = 'f'
@@ -433,7 +433,7 @@ CREATE TABLE bernie_nmarchio2.base_activists_unmatched
 distkey(jsonid_encoded)
 sortkey(jsonid_encoded) as
 (select xwalk.person_id,
-        --NULL as voting_address_id,
+        --NULL as household_id,
         xwalk.jsonid_encoded,
         xwalk.myc_van_id,
         xwalk.actionkit_id,
@@ -558,7 +558,7 @@ sortkey(jsonid_encoded) as
 
     (SELECT person_id::varchar,
             state_code,
-            voting_address_id
+            household_id
       FROM phoenix_analytics.person
       WHERE is_deceased = 'f'
         AND reg_record_merged = 'f'
@@ -743,9 +743,9 @@ commit;
 begin;
 DROP TABLE IF EXISTS bernie_nmarchio2.base_household;
 CREATE TABLE bernie_nmarchio2.base_household
-distkey(voting_address_id)
-sortkey(voting_address_id) as
-(select voting_address_id::varchar,
+distkey(household_id)
+sortkey(household_id) as
+(select household_id::varchar,
 
         coalesce(bactive.any_activist_donor_household_flag,0) as any_activist_donor_household_flag,
         coalesce(bactive.activist_household_flag,0) as activist_household_flag,
@@ -775,37 +775,37 @@ sortkey(voting_address_id) as
         coalesce(bvalid.thirdp_support_1_2_3_4_5_id_hh,0) as thirdp_support_1_2_3_4_5_id_hh
 
 from
-(select voting_address_id::varchar,
-	    count(distinct case when any_activist_donor_flag = 1 and household_under_10 = 1 then voting_address_id end) as any_activist_donor_household_flag,
-        count(distinct CASE WHEN activist_flag = 1 and household_under_10 = 1 then voting_address_id end) as activist_household_flag,
-        count(distinct case when all_flags_myc = 1 and household_under_10 = 1 then voting_address_id end) as all_flags_myc_household_flag,
-        count(distinct case when all_flags_surveys = 1 and household_under_10 = 1 then voting_address_id end) as all_flags_surveys_household_flag,
-        count(distinct case when donor_1plus_flag = 1 and household_under_10 = 1 then voting_address_id end) as donor_1plus_household_flag,
-        count(distinct case when bernapp = 1 and household_under_10 = 1 then voting_address_id end) as bernapp_household_flag,
-        count(distinct case when slack_vol = 1 and household_under_10 = 1 then voting_address_id end) as slack_vol_household_flag,
-        count(distinct CASE WHEN akmob_rsvps >= 2 and household_under_10 = 1 then voting_address_id end) as akmob_rsvps_household_flag,
-        count(distinct CASE WHEN akmob_attended > 0 and household_under_10 = 1 then voting_address_id end) as akmob_attended_household_flag
+(select household_id::varchar,
+	    count(distinct case when any_activist_donor_flag = 1 and household_under_10 = 1 then household_id end) as any_activist_donor_household_flag,
+        count(distinct CASE WHEN activist_flag = 1 and household_under_10 = 1 then household_id end) as activist_household_flag,
+        count(distinct case when all_flags_myc = 1 and household_under_10 = 1 then household_id end) as all_flags_myc_household_flag,
+        count(distinct case when all_flags_surveys = 1 and household_under_10 = 1 then household_id end) as all_flags_surveys_household_flag,
+        count(distinct case when donor_1plus_flag = 1 and household_under_10 = 1 then household_id end) as donor_1plus_household_flag,
+        count(distinct case when bernapp = 1 and household_under_10 = 1 then household_id end) as bernapp_household_flag,
+        count(distinct case when slack_vol = 1 and household_under_10 = 1 then household_id end) as slack_vol_household_flag,
+        count(distinct CASE WHEN akmob_rsvps >= 2 and household_under_10 = 1 then household_id end) as akmob_rsvps_household_flag,
+        count(distinct CASE WHEN akmob_attended > 0 and household_under_10 = 1 then household_id end) as akmob_attended_household_flag
 from bernie_nmarchio2.base_activists group by 1) bactive
 full join
-(select voting_address_id::varchar,
-        count(distinct CASE WHEN ccj_id_1 = 1 and household_under_10 = 1 then voting_address_id end) as ccj_id_1_hh,
-        count(distinct CASE WHEN ccj_id_2 = 1 and household_under_10 = 1 then voting_address_id end) as ccj_id_2_hh,
-        count(distinct CASE WHEN ccj_id_3 = 1 and household_under_10 = 1 then voting_address_id end) as ccj_id_3_hh,
-        count(distinct CASE WHEN ccj_id_4 = 1 and household_under_10 = 1 then voting_address_id end) as ccj_id_4_hh,
-        count(distinct CASE WHEN ccj_id_5 = 1 and household_under_10 = 1 then voting_address_id end) as ccj_id_5_hh,
-        count(distinct CASE WHEN ccj_id_1_2_3_4_5 = 1 and household_under_10 = 1 then voting_address_id end) as ccj_id_1_2_3_4_5_hh,
-        count(distinct CASE WHEN thirdp_first_choice_bernie = 1 and household_under_10 = 1 then voting_address_id end) as thirdp_first_choice_bernie_hh,
-        count(distinct CASE WHEN thirdp_first_choice_trump = 1 and household_under_10 = 1 then voting_address_id end) as thirdp_first_choice_trump_hh,
-        count(distinct CASE WHEN thirdp_first_choice_biden_warren_buttigieg = 1 and household_under_10 = 1 then voting_address_id end) as thirdp_first_choice_biden_warren_buttigieg_hh,
-        count(distinct CASE WHEN thirdp_first_choice_any = 1 and household_under_10 = 1 then voting_address_id end) as thirdp_first_choice_any_hh,
-        count(distinct CASE WHEN thirdp_support_1_id = 1 and household_under_10 = 1 then voting_address_id end) as thirdp_support_1_id_hh,
-        count(distinct CASE WHEN thirdp_support_2_id = 1 and household_under_10 = 1 then voting_address_id end) as thirdp_support_2_id_hh,
-        count(distinct CASE WHEN thirdp_support_3_id = 1 and household_under_10 = 1 then voting_address_id end) as thirdp_support_3_id_hh,
-        count(distinct CASE WHEN thirdp_support_4_id = 1 and household_under_10 = 1 then voting_address_id end) as thirdp_support_4_id_hh,
-        count(distinct CASE WHEN thirdp_support_5_id = 1 and household_under_10 = 1 then voting_address_id end) as thirdp_support_5_id_hh,
-        count(distinct CASE WHEN thirdp_support_1_2_3_4_5_id = 1 and household_under_10 = 1 then voting_address_id end) as thirdp_support_1_2_3_4_5_id_hh
+(select household_id::varchar,
+        count(distinct CASE WHEN ccj_id_1 = 1 and household_under_10 = 1 then household_id end) as ccj_id_1_hh,
+        count(distinct CASE WHEN ccj_id_2 = 1 and household_under_10 = 1 then household_id end) as ccj_id_2_hh,
+        count(distinct CASE WHEN ccj_id_3 = 1 and household_under_10 = 1 then household_id end) as ccj_id_3_hh,
+        count(distinct CASE WHEN ccj_id_4 = 1 and household_under_10 = 1 then household_id end) as ccj_id_4_hh,
+        count(distinct CASE WHEN ccj_id_5 = 1 and household_under_10 = 1 then household_id end) as ccj_id_5_hh,
+        count(distinct CASE WHEN ccj_id_1_2_3_4_5 = 1 and household_under_10 = 1 then household_id end) as ccj_id_1_2_3_4_5_hh,
+        count(distinct CASE WHEN thirdp_first_choice_bernie = 1 and household_under_10 = 1 then household_id end) as thirdp_first_choice_bernie_hh,
+        count(distinct CASE WHEN thirdp_first_choice_trump = 1 and household_under_10 = 1 then household_id end) as thirdp_first_choice_trump_hh,
+        count(distinct CASE WHEN thirdp_first_choice_biden_warren_buttigieg = 1 and household_under_10 = 1 then household_id end) as thirdp_first_choice_biden_warren_buttigieg_hh,
+        count(distinct CASE WHEN thirdp_first_choice_any = 1 and household_under_10 = 1 then household_id end) as thirdp_first_choice_any_hh,
+        count(distinct CASE WHEN thirdp_support_1_id = 1 and household_under_10 = 1 then household_id end) as thirdp_support_1_id_hh,
+        count(distinct CASE WHEN thirdp_support_2_id = 1 and household_under_10 = 1 then household_id end) as thirdp_support_2_id_hh,
+        count(distinct CASE WHEN thirdp_support_3_id = 1 and household_under_10 = 1 then household_id end) as thirdp_support_3_id_hh,
+        count(distinct CASE WHEN thirdp_support_4_id = 1 and household_under_10 = 1 then household_id end) as thirdp_support_4_id_hh,
+        count(distinct CASE WHEN thirdp_support_5_id = 1 and household_under_10 = 1 then household_id end) as thirdp_support_5_id_hh,
+        count(distinct CASE WHEN thirdp_support_1_2_3_4_5_id = 1 and household_under_10 = 1 then household_id end) as thirdp_support_1_2_3_4_5_id_hh
 from phoenix_analytics.person inner join bernie_nmarchio2.base_validation using(person_id) group by 1) bvalid
-using(voting_address_id) where voting_address_id is not null);
+using(household_id) where household_id is not null);
 commit;
 
 ------------------------------------------------------------------------------------------------------------------------------------
@@ -828,7 +828,7 @@ sortkey(person_id) AS
 truncate bernie_data_commons.base_universe;
 insert into bernie_data_commons.base_universe
   (SELECT p.person_id::varchar,
-  	  p.voting_address_id,
+  	  p.household_id,
   	  xwalk.jsonid_encoded,
           xwalk.myc_van_id,
           xwalk.st_myc_van_id,
@@ -1353,7 +1353,7 @@ insert into bernie_data_commons.base_universe
  -- PERSON
       (SELECT person_id::varchar,
               state_code,
-              voting_address_id::varchar,
+              household_id::varchar,
               county_fips,
               county_name,
               dnc_precinct_id,
@@ -1449,7 +1449,7 @@ insert into bernie_data_commons.base_universe
 
 -- DONOR/VOLUNTEER HOUSEHOLD LEVEL INFO
 	left join
-   (select voting_address_id,
+   (select household_id,
            any_activist_donor_household_flag,
            activist_household_flag,
            all_flags_myc_household_flag,
@@ -1476,7 +1476,7 @@ insert into bernie_data_commons.base_universe
            thirdp_support_5_id_hh,
            thirdp_support_1_2_3_4_5_id_hh
    from bernie_nmarchio2.base_household) bhousehold
-   on p.voting_address_id = bhousehold.voting_address_id
+   on p.household_id = bhousehold.household_id
 
 -- DONOR/VOLUNTEER INFO
     left join
