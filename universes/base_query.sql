@@ -282,7 +282,6 @@ sortkey(person_id) as
                OR volunteer_myc = 1
                OR constituencies_myc = 1
                OR volunteer_shifts_myc = 1
-               OR student_myc = 1
                OR teacher_myc = 1
                OR labor_myc = 1 THEN 1
                else 0 end as all_flags_myc
@@ -291,7 +290,7 @@ sortkey(person_id) as
              count(distinct CASE WHEN ac_lookup.activist_code_type = 'MVP' then mx.person_id end) as mvp_myc ,
              count(distinct CASE WHEN ac_lookup.activist_code_type = 'Activist' then mx.person_id end) as activist_myc ,
              count(distinct CASE WHEN ac_lookup.activist_code_type = 'Canvassed' then mx.person_id end) as canvass_myc ,
-             count(distinct CASE WHEN ac_lookup.activist_code_type = 'Volunteer' then mx.person_id end) as volunteer_myc ,
+             count(distinct CASE WHEN ac_lookup.activist_code_type = 'Volunteer' AND ac_lookup.activist_code_name NOT SIMILAR TO '%Student%' then mx.person_id end) as volunteer_myc ,
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO ('%Latinx4Bern%|%LGBTQ 4 Bernie%|%Muslims4Bern%|%AfAm4Bernie%|%4 Bernie%|%BlackWomen4Bern%|%Share the Bern%|%Faith 4 Bernie%|%Women 4 Bernie%|%Veterans 4 Bernie%') then mx.person_id end) as constituencies_myc ,
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO ('%Volunteer Level%|%Volunteer Team Lead%|%Volunteer Leader%|%Caucus Volunteer%|%Vol Yes%|%SuperVol%|%LatinX Vols%|%SuperVols%|%Canvass%|%Shift Compl%|%Knock Doors%|%Give ride to caucus%|%Phone Bank%|%HQ_Phonebank%') then mx.person_id end) as volunteer_shifts_myc ,
              count(distinct CASE WHEN ac_lookup.activist_code_name SIMILAR TO '%Student%' THEN mx.person_id END) AS student_myc ,
