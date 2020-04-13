@@ -25,5 +25,8 @@ Note, all of the above code is not actively maintained and will not run out of t
 * Visit the [universes](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) folder for info about the `base_universe` table for cutting GOTV lists and volunteer / event recruitment.
 * To enable location based targeting [here is a workflow](https://github.com/Bernie-2020/bernie-targeting/blob/master/analytics/travel-time-targeting_v2.ipynb) that calculates the travel time between each voter within a given commuting radius of a set of points of interest. 
 
-## Developer
+## Author
 Organizing Analytics Team. Nicholas Marchio, Data Science Engineer.
+
+Please feel free to leave an issue to get in touch about how to get involved, improving this demonstration codebase, or other open source political data projects.
+
