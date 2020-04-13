@@ -1,63 +1,21 @@
 # Organizing Modeling Workflows
 
-## Platform Links
-* [Project Folder](https://platform.civisanalytics.com/spa/#/projects/132631)
-  * Workflow to [build analytics frame and base universe](https://platform.civisanalytics.com/spa/#/workflows/10551). Runs overnight 2 times per week 3AM on Tuesday and early Saturday.
-  * Workflow to [build the modeling frame, DVs, and sync to the DS cluster](https://platform.civisanalytics.com/spa/#/workflows/11935). Runs on an as-needed basis.
-* To request a model, issue a [Jira ticket](https://berniesanders.atlassian.net/jira/software/projects/MOD/boards/12) and tag Nico Marchio and Michael Futch.
+## About the `bernie-targeting` repo
 
-## Base Universe for Targeting
-* Visit the [universes](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) folder for info about the `bernie_data_commons.base_universe` table for cutting GOTV lists and volunteer / event recruitment.
-* To enable location based targeting [here is a workflow](https://github.com/Bernie-2020/bernie-targeting/blob/master/analytics/travel-time-targeting_v2.ipynb) that calculates the travel time between each voter within a given commuting radius of a set of points of interest. 
+This repo contains a number of resources useful for performing common campaign-related data science tasks. Much of the code in this repo relies on Civis Platform, a research infrastructure built on AWS, often utilized for political campaigns. The SQL code in the repo uses [Redshift SQL](https://aws.amazon.com/redshift/) and many of the modeling functions utilize the [Civis API](https://civis-python.readthedocs.io/en/stable/). In terms of data, the scripts reference data available through the DNC Phoenix database and supplementary geotables linked below. If these requirements are met, it is possible to use this code to spin up a [covariate matrix](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) with over 500+ ML-ready predictors and an analysis table to apply demographic and socioeconomic labels to all individuals in the Phoenix database. There are also starter-scripts for building ML models in the [modeling]( https://github.com/Bernie-2020/bernie-targeting/tree/master/modeling) folder and [SQL code](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) for organizing campaign data into a voter contact universes table. The code is not actively maintained and won't run out of the box due to database dependencies, but we will do our best to respond to questions posed via issues. 
 
 ## Data
 ### Modeling Frame:
-* Platform table: `model_inputs.rainbow_modeling_frame` on the Bernie DS cluster.
-* [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) to create modeling frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) of features and descriptions.
-* Table with three default feature lists for modeling `bernie_nmarchio2.feature_list` and here is the [import script](https://platform.civisanalytics.com/spa/#/imports/53801807) to pull in the lists into Platform.
-* Geographic features: county `bernie_nmarchio2.geo_county_covariates`, tract `bernie_nmarchio2.geo_tract_covariates`, and block group `bernie_nmarchio2.geo_block_covariates`.
-* Raw data [archived on S3](https://github.com/Bernie-2020/bernie-targeting/blob/master/s3-files/modeling-frame-source-data.R) and [dev scripts for cleaning and imputing missing data](https://github.com/Bernie-2020/bernie-targeting/tree/master/modeling-frame/dev).
-* Data projects: 
-  * Engineer features from `phoenix_electionbase.ebase_census_blocks` 
-  * Synthesize party switching behavior from `phoenix_voter_file.registration_scd`
-  * Test predictive power of `phoenix_consumer.tsmart_consumer`
+* This [script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) creates a modeling frame consisting of over 500 covariates at the individual and small area level. The build process assumes that your campaign has access to DNC Phoenix, but changes may be needed subject to schema naming conventions or if there are revisions to the source tables. The SQL script uses AWS Redshift syntax. 
+* The table build process also pulls in geotables from public data sources which you can download from this [link](https://uchicago.box.com/s/4b2vzr2mu7z2nbo3tx9mlorotah71xqt) and here is a [data dictionary](https://docs.google.com/spreadsheets/d/1IyvVre4zJMJq4bw0epxOhQe0_DSuyxXzQ0qmAObUDRQ/edit?usp=sharing) for descriptions.
+* These [dev scripts were used to clean and imput missing data in the geotables](https://github.com/Bernie-2020/bernie-targeting/tree/master/modeling-frame/dev).
 
 ### Analytics Frame:
-* Platform table: `bernie_data_commons.rainbow_analytics_frame` on the Bernie 2020 cluster.
-* [Script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-analytics-frame.sql) to create analytics frame and [data dictionary](https://docs.google.com/spreadsheets/d/1O1a4SdNBuPFMRT97__IeD1624OFDFafCSGQAuclDrFU/edit#gid=176972138) for list of features.
+* This [script](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-analytics-frame.sql) creates an analytics frame and labels individual-level data into common socioeconomic and demographic classifications. Again, this script requires access to DNC Phoenix, which may be subject to changes in schema naming conventions and revisions to source tables.
 
-## Model Scores
-
-#### Voter Engagement Models:
-* [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/dv-recode/volunteer-dv-recode-v2.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/volunteer-modeling-workflow-20191219.ipynb)
-* Scores table: `bernie_nmarchio2.actionpop_output_20191220` 
-* Validation metrics: `bernie_nmarchio2.actionpop_validation_20191220`
-
-| Score column | Description | 
-| :--- | :--- | 
-| `attendee` | Probability to be an attendee of any kind of event |
-| `kickoff_party_attendee` | Probability to attend a kickoff party |
-| `canvasser_attendee` | Probability to be a canvass volunteer |
-| `phonebank_attendee` | Probability to be a phonebank volunteer |
-| `rally_barnstorm_attendee` | Probability to attend a rally or barnstorm event |
-| `kickoff_party_rally_barnstorm_attendee` | Probability to attend a kickoff party, rally, or barnstorm event |
-| `canvasser_phonebank_attendee` | Probability to be a canvass or phonebank volunteer |
-| `donor_1plus_times` | Probability to donate at least once |
-| `donor_27plus_usd` | Probability to donate more than $27 |
-| `bernie_action` | Probability to take any of the above actions |
-* Note columns with `_100` are cut into percentiles nationally such that when `where score_100 >= 80` would give the top 20% highest scores.
-
-#### Spoke Persuasion Models:
-* [DV recoding script](https://github.com/Bernie-2020/bernie-targeting/blob/master/pipeline-etl/dv-recode/spoke-dv-recode.sql) and [modeling notebook](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling/spoke-modeling-workflow-20191221.ipynb)
-* Scores table: `bernie_nmarchio2.spoke_output_20191221` 
-* Validation metrics: `bernie_nmarchio2.spoke_validation_20191221`
-
-| Score column | Description |
-| :--- | :--- |
-| `spoke_support_1box` | Probability of responding with 1 support |
-| `spoke_persuasion_1plus` | Probability of moving 1 or more in favor of Bernie |
-| `spoke_persuasion_1minus` | Probability of moving 1 or more against Bernie |
-* Note columns with `_100` are cut into percentiles nationally such that when `where score_100 >= 80` would give the top 20% highest scores.
+## Base Universe and Analytics tools
+* Visit the [universes](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) folder for info about the `bernie_data_commons.base_universe` table for cutting GOTV lists and volunteer / event recruitment.
+* To enable location based targeting [here is a workflow](https://github.com/Bernie-2020/bernie-targeting/blob/master/analytics/travel-time-targeting_v2.ipynb) that calculates the travel time between each voter within a given commuting radius of a set of points of interest. 
 
 ## Developers
 Organizing Analytics Team. Nico Marchio, Data Science Engineer.
