@@ -1,6 +1,6 @@
 # Organizing Modeling Workflows
 
-## About the `bernie-targeting` repo
+### About the `bernie-targeting` Repo
 
 This repo contains a number of resources useful for performing common campaign-related data science tasks. Much of the code in this repo relies on Civis Platform, a research infrastructure built on AWS, often utilized for political campaigns. The SQL code in the repo uses [Redshift SQL](https://aws.amazon.com/redshift/) and many of the modeling functions utilize the [Civis API](https://civis-python.readthedocs.io/en/stable/). In terms of data, the scripts reference data available through the DNC Phoenix database and supplementary geotables linked below. If these requirements are met, it is possible to use this code to spin up a [covariate matrix](https://github.com/Bernie-2020/bernie-targeting/blob/master/modeling-frame/rainbow-modeling-frame.sql) with over 500+ ML-ready predictors and an analysis table to apply demographic and socioeconomic labels to all individuals in the Phoenix database. There are also starter-scripts for building ML models in the [modeling]( https://github.com/Bernie-2020/bernie-targeting/tree/master/modeling) folder and [SQL code](https://github.com/Bernie-2020/bernie-targeting/tree/master/universes) for organizing campaign data into a voter contact universes table. The code is not actively maintained and won't run out of the box due to database dependencies, but we will do our best to respond to questions posed via issues. 
 
